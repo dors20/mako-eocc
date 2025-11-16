@@ -1,0 +1,107 @@
+% mako-eocc.tex - Draft OSDI-style paper for Txn Reordering project
+\documentclass[letterpaper,twocolumn,10pt]{article}
+\usepackage{usenix-2020-09} % use recent USENIX style; adjust if needed
+\usepackage{times}
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{enumitem}
+
+\newcommand{\sysname}{Mako\xspace}
+\newcommand{\projname}{Txn-Reorder\xspace}
+
+\begin{document}
+
+\date{}
+\title{Txn-Reorder for Mako: Semantic Batching and Transaction Reordering in Geo-Replicated OCC}
+
+\author{
+  Anonymous Submission
+}
+\maketitle
+
+\begin{abstract}
+We revisit optimistic concurrency control (OCC) inside \sysname, a speculative, geo-replicated transactional key-value store that already attains 3.66M TPC-C txn/s with cross-continental replication. Although speculative 2PC decouples execution from replication, OCC inside \sysname still serializes transactions in arrival order and therefore wastes work under contention bursts. We propose \projname, a batching and reordering framework inspired by Ding~\emph{et~al.} (PVLDB~2018) that integrates semantic batching at both the storage and validator layers, with configurable policies that exploit RustyCpp-safe data structures. This paper outlines the plan to implement storage-aware write-first batching, feedback-vertex-set heuristics for validator reordering, and hyper-parameterized policies that can be toggled via JSON configuration at runtime. Our early design analysis indicates that \projname can reduce intra-batch aborts, lower tail latencies, and provide reproducible knobs for production deployments without compromising \sysname’s speculative replication pipeline.
+\end{abstract}
+
+\section{Introduction}
+\sysname decouples execution from replication via speculative 2PC, allowing local shards to process distributed transactions without blocking on Paxos replication. While this architecture delivers record-setting throughput (3.66M txn/s on TPC-C with 10 shards and 24 threads each) and tolerates datacenter failures, OCC within \sysname preserves a strict arrival order during validation and storage replay. Under high contention, this choice forces otherwise independent transactions to abort because they read stale data or arrive at the validator in an unfavorable order.
+
+Prior work on semantic batching~\cite{ding2018txnreorder} demonstrates that reordering transactions \emph{after} they have executed can reduce aborts by up to 2.2$\times$ and 71\% tail latency. However, existing systems applying those ideas are single-site or lack geo-replication. Our goal is to marry the batching/reordering framework with \sysname’s speculative, multi-core architecture, producing a configurable module that can be disabled, tuned, and evaluated against baseline OCC.
+
+This paper presents: (i) an analysis of the \sysname codebase and the Ding~\emph{et~al.} algorithmic requirements, (ii) a design for storage- and validator-level batching that respects RustyCpp safety rules, and (iii) a comprehensive experiment plan covering baselines, hyper-parameters, and evaluation metrics. Future updates to this draft will report concrete performance results and implementation insights as we progress.
+
+\section{Background and Motivation}
+\subsection{Mako Overview}
+\sysname processes client transactions through speculative execution at shard leaders, followed by asynchronous replication via per-core Paxos logs. Vector watermarks bound cascading aborts when failures occur. The default concurrency control is OCC with backward validation, optimized for low latency but still subject to abort storms when workloads exhibit high write-write or write-read contention.
+
+\subsection{Txn Reordering via Semantic Batching}
+Ding~\emph{et~al.} propose batching requests at both storage and validator:
+\begin{itemize}[leftmargin=*]
+  \item \textbf{Storage batching}: buffer reads/writes per object; apply the highest-version write, then satisfy pending reads to minimize stale reads.
+  \item \textbf{Validator batching}: collect transactions into batches, build a dependency graph of read-write edges, and compute a feedback vertex set (FVS) to determine which transactions must abort so the rest can commit in an acyclic order.
+\end{itemize}
+Policies (e.g., minimizing abort count, prioritizing aged transactions, tail-latency reduction) influence which nodes enter the FVS. Practical heuristics include SCC-based greedy removal and sort-based approximations.
+
+\section{Txn-Reorder Design for Mako}
+\subsection{Configuration Surface}
+We expose a JSON-driven configuration consumed at runtime (e.g., \texttt{\-\-txn-config=path.json}). The JSON snippet defines enabling flags, batch sizes, flush timers, policies, and algorithm choices. The system defaults to feature-disabled to preserve baseline behavior.
+
+\subsection{Storage Batching}
+Key steps:
+\begin{enumerate}[leftmargin=*]
+  \item Instruments Masstree access paths to enqueue operations per key or per shard.
+  \item Applies highest timestamp writes first before servicing reads in a batch.
+  \item Flushes batches based on size or time thresholds, configurable via JSON.
+  \item Emits metrics on avoided stale reads and batch sizes.
+\end{enumerate}
+
+\subsection{Validator Batching}
+\begin{enumerate}[leftmargin=*]
+  \item Collects transactions into batches of configurable size or timeout.
+  \item Builds dependency graphs (RustyCpp-managed) by inspecting read/write sets.
+  \item Runs FVS heuristics (SCC-greedy, sort-greedy) with selectable policies.
+  \item Commits surviving transactions in topologically sorted order; aborts others with policy-specific annotations.
+\end{enumerate}
+
+\subsection{RustyCpp Safety}
+All new data structures (batch buffers, graphs, policy state) use RustyCpp smart pointers (\texttt{rusty::Box}, \texttt{rusty::Arc}, etc.). Unsafe sections are clearly annotated, enabling RustyCpp borrow checker runs during CI.
+
+\section{Evaluation Plan}
+Detailed experimental scenarios are itemized in \texttt{doc/experiments.md}. Highlights include:
+\begin{itemize}[leftmargin=*]
+  \item Baselines: Mako OCC (feature off), storage-only, validator-only, both-enabled, and existing deptran protocols (Janus/RCC).
+  \item Workloads: TPC-C across varying warehouses/threads, read-write microbenchmarks with tuned contention, queue microbenchmarks for tail latency, and geo-replicated configs.
+  \item Metrics: throughput, latency percentiles, abort breakdowns, batch characteristics, and resource utilization.
+\end{itemize}
+We will present results as throughput/latency plots, policy comparison charts, and table summaries capturing hyper-parameter effects.
+
+\section{Status and Next Steps}
+Completed:
+\begin{itemize}[leftmargin=*]
+  \item Comprehensive review of \sysname and Ding~\emph{et~al.} papers.
+  \item Task breakdown in \texttt{doc/txn-reordering.md}.
+  \item Experiment matrix and hyper-parameter plan in \texttt{doc/experiments.md}.
+  \item Initial paper skeleton (\texttt{doc/paper/mako-eocc.tex}).
+\end{itemize}
+Upcoming milestones:
+\begin{enumerate}[leftmargin=*]
+  \item Implement JSON config plumbing and feature toggles.
+  \item Prototype storage batching pipeline with instrumentation.
+  \item Implement validator graph builder and FVS heuristics.
+  \item Execute experiment plan, populate figures/tables, and refine paper sections with empirical data.
+\end{enumerate}
+
+\section*{Acknowledgments}
+We thank the original \sysname authors and the Ding~\emph{et~al.} team for open-sourcing documentation that inspired this follow-on effort.
+
+\bibliographystyle{plain}
+\begin{thebibliography}{9}
+\bibitem{ding2018txnreorder}
+Bailu Ding et al. Improving Optimistic Concurrency Control Through Transaction Batching and Operation Reordering. PVLDB 12(2):169--182, 2018.
+\bibitem{makoosdi25}
+Weihai Shen et al. Mako: Speculative Distributed Transactions with Geo-Replication. OSDI 2025.
+\end{thebibliography}
+
+\end{document}
+
