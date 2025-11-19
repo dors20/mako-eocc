@@ -4,6 +4,16 @@ Implement the transaction batching and reordering framework from Ding *et al.*, 
 
 ---
 
+## Status (Nov 19, 2025)
+
+- Added `txn_reordering` config loader backed by YAML/JSON and exposed via the new `--txn-config` flag in `dbtest`.
+- Introduced `StorageBatcher` (writes-before-reads) and `ValidatorBatcher` (batch + policy ordering) inside the shard server pipeline; both honor the JSON hyper-parameters.
+- Logging hooks and event counters now emit per-flush telemetry, plus a `RequestAccessTracker` that captures per-key read/write sets for every `req_nr`.
+- Validator batches now build per-shard **directed** dependency graphs, run a greedy FVS policy (default: min-abort), and selectively abort conflicting validators before they reach Masstree.
+- Structured counters feed both the stats server and a new `results/trcc_metrics.json` artifact, so experiments capture storage/validator batch sizes, drop counts, conflict density, and reorder latency without extra instrumentation.
+
+---
+
 ## Paper Summary
 
 1. **Problem**  
@@ -26,32 +36,30 @@ Implement the transaction batching and reordering framework from Ding *et al.*, 
 ## Implementation Tasks
 
 ### 1. Architecture & Config Surface
-- [ ] Introduce a top-level `TxnReorderingConfig` (JSON-driven via CLI flag) with toggles for `storage_batching`, `validator_batching`, and policy parameters.
-- [ ] Integrate config plumbing into `dbtest` and `config/*.yml` loader so the feature can be enabled/disabled per run without recompilation.
-- [ ] Ensure config is accessible inside Mako’s scheduler/validator components (likely `src/deptran/occ` and `src/mako/lib`).
+- [x] Introduce a top-level `TxnReorderingConfig` (JSON-driven via CLI flag) with toggles for `storage_batching`, `validator_batching`, and policy parameters. ✅ implemented via `txn_reordering_config.{h,cc}` and the `--txn-config` flag.
+- [x] Integrate config plumbing into `dbtest` so the feature can be enabled/disabled per run without recompilation (JSON parser piggybacks on YAML-cpp).
+- [x] Ensure config is accessible inside Mako’s scheduler/validator components (wired through `ShardServer` + batchers).
 
 ### 2. Storage Batching Module
-- [ ] Identify storage-facing APIs (Masstree access paths in `src/mako/*` and `src/deptran/*`).  
-- [ ] Design per-key (or per-shard) batching buffers; reuse existing per-core queues if possible.  
-- [ ] Implement write-first ordering: apply highest timestamp write, then service read queue with up-to-date value.  
-- [ ] Provide knobs: `storage_batch_size`, `flush_interval_us`, `max_batch_bytes`.  
-- [ ] Add instrumentation counters (batched ops, stale-read avoidance).  
-- [ ] Guard entire module behind feature flag; default off.
+- [x] Identify storage-facing APIs (Masstree access paths in `src/mako/*` and `src/deptran/*`).  
+- [ ] (Stretch) Design per-key (or per-shard) batching buffers; reuse existing per-core queues if possible.  
+- [x] Implement write-first ordering: apply highest timestamp write, then service read queue with up-to-date value (initially at the request-class granularity; per-key refinement still open).  
+- [x] Provide knobs: `storage_batch_size`, `flush_interval_us`, `max_batch_bytes`.  
+- [x] Add instrumentation counters (batched ops, stale-read avoidance).  
+- [x] Guard entire module behind feature flag; default off.
 
 ### 3. Validator Batching & Reordering
-- [ ] Extend OCC validator to collect `Batch` objects (configurable `validator_batch_size`, `max_wait_us`).  
-- [ ] Build dependency graph per batch: nodes = transactions, edges = read-after-write conflicts.  
-- [ ] Implement greedy FVS algorithms described in the paper:  
-  - SCC-based greedy (default).  
-  - Sort-based heuristic (optional).  
-- [ ] Support policy hooks:
-  - `min_abort` (pure throughput).  
-  - `age_priority` (reward retries).  
-  - `tail_latency` / `deadline`.  
-  - `thread_aware` (avoid starving certain cores).  
-- [ ] Expose policy selection + weights via JSON config.  
-- [ ] Ensure graph construction & reordering uses RustyCpp smart pointers (no raw `new`).  
-- [ ] Emit metrics: batch size, FVS size, abort causes, reorder time.
+> **Current impl (Nov 19)**: `ValidatorBatcher` fully implements directed dependency graph construction (Reader->Writer edges) and cycle detection/breaking.
+- [x] Extend OCC validator to collect `Batch` objects (configurable `validator_batching`, `batch_size`, `max_wait_us`) via `ValidatorBatcher`.
+- [x] Build dependency graph per batch: nodes = transactions, edges = read-write dependencies (Reader->Writer) captured via `RequestAccessTracker`.
+- [x] Implement cycle detection and breaking algorithms:
+  - [x] Directed DFS cycle detection.
+  - [x] Victim selection based on policy (currently max-degree/min-abort).
+- [x] Add selective abort responses for victim transactions.
+- [ ] Support policy hooks (currently `min_abort` heuristic; other policies map to score-based selection).
+- [ ] Expose policy selection + weights via JSON config.
+- [x] Ensure graph construction & reordering uses RustyCpp-safe containers.
+- [x] Emit metrics: batch size, reorder latency, FVS density, and drop counts via `trcc_*` counters.
 
 ### 4. Hyper-Parameter Plumbing
 - [ ] Define JSON schema (document in `experiments.md`):
@@ -70,7 +78,7 @@ Implement the transaction batching and reordering framework from Ding *et al.*, 
     }
   }
   ```
-- [ ] Add CLI flag `--txn-config=/path/to/json`. If absent, fall back to defaults (feature off).
+- [x] Add CLI flag `--txn-config=/path/to/json`. If absent, fall back to defaults (feature off).
 - [ ] Validate JSON at startup; fail fast with descriptive error.
 
 ### 5. RustyCpp & Safety
@@ -79,9 +87,9 @@ Implement the transaction batching and reordering framework from Ding *et al.*, 
 - [ ] Add unit tests for borrow-checker (e.g., `make borrow_check_all_dbtest`).
 
 ### 6. Telemetry & Logging
-- [ ] Integrate with existing stats (`results/` and `scripts/aggregate`).  
-- [ ] Log reordering decisions when `MAKO_LOG_LEVEL=debug`.  
-- [ ] Export JSON snippets summarizing each batch for offline analysis.
+- [x] Integrate with existing stats (event counters surfaced via stats server + `results/trcc_metrics.json`).  
+- [x] Log reordering decisions when `MAKO_LOG_LEVEL=debug`.  
+- [x] Export JSON snapshots summarizing TRCC counters for offline analysis (`results/trcc_metrics.json`).
 
 ### 7. Documentation
 - [ ] Cross-link config options in `doc/config.md`.  
@@ -89,7 +97,7 @@ Implement the transaction batching and reordering framework from Ding *et al.*, 
 - [ ] Add section to `doc/mako-eocc-design.md` describing the module.
 
 ### 8. Validation Plan
-- [ ] Unit tests for graph builder & policies (synthetic workloads).  
+- [x] Unit tests for graph builder & policies (synthetic workloads).  
 - [ ] Integration tests: run `ci/ci.sh simpleTransaction` with small batches to ensure no regression when feature disabled/enabled.  
 - [ ] Stress test: adapt `examples/test_2shard_replication.sh` to toggle feature.  
 - [ ] Verify that disabling returns to baseline behavior and metrics.
@@ -104,9 +112,8 @@ Implement the transaction batching and reordering framework from Ding *et al.*, 
 ---
 
 ## Next Steps
-1. Finalize JSON schema and plumbing (Task 1 & 4).  
-2. Prototype storage batching pipeline + metrics.  
-3. Implement validator graph builder & SCC greedy policy.  
+1. Implement sort-based + policy-aware FVS heuristics (age/tail/thread).  
+2. Validate via scripted experiments + integrate findings into paper/results.  
+3. Harden config schema validation + docs cross-links.  
 4. Stand up experiments from `doc/experiments.md`.  
 5. Iterate on performance + memory profiling.
-

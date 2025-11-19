@@ -45,7 +45,9 @@ Policies (e.g., minimizing abort count, prioritizing aged transactions, tail-lat
 
 \section{Txn-Reorder Design for Mako}
 \subsection{Configuration Surface}
-We expose a JSON-driven configuration consumed at runtime (e.g., \texttt{\-\-txn-config=path.json}). The JSON snippet defines enabling flags, batch sizes, flush timers, policies, and algorithm choices. The system defaults to feature-disabled to preserve baseline behavior.
+We expose a JSON-driven configuration consumed at runtime (e.g., \texttt{\-\-txn-config=path.json}). The JSON snippet defines enabling flags, batch sizes, flush timers, policies, and algorithm choices. The system defaults to feature-disabled to preserve baseline behavior.\
+\
+Our current prototype implements this surface via a dedicated `txn_reordering` module that parses JSON with YAML-cpp, caches the knobs inside `TxnReorderingOptions`, and wires the `--txn-config` flag into `dbtest`. All shard-side helpers simply call `TxnReorderingOptions::Instance()` so researchers can toggle batching without recompilation.\
 
 \subsection{Storage Batching}
 Key steps:
@@ -55,6 +57,7 @@ Key steps:
   \item Flushes batches based on size or time thresholds, configurable via JSON.
   \item Emits metrics on avoided stale reads and batch sizes.
 \end{enumerate}
+\noindent\textit{Prototype status:} `StorageBatcher` now intercepts shard RPCs, groups them by arrival, and executes write-class verbs (e.g., batch lock/install) ahead of reads while emitting debug logs per flush. A `RequestAccessTracker` siphons the table-id/key pairs out of Masstree RPCs so downstream validators inherit per-transaction read/write sets without touching the Masstree internals.
 
 \subsection{Validator Batching}
 \begin{enumerate}[leftmargin=*]
@@ -63,6 +66,7 @@ Key steps:
   \item Runs FVS heuristics (SCC-greedy, sort-greedy) with selectable policies.
   \item Commits surviving transactions in topologically sorted order; aborts others with policy-specific annotations.
 \end{enumerate}
+\noindent\textit{Prototype status:} `ValidatorBatcher` now consumes the tracker output and builds per-batch dependency graphs. Unlike the initial design, we construct a \textbf{directed graph} where an edge $T_i \to T_j$ exists if $T_i$ reads a key that $T_j$ writes (Reader-before-Writer constraint). This accurately models the serialization dependencies inherent in OCC. We detect cycles using a 3-state DFS and break them by selecting a victim based on the active policy (e.g., highest degree). Surviving transactions are reordered topologically and dispatched to the underlying shard logic, while victims are aborted early. This implementation has been verified with unit tests covering reordering success (Reader-Writer conflict resolved by ordering) and cycle detection.
 
 \subsection{RustyCpp Safety}
 All new data structures (batch buffers, graphs, policy state) use RustyCpp smart pointers (\texttt{rusty::Box}, \texttt{rusty::Arc}, etc.). Unsafe sections are clearly annotated, enabling RustyCpp borrow checker runs during CI.
@@ -74,6 +78,7 @@ Detailed experimental scenarios are itemized in \texttt{doc/experiments.md}. Hig
   \item Workloads: TPC-C across varying warehouses/threads, read-write microbenchmarks with tuned contention, queue microbenchmarks for tail latency, and geo-replicated configs.
   \item Metrics: throughput, latency percentiles, abort breakdowns, batch characteristics, and resource utilization.
 \end{itemize}
+Instrumentation already exports `trcc_storage_*` counters plus per-batch reorder logs (commit order vs FVS drops), so the experiment harness can capture FVS size, deferred latency, and selective abort counts without extra probes.
 We will present results as throughput/latency plots, policy comparison charts, and table summaries capturing hyper-parameter effects.
 
 \section{Status and Next Steps}
@@ -81,15 +86,16 @@ Completed:
 \begin{itemize}[leftmargin=*]
   \item Comprehensive review of \sysname and Ding~\emph{et~al.} papers.
   \item Task breakdown in \texttt{doc/txn-reordering.md}.
-  \item Experiment matrix and hyper-parameter plan in \texttt{doc/experiments.md}.
+    \item Experiment matrix and hyper-parameter plan in \texttt{doc/experiments.md}.
   \item Initial paper skeleton (\texttt{doc/paper/mako-eocc.tex}).
+  \item First working JSON-configurable `StorageBatcher`/`ValidatorBatcher` implementations in \texttt{src/mako/txn\_reordering}.
+  \item Per-key `RequestAccessTracker`, SCC-based FVS reordering, selective abort path, and TRCC counter exports (stats server + \texttt{results/trcc\_metrics.json}) validated via new unit tests.
 \end{itemize}
 Upcoming milestones:
 \begin{enumerate}[leftmargin=*]
-  \item Implement JSON config plumbing and feature toggles.
-  \item Prototype storage batching pipeline with instrumentation.
-  \item Implement validator graph builder and FVS heuristics.
-  \item Execute experiment plan, populate figures/tables, and refine paper sections with empirical data.
+  \item Implement policy-aware/sort-based FVS heuristics and stress them under scripted workloads.
+  \item Harden config schema validation + docs cross-links, then execute the experiment plan and fold empirical data back into this draft.
+  \item Stand up end-to-end experiments (per \texttt{doc/experiments.md}) and integrate performance/latency plots.
 \end{enumerate}
 
 \section*{Acknowledgments}

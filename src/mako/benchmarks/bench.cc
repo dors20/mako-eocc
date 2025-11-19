@@ -4,6 +4,7 @@
 #include <vector>
 #include <utility>
 #include <string>
+#include <filesystem>
 
 #include <stdlib.h>
 #include <sched.h>
@@ -51,6 +52,49 @@ static void arr2str(vector<uint64_t> arr) {
   }
   cerr << "]";
   cerr << endl;
+}
+
+static void WriteTrccMetricsJson(const std::map<std::string, counter_data> &ctrs) {
+  namespace fs = std::filesystem;
+  std::error_code ec;
+  fs::create_directories("results", ec);
+  std::ofstream ofs("results/trcc_metrics.json", std::ios::trunc);
+  if (!ofs.is_open()) {
+    cerr << "failed to write results/trcc_metrics.json" << endl;
+    return;
+  }
+  const std::vector<std::string> keys = {
+      "trcc_storage_direct_dispatch",
+      "trcc_storage_batches",
+      "trcc_storage_batch_size",
+      "trcc_storage_reorder_us",
+      "trcc_validator_batches",
+      "trcc_validator_batch_size",
+      "trcc_validator_aborts",
+      "trcc_validator_dropped",
+      "trcc_validator_reorder_us",
+      "trcc_validator_conflicts"};
+  ofs << "{\n";
+  bool first = true;
+  for (const auto &key : keys) {
+    auto it = ctrs.find(key);
+    if (it == ctrs.end()) {
+      continue;
+    }
+    if (!first) {
+      ofs << ",\n";
+    } else {
+      first = false;
+    }
+    ofs << "  \"" << key << "\": {\"count\": " << it->second.count_;
+    if (it->second.type_ == counter_data::TYPE_AGG && it->second.count_ > 0) {
+      double avg = static_cast<double>(it->second.sum_) /
+                   static_cast<double>(it->second.count_);
+      ofs << ", \"avg\": " << avg << ", \"max\": " << it->second.max_;
+    }
+    ofs << "}";
+  }
+  ofs << "\n}\n";
 }
 
 template <typename T>
@@ -625,12 +669,14 @@ bench_runner::run()
     //cerr << "[breakdown] TPUT worker-" << i << ": " << format_list(tmp.begin(), tmp.end()) << endl << endl;
   }
 
+  map<string, counter_data> ctrs = event_counter::get_all_counters();
+  WriteTrccMetricsJson(ctrs);
+
   if (BenchmarkConfig::getInstance().getVerbose()) {
     const pair<uint64_t, uint64_t> mem_info_after = get_system_memory_info();
     const int64_t delta = int64_t(mem_info_before.first) - int64_t(mem_info_after.first); // free mem
     const double delta_mb = double(delta)/1048576.0;
     const double size_delta_mb = double(size_delta)/1048576.0;
-    map<string, counter_data> ctrs = event_counter::get_all_counters();
 
     // cerr << "--- table statistics ---" << endl;
     // for (map<string, abstract_ordered_index *>::iterator it = open_tables.begin();

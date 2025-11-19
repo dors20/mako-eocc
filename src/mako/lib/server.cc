@@ -559,6 +559,40 @@ namespace mako
         queue_response = queueY;
         open_tables_table_id = open_tablesX;
         shardReceiver->Register(db, open_tables_table_id);
+
+        storage_batcher_.SetDispatcher(
+            [this](uint8_t req_type, mako::TransportRequestHandle* handle, size_t) {
+                size_t msg_len = shardReceiver->ReceiveRequest(
+                    req_type,
+                    handle->GetRequestBuffer(),
+                    handle->GetResponseBuffer());
+                handle->EnqueueResponse(msg_len);
+            });
+        storage_batcher_.SetAccessTracker(&access_tracker_);
+
+        validator_batcher_.SetDispatcher(
+            [this](mako::TransportRequestHandle* handle, size_t) {
+                size_t msg_len = shardReceiver->ReceiveRequest(
+                    validateReqType,
+                    handle->GetRequestBuffer(),
+                    handle->GetResponseBuffer());
+                handle->EnqueueResponse(msg_len);
+            });
+        validator_batcher_.SetAccessTracker(&access_tracker_);
+        validator_batcher_.SetAbortDispatcher(
+            [this](mako::TransportRequestHandle* handle) {
+                if (!handle) {
+                    return;
+                }
+                auto* req = reinterpret_cast<basic_request_t*>(handle->GetRequestBuffer());
+                auto* resp = reinterpret_cast<get_int_response_t*>(handle->GetResponseBuffer());
+                resp->result = sync_util::sync_logger::retrieveShardW();
+                resp->status = ErrorCode::ABORT;
+                resp->shard_index = TThread::get_shard_index();
+                resp->req_nr = req->req_nr;
+                handle->EnqueueResponse(sizeof(get_int_response_t));
+                db->shard_abort_txn(nullptr);
+            });
     }
 
     void ShardServer::UpdateTable(int table_id, abstract_ordered_index *table)
@@ -589,19 +623,19 @@ namespace mako
                 }
 
                 // Cast to transport-agnostic interface
-                // The backend has enqueued a TransportRequestHandle* (cast to erpc::ReqHandle*)
                 mako::TransportRequestHandle* req_handle = reinterpret_cast<mako::TransportRequestHandle*>(handle);
+                const uint8_t req_type = req_handle->GetRequestType();
 
-                // Use abstract interface methods instead of eRPC-specific API
-                size_t msgLen = shardReceiver->ReceiveRequest(
-                    req_handle->GetRequestType(),
-                    req_handle->GetRequestBuffer(),
-                    req_handle->GetResponseBuffer());
-
-                // Enqueue response via transport-agnostic interface
-                // This will call ErpcRequestHandle::EnqueueResponse() or RrrRequestHandle::EnqueueResponse()
-                req_handle->EnqueueResponse(msgLen);
+                // Delegate to the appropriate batcher based on request type
+                if (req_type == validateReqType) {
+                    validator_batcher_.Enqueue(req_handle, msg_size);
+                } else {
+                    storage_batcher_.Enqueue(req_handle, msg_size);
+                }
             }
+
+            storage_batcher_.Flush();
+            validator_batcher_.Flush();
 
             if (queue->should_stop()) {
                 break;

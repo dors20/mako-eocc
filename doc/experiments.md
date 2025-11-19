@@ -57,7 +57,8 @@ Run factorial combinations for key scenarios; for exhaustive sweeps use Latin hy
 - Throughput (txn/s) per workload.
 - P50/P95/P99 latency.
 - Abort rate (overall, intra-batch vs inter-batch).
-- Batch stats: average size, reorder time, FVS size.
+- Batch stats: average size, reorder time, FVS size (also emitted via `trcc_*` counters).
+- TRCC counters: `trcc_storage_direct_dispatch`, `trcc_storage_batches`, `trcc_storage_batch_size`, `trcc_storage_reorder_us`, `trcc_validator_*` (batches, drop counts, reorder latency, conflicts). Machine-readable snapshots land in `results/trcc_metrics.json`.
 - CPU utilization per shard & validator.
 - Network bytes, replication lag (to verify no regressions).
 
@@ -83,6 +84,7 @@ Add additional rows as we explore more workloads/policies.
 
 ### Automation
 - Extend `run_experiment.py` to accept `--txn-config JSON`.  
+- `dbtest` now accepts `--txn-config=/path/to/config.json`; reuse the YAML-cpp parser so JSON manifests integrate with existing infra.  
 - Produce YAML/JSON manifest enumerating experiment runs; store under `results/manifests/txn-reorder/*.json`.  
 - Use `scripts/aggregate_run_output.py` to summarize metrics, generate plots for paper.
 

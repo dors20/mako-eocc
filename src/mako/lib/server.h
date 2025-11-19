@@ -13,6 +13,9 @@
 #include "benchmarks/abstract_db.h"
 #include "benchmarks/abstract_ordered_index.h"
 #include "lib/helper_queue.h"
+#include "txn_reordering/storage_batcher.h"
+#include "txn_reordering/validator_batcher.h"
+#include "txn_reordering/request_access_tracker.h"
 
 void register_sync_util_ss(std::function<int()>);
 
@@ -109,6 +112,9 @@ namespace mako
         mako::HelperQueue *queue;
         mako::HelperQueue *queue_response;
         map<int, abstract_ordered_index *> open_tables_table_id;
+        txn_reordering::StorageBatcher storage_batcher_;
+        txn_reordering::ValidatorBatcher validator_batcher_;
+        txn_reordering::RequestAccessTracker access_tracker_;
         // map<string, vector<abstract_ordered_index *>> partitions;
         // map<string, vector<abstract_ordered_index *>> remote_partitions;
     };

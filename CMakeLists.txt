@@ -478,6 +478,10 @@ set(MAKO_SRCFILES
   "${CMAKE_CURRENT_SOURCE_DIR}/src/mako/lib/client.cc"
   "${CMAKE_CURRENT_SOURCE_DIR}/src/mako/lib/shardClient.cc"
   "${CMAKE_CURRENT_SOURCE_DIR}/src/mako/lib/server.cc"
+  "${CMAKE_CURRENT_SOURCE_DIR}/src/mako/txn_reordering/txn_reordering_config.cc"
+  "${CMAKE_CURRENT_SOURCE_DIR}/src/mako/txn_reordering/storage_batcher.cc"
+  "${CMAKE_CURRENT_SOURCE_DIR}/src/mako/txn_reordering/request_access_tracker.cc"
+  "${CMAKE_CURRENT_SOURCE_DIR}/src/mako/txn_reordering/validator_batcher.cc"
   "${CMAKE_CURRENT_SOURCE_DIR}/src/mako/benchmarks/abstract_db.cc"
 )
 
@@ -864,6 +868,7 @@ if(BUILD_TESTS)
     # Common test include directories
     set(TEST_INCLUDE_DIRS
         src
+        src/mako
         src/rrr
         src/memdb
         test
@@ -874,6 +879,8 @@ if(BUILD_TESTS)
     
     # Common test link libraries
     set(TEST_LINK_LIBS
+        mako
+        yaml-cpp
         rrr
         memdb
         pthread
@@ -915,6 +922,12 @@ if(BUILD_TESTS)
     target_compile_options(test_reactor PRIVATE ${TEST_COMPILE_OPTIONS})
     target_link_libraries(test_reactor ${TEST_LINK_LIBS} ${GTEST_LIBRARIES} ${GTEST_MAIN_LIBRARIES} pthread)
     add_test(NAME test_reactor COMMAND test_reactor)
+    
+    add_executable(test_trcc_batchers test/test_trcc_batchers.cc)
+    target_include_directories(test_trcc_batchers PRIVATE ${TEST_INCLUDE_DIRS} ${GTEST_INCLUDE_DIRS})
+    target_compile_options(test_trcc_batchers PRIVATE ${TEST_COMPILE_OPTIONS})
+    target_link_libraries(test_trcc_batchers ${TEST_LINK_LIBS} ${GTEST_LIBRARIES} ${GTEST_MAIN_LIBRARIES} pthread)
+    add_test(NAME test_trcc_batchers COMMAND test_trcc_batchers)
     
     # Coroutine Tests (existing)
     if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/test/coroutine.cc")
@@ -971,7 +984,7 @@ if(BUILD_TESTS)
     # Add a convenience target to run all tests
     add_custom_target(run_tests
         COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure
-        DEPENDS test_marshal test_rpc test_future test_reactor test_rpc_extended test_reactor_extended simpleTransaction simplePaxos shard1ReplicationSimple  # test_alock removed
+        DEPENDS test_marshal test_rpc test_future test_reactor test_trcc_batchers test_rpc_extended test_reactor_extended simpleTransaction simplePaxos shard1ReplicationSimple  # test_alock removed
         COMMENT "Running all RRR tests"
     )
     
@@ -999,6 +1012,7 @@ if(BUILD_TESTS)
     # message(STATUS "  - test_alock: Atomic lock tests")  # Commented out due to crashes
     message(STATUS "  - test_future: Future/async operation tests")
     message(STATUS "  - test_reactor: Reactor/event system tests")
+    message(STATUS "  - test_trcc_batchers: Storage/validator batching tests")
     message(STATUS "  - test_reactor_extended: Extended reactor tests (events, coroutines, load)")
     message(STATUS "")
     message(STATUS "Run tests with: make run_tests")

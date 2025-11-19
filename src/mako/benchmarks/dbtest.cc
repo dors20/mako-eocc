@@ -1,6 +1,8 @@
 #include <iostream>
 #include <mako.hh>
 
+#include "txn_reordering/txn_reordering_config.h"
+
 using namespace std;
 using namespace util;
 
@@ -23,12 +25,13 @@ static void parse_command_line_args(int argc,
       {"paxos-proc-name"            , required_argument , 0                          , 'P'} ,
       {"site-name"                  , required_argument , 0                          , 'N'} ,
       {"local-shards"               , required_argument , 0                          , 'L'} ,
+      {"txn-config"                 , required_argument , 0                          , 'J'} ,
       {"is-micro"                   , no_argument       , &is_micro                  ,   1} ,
       {"is-replicated"              , no_argument       , &is_replicated             ,   1} ,
       {0, 0, 0, 0}
     };
     int option_index = 0;
-    int c = getopt_long(argc, argv, "t:g:q:F:P:N:L:", long_options, &option_index);
+    int c = getopt_long(argc, argv, "t:g:q:F:P:N:L:J:", long_options, &option_index);
     if (c == -1)
       break;
 
@@ -65,6 +68,19 @@ static void parse_command_line_args(int argc,
 
     case 'L':
       local_shards_str = string(optarg);
+      break;
+
+    case 'J': {
+      std::string config_path(optarg);
+      std::string error;
+      auto& options = mako::txn_reordering::TxnReorderingOptions::Instance();
+      if (!options.LoadFromFile(config_path, &error)) {
+        cerr << "[ERROR] Failed to load txn config from " << config_path
+             << ": " << error << endl;
+        exit(1);
+      }
+      Notice("Loaded txn reordering config from %s", config_path.c_str());
+      }
       break;
 
     case 'q': {
