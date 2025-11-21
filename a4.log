@@ -1,0 +1,112 @@
+I [/home/ubuntu/mako/src/deptran/paxos_main_helper.cc:78] 2025-11-19 00:41:13.185 | PWD : /home/ubuntu/mako
+I [/home/ubuntu/mako/src/deptran/paxos_main_helper.cc:273] 2025-11-19 00:41:13.185 | starting process 82329
+I [/home/ubuntu/mako/src/deptran/config.cc:290] 2025-11-19 00:41:13.185 | LoadYML: /home/ubuntu/mako/examples/../config/1leader_2followers/paxos3_shardidx0.yml
+I [/home/ubuntu/mako/src/deptran/config.cc:290] 2025-11-19 00:41:13.186 | LoadYML: /home/ubuntu/mako/examples/../config/occ_paxos.yml
+I [/home/ubuntu/mako/src/deptran/paxos_main_helper.cc:282] 2025-11-19 00:41:13.186 | server_infos, number of sites: 3, proc_name: learner
+I [/home/ubuntu/mako/src/deptran/paxos_main_helper.cc:288] 2025-11-19 00:41:13.191 | parition id of each Paxos group is 2, site-name: s403, site-id: 11
+I [/home/ubuntu/mako/src/deptran/paxos_main_helper.cc:288] 2025-11-19 00:41:13.196 | parition id of each Paxos group is 1, site-name: s402, site-id: 7
+I [/home/ubuntu/mako/src/deptran/paxos_main_helper.cc:288] 2025-11-19 00:41:13.202 | parition id of each Paxos group is 0, site-name: s401, site-id: 3
+I [/home/ubuntu/mako/src/deptran/paxos_main_helper.cc:294] 2025-11-19 00:41:13.202 | running machine-id: 3
+I [/home/ubuntu/mako/src/deptran/paxos_main_helper.cc:88] 2025-11-19 00:41:13.202 | launching site: 3, bind address 0.0.0.0:7301
+I [/home/ubuntu/mako/src/deptran/paxos_main_helper.cc:103] 2025-11-19 00:41:13.202 | waiting for server setup threads.
+I [/home/ubuntu/mako/src/deptran/paxos_worker.cc:192] 2025-11-19 00:41:13.202 | [service]loc_id: 3, name: s401, proc: learner, id: 3
+starting server at 0.0.0.0:7301
+I [/home/ubuntu/mako/src/deptran/paxos_worker.cc:215] 2025-11-19 00:41:13.202 | Server s401 ready at 0.0.0.0:7301
+I [/home/ubuntu/mako/src/deptran/communicator.cc:14] 2025-11-19 00:41:13.202 | setup paxos communicator
+I [/home/ubuntu/mako/src/deptran/paxos_main_helper.cc:88] 2025-11-19 00:41:13.202 | launching site: 7, bind address 0.0.0.0:7302
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-19 00:41:13.202 | connect to site: 127.0.0.1:7001 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/paxos_worker.cc:192] 2025-11-19 00:41:13.202 | [service]loc_id: 3, name: s402, proc: learner, id: 7
+starting server at 0.0.0.0:7302
+I [/home/ubuntu/mako/src/deptran/paxos_worker.cc:215] 2025-11-19 00:41:13.202 | Server s402 ready at 0.0.0.0:7302
+I [/home/ubuntu/mako/src/deptran/communicator.cc:14] 2025-11-19 00:41:13.202 | setup paxos communicator
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-19 00:41:13.202 | connect to site: 127.0.0.1:7001 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-19 00:41:13.202 | connect to site: 127.0.0.1:7101 (attempt 0)
+E [/home/ubuntu/mako/src/rrr/rpc/client.cpp:179] 2025-11-19 00:41:13.202 | rrr::Client: connect(127.0.0.1:7101): Connection refused
+I [/home/ubuntu/mako/src/deptran/paxos_main_helper.cc:88] 2025-11-19 00:41:13.202 | launching site: b, bind address 0.0.0.0:7303
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-19 00:41:13.202 | connect to site: 127.0.0.1:7101 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/paxos_worker.cc:192] 2025-11-19 00:41:13.202 | [service]loc_id: 3, name: s403, proc: learner, id: 11
+E [/home/ubuntu/mako/src/rrr/rpc/client.cpp:179] 2025-11-19 00:41:13.202 | rrr::Client: connect(127.0.0.1:7101): Connection refused
+starting server at 0.0.0.0:7303
+I [/home/ubuntu/mako/src/deptran/paxos_worker.cc:215] 2025-11-19 00:41:13.202 | Server s403 ready at 0.0.0.0:7303
+I [/home/ubuntu/mako/src/deptran/communicator.cc:14] 2025-11-19 00:41:13.202 | setup paxos communicator
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-19 00:41:13.202 | connect to site: 127.0.0.1:7001 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-19 00:41:13.202 | connect to site: 127.0.0.1:7101 (attempt 0)
+E [/home/ubuntu/mako/src/rrr/rpc/client.cpp:179] 2025-11-19 00:41:13.202 | rrr::Client: connect(127.0.0.1:7101): Connection refused
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-19 00:41:14.202 | connect to site: 127.0.0.1:7101 (attempt 1)
+E [/home/ubuntu/mako/src/rrr/rpc/client.cpp:179] 2025-11-19 00:41:14.202 | rrr::Client: connect(127.0.0.1:7101): Connection refused
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-19 00:41:14.202 | connect to site: 127.0.0.1:7101 (attempt 1)
+E [/home/ubuntu/mako/src/rrr/rpc/client.cpp:179] 2025-11-19 00:41:14.202 | rrr::Client: connect(127.0.0.1:7101): Connection refused
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-19 00:41:14.203 | connect to site: 127.0.0.1:7101 (attempt 1)
+E [/home/ubuntu/mako/src/rrr/rpc/client.cpp:179] 2025-11-19 00:41:14.203 | rrr::Client: connect(127.0.0.1:7101): Connection refused
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-19 00:41:15.203 | connect to site: 127.0.0.1:7101 (attempt 2)
+E [/home/ubuntu/mako/src/rrr/rpc/client.cpp:179] 2025-11-19 00:41:15.203 | rrr::Client: connect(127.0.0.1:7101): Connection refused
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-19 00:41:15.203 | connect to site: 127.0.0.1:7101 (attempt 2)
+E [/home/ubuntu/mako/src/rrr/rpc/client.cpp:179] 2025-11-19 00:41:15.203 | rrr::Client: connect(127.0.0.1:7101): Connection refused
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-19 00:41:15.203 | connect to site: 127.0.0.1:7101 (attempt 2)
+E [/home/ubuntu/mako/src/rrr/rpc/client.cpp:179] 2025-11-19 00:41:15.203 | rrr::Client: connect(127.0.0.1:7101): Connection refused
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-19 00:41:16.203 | connect to site: 127.0.0.1:7101 (attempt 3)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-19 00:41:16.203 | connect to site: 127.0.0.1:7201 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-19 00:41:16.203 | connect to site: 127.0.0.1:7301 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-19 00:41:16.203 | connect to site: 127.0.0.1:7002 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-19 00:41:16.203 | connect to site: 127.0.0.1:7102 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-19 00:41:16.203 | connect to site: 127.0.0.1:7202 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-19 00:41:16.203 | connect to site: 127.0.0.1:7302 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-19 00:41:16.203 | connect to site: 127.0.0.1:7003 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-19 00:41:16.203 | connect to site: 127.0.0.1:7103 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-19 00:41:16.203 | connect to site: 127.0.0.1:7203 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-19 00:41:16.203 | connect to site: 127.0.0.1:7303 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/paxos_main_helper.cc:100] 2025-11-19 00:41:16.203 | site 7 launched!
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-19 00:41:16.203 | connect to site: 127.0.0.1:7101 (attempt 3)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-19 00:41:16.203 | connect to site: 127.0.0.1:7201 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-19 00:41:16.203 | connect to site: 127.0.0.1:7301 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-19 00:41:16.203 | connect to site: 127.0.0.1:7002 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-19 00:41:16.203 | connect to site: 127.0.0.1:7102 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-19 00:41:16.203 | connect to site: 127.0.0.1:7202 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-19 00:41:16.203 | connect to site: 127.0.0.1:7302 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-19 00:41:16.203 | connect to site: 127.0.0.1:7003 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-19 00:41:16.203 | connect to site: 127.0.0.1:7103 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-19 00:41:16.203 | connect to site: 127.0.0.1:7203 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-19 00:41:16.203 | connect to site: 127.0.0.1:7303 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/paxos_main_helper.cc:100] 2025-11-19 00:41:16.203 | site 3 launched!
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-19 00:41:16.204 | connect to site: 127.0.0.1:7101 (attempt 3)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-19 00:41:16.204 | connect to site: 127.0.0.1:7201 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-19 00:41:16.204 | connect to site: 127.0.0.1:7301 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-19 00:41:16.204 | connect to site: 127.0.0.1:7002 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-19 00:41:16.204 | connect to site: 127.0.0.1:7102 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-19 00:41:16.204 | connect to site: 127.0.0.1:7202 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-19 00:41:16.204 | connect to site: 127.0.0.1:7302 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-19 00:41:16.204 | connect to site: 127.0.0.1:7003 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-19 00:41:16.204 | connect to site: 127.0.0.1:7103 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-19 00:41:16.204 | connect to site: 127.0.0.1:7203 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-19 00:41:16.204 | connect to site: 127.0.0.1:7303 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/paxos_main_helper.cc:100] 2025-11-19 00:41:16.204 | site 11 launched!
+I [/home/ubuntu/mako/src/deptran/paxos_main_helper.cc:107] 2025-11-19 00:41:16.204 | done waiting for server setup threads.
+I [/home/ubuntu/mako/src/deptran/paxos_worker.cc:249] 2025-11-19 00:41:16.204 | heartbeat setup for s401 on 0.0.0.0:17301
+I [/home/ubuntu/mako/src/deptran/paxos_worker.cc:249] 2025-11-19 00:41:16.204 | heartbeat setup for s402 on 0.0.0.0:17302
+I [/home/ubuntu/mako/src/deptran/paxos_worker.cc:249] 2025-11-19 00:41:16.204 | heartbeat setup for s403 on 0.0.0.0:17303
+I [/home/ubuntu/mako/src/deptran/paxos_main_helper.cc:114] 2025-11-19 00:41:16.204 | server workers' communicators setup
+learner, received ending: 0, num_workers:3, received msg: 0, end_received_leader:0
+I [/home/ubuntu/mako/src/deptran/paxos_main_helper.cc:734] 2025-11-19 00:41:16.204 | start a heartbeatBackground, addr:127.0.0.1:17001
+E [/home/ubuntu/mako/src/rrr/rpc/client.cpp:179] 2025-11-19 00:41:16.204 | rrr::Client: connect(127.0.0.1:17001): Connection refused
+I [/home/ubuntu/mako/src/deptran/paxos_worker.cc:134] 2025-11-19 00:41:16.782 | Recieved a zero length log
+I [/home/ubuntu/mako/src/deptran/paxos_worker.cc:134] 2025-11-19 00:41:16.783 | Recieved a zero length log
+I [/home/ubuntu/mako/src/deptran/paxos_worker.cc:134] 2025-11-19 00:41:16.783 | Recieved a zero length log
+learner, received ending: 3, received msg: 303
+I [/home/ubuntu/mako/src/deptran/paxos_main_helper.cc:975] 2025-11-19 00:41:20.204 | shutdown Server Control Service after task finish total submit 0
+I [/home/ubuntu/mako/src/deptran/benchmark_control_rpc.cc:43] 2025-11-19 00:41:20.204 | Shutdown Server Control Service
+I [/home/ubuntu/mako/src/deptran/benchmark_control_rpc.cc:43] 2025-11-19 00:41:20.204 | Shutdown Server Control Service
+I [/home/ubuntu/mako/src/deptran/benchmark_control_rpc.cc:43] 2025-11-19 00:41:20.204 | Shutdown Server Control Service
+I [/home/ubuntu/mako/src/deptran/paxos_main_helper.cc:308] 2025-11-19 00:41:20.205 | all server workers have shut down.
+I [/home/ubuntu/mako/src/deptran/paxos_worker.cc:282] 2025-11-19 00:41:20.205 | site s401 deleting services, num: 1 0 0 0
+I [/home/ubuntu/mako/src/deptran/paxos_main_helper.cc:747] 2025-11-19 00:41:20.210 | heartbeatBackground is ended!
+I [/home/ubuntu/mako/src/deptran/paxos/server.h:47] 2025-11-19 00:41:20.255 | site par 0, loc 3: prepare 0, accept 0, commit 0
+I [/home/ubuntu/mako/src/deptran/paxos_worker.cc:282] 2025-11-19 00:41:20.255 | site s402 deleting services, num: 1 0 0 0
+I [/home/ubuntu/mako/src/deptran/paxos/server.h:47] 2025-11-19 00:41:20.306 | site par 1, loc 3: prepare 0, accept 0, commit 0
+I [/home/ubuntu/mako/src/deptran/paxos_worker.cc:282] 2025-11-19 00:41:20.306 | site s403 deleting services, num: 1 0 0 0
+I [/home/ubuntu/mako/src/deptran/paxos/server.h:47] 2025-11-19 00:41:20.306 | site par 2, loc 3: prepare 0, accept 0, commit 0
+I [/home/ubuntu/mako/src/deptran/paxos_worker.cc:641] 2025-11-19 00:41:20.306 | Ending worker with n_tot 0 and n_current 0
+I [/home/ubuntu/mako/src/deptran/paxos_worker.cc:641] 2025-11-19 00:41:20.310 | Ending worker with n_tot 0 and n_current 0
+I [/home/ubuntu/mako/src/deptran/paxos_worker.cc:641] 2025-11-19 00:41:20.314 | Ending worker with n_tot 0 and n_current 0
+I [/home/ubuntu/mako/src/deptran/paxos_main_helper.cc:321] 2025-11-19 00:41:20.318 | exit process.
+[learner committed]: 303(follower/learner), 0(leader), endReceived: 3, leaderEndReceived:0
+[[32mPASS[0m] committed logs count verify

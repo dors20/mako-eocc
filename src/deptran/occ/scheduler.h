@@ -7,6 +7,7 @@ namespace janus {
 class SchedulerOcc: public SchedulerClassic {
  public:
   SchedulerOcc();
+  virtual ~SchedulerOcc();
   virtual mdb::Txn *get_mdb_txn(const i64 tid);
 
   virtual bool HandleConflicts(Tx& dtxn,
@@ -28,6 +29,10 @@ class SchedulerOcc: public SchedulerClassic {
   };
   virtual bool DoPrepare(txnid_t tx_id) override;
   virtual void DoCommit(Tx& tx) override;
+
+#ifdef OCC_ANALYSIS_ENABLED
+  void printAnalysisStatistics() const;
+#endif
 };
 
 } // namespace janus

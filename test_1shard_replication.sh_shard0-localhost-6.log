@@ -1,0 +1,461 @@
+=========================================
+Configuration:
+=========================================
+  Number of shards:  1
+  Shard index:       0
+  Number of threads: 6
+  Cluster:           localhost
+  Micro benchmark:   disabled
+  Replicated mode:   enabled
+=========================================
+20251017-00:50.11-186396(us) 04711 * ParseOldFormat  (configuration.cc:66): Using old configuration format
+I [/home/ubuntu/mako/src/deptran/paxos_main_helper.cc:78] 2025-11-17 00:50:11.186 | PWD : /home/ubuntu/mako
+I [/home/ubuntu/mako/src/deptran/paxos_main_helper.cc:273] 2025-11-17 00:50:11.186 | starting process 4711
+I [/home/ubuntu/mako/src/deptran/config.cc:290] 2025-11-17 00:50:11.187 | LoadYML: config/1leader_2followers/paxos6_shardidx0.yml
+I [/home/ubuntu/mako/src/deptran/config.cc:290] 2025-11-17 00:50:11.189 | LoadYML: config/occ_paxos.yml
+I [/home/ubuntu/mako/src/deptran/paxos_main_helper.cc:282] 2025-11-17 00:50:11.191 | server_infos, number of sites: 6, proc_name: localhost
+I [/home/ubuntu/mako/src/deptran/paxos_main_helper.cc:288] 2025-11-17 00:50:11.197 | parition id of each Paxos group is 5, site-name: s106, site-id: 20
+I [/home/ubuntu/mako/src/deptran/paxos_main_helper.cc:288] 2025-11-17 00:50:11.203 | parition id of each Paxos group is 4, site-name: s105, site-id: 16
+I [/home/ubuntu/mako/src/deptran/paxos_main_helper.cc:288] 2025-11-17 00:50:11.208 | parition id of each Paxos group is 3, site-name: s104, site-id: 12
+I [/home/ubuntu/mako/src/deptran/paxos_main_helper.cc:288] 2025-11-17 00:50:11.214 | parition id of each Paxos group is 2, site-name: s103, site-id: 8
+I [/home/ubuntu/mako/src/deptran/paxos_main_helper.cc:288] 2025-11-17 00:50:11.219 | parition id of each Paxos group is 1, site-name: s102, site-id: 4
+I [/home/ubuntu/mako/src/deptran/paxos_main_helper.cc:288] 2025-11-17 00:50:11.225 | parition id of each Paxos group is 0, site-name: s101, site-id: 0
+I [/home/ubuntu/mako/src/deptran/paxos_main_helper.cc:294] 2025-11-17 00:50:11.225 | running machine-id: 0
+I [/home/ubuntu/mako/src/deptran/paxos_main_helper.cc:88] 2025-11-17 00:50:11.225 | launching site: 0, bind address 0.0.0.0:7001
+I [/home/ubuntu/mako/src/deptran/paxos_worker.cc:192] 2025-11-17 00:50:11.225 | [service]loc_id: 0, name: s101, proc: localhost, id: 0
+starting server at 0.0.0.0:7001
+I [/home/ubuntu/mako/src/deptran/paxos_worker.cc:215] 2025-11-17 00:50:11.225 | Server s101 ready at 0.0.0.0:7001
+I [/home/ubuntu/mako/src/deptran/communicator.cc:14] 2025-11-17 00:50:11.225 | setup paxos communicator
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:11.225 | connect to site: 127.0.0.1:7001 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:11.225 | connect to site: 127.0.0.1:7101 (attempt 0)
+E [/home/ubuntu/mako/src/rrr/rpc/client.cpp:179] 2025-11-17 00:50:11.226 | rrr::Client: connect(127.0.0.1:7101): Connection refused
+I [/home/ubuntu/mako/src/deptran/paxos_main_helper.cc:103] 2025-11-17 00:50:11.226 | waiting for server setup threads.
+I [/home/ubuntu/mako/src/deptran/paxos_main_helper.cc:88] 2025-11-17 00:50:11.226 | launching site: 4, bind address 0.0.0.0:7002
+I [/home/ubuntu/mako/src/deptran/paxos_worker.cc:192] 2025-11-17 00:50:11.226 | [service]loc_id: 0, name: s102, proc: localhost, id: 4
+starting server at 0.0.0.0:7002
+I [/home/ubuntu/mako/src/deptran/paxos_worker.cc:215] 2025-11-17 00:50:11.226 | Server s102 ready at 0.0.0.0:7002
+I [/home/ubuntu/mako/src/deptran/communicator.cc:14] 2025-11-17 00:50:11.226 | setup paxos communicator
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:11.226 | connect to site: 127.0.0.1:7001 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:11.226 | connect to site: 127.0.0.1:7101 (attempt 0)
+E [/home/ubuntu/mako/src/rrr/rpc/client.cpp:179] 2025-11-17 00:50:11.226 | rrr::Client: connect(127.0.0.1:7101): Connection refused
+I [/home/ubuntu/mako/src/deptran/paxos_main_helper.cc:88] 2025-11-17 00:50:11.226 | launching site: 8, bind address 0.0.0.0:7003
+I [/home/ubuntu/mako/src/deptran/paxos_worker.cc:192] 2025-11-17 00:50:11.226 | [service]loc_id: 0, name: s103, proc: localhost, id: 8
+starting server at 0.0.0.0:7003
+I [/home/ubuntu/mako/src/deptran/paxos_worker.cc:215] 2025-11-17 00:50:11.226 | Server s103 ready at 0.0.0.0:7003
+I [/home/ubuntu/mako/src/deptran/communicator.cc:14] 2025-11-17 00:50:11.226 | setup paxos communicator
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:11.226 | connect to site: 127.0.0.1:7001 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:11.226 | connect to site: 127.0.0.1:7101 (attempt 0)
+E [/home/ubuntu/mako/src/rrr/rpc/client.cpp:179] 2025-11-17 00:50:11.226 | rrr::Client: connect(127.0.0.1:7101): Connection refused
+I [/home/ubuntu/mako/src/deptran/paxos_main_helper.cc:88] 2025-11-17 00:50:11.226 | launching site: 10, bind address 0.0.0.0:7005
+I [/home/ubuntu/mako/src/deptran/paxos_worker.cc:192] 2025-11-17 00:50:11.226 | [service]loc_id: 0, name: s104, proc: localhost, id: 12
+starting server at 0.0.0.0:7004
+I [/home/ubuntu/mako/src/deptran/paxos_worker.cc:215] 2025-11-17 00:50:11.226 | Server s104 ready at 0.0.0.0:7004
+I [/home/ubuntu/mako/src/deptran/communicator.cc:14] 2025-11-17 00:50:11.226 | setup paxos communicator
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:11.226 | connect to site: 127.0.0.1:7001 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:11.226 | connect to site: 127.0.0.1:7101 (attempt 0)
+E [/home/ubuntu/mako/src/rrr/rpc/client.cpp:179] 2025-11-17 00:50:11.226 | rrr::Client: connect(127.0.0.1:7101): Connection refused
+I [/home/ubuntu/mako/src/deptran/paxos_main_helper.cc:88] 2025-11-17 00:50:11.226 | launching site: 14, bind address 0.0.0.0:7006
+I [/home/ubuntu/mako/src/deptran/paxos_worker.cc:192] 2025-11-17 00:50:11.226 | [service]loc_id: 0, name: s105, proc: localhost, id: 16
+starting server at 0.0.0.0:7005
+I [/home/ubuntu/mako/src/deptran/paxos_worker.cc:215] 2025-11-17 00:50:11.226 | Server s105 ready at 0.0.0.0:7005
+I [/home/ubuntu/mako/src/deptran/communicator.cc:14] 2025-11-17 00:50:11.226 | setup paxos communicator
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:11.226 | connect to site: 127.0.0.1:7001 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:11.226 | connect to site: 127.0.0.1:7101 (attempt 0)
+E [/home/ubuntu/mako/src/rrr/rpc/client.cpp:179] 2025-11-17 00:50:11.226 | rrr::Client: connect(127.0.0.1:7101): Connection refused
+I [/home/ubuntu/mako/src/deptran/paxos_main_helper.cc:88] 2025-11-17 00:50:11.227 | launching site: c, bind address 0.0.0.0:7004
+I [/home/ubuntu/mako/src/deptran/paxos_worker.cc:192] 2025-11-17 00:50:11.227 | [service]loc_id: 0, name: s106, proc: localhost, id: 20
+starting server at 0.0.0.0:7006
+I [/home/ubuntu/mako/src/deptran/paxos_worker.cc:215] 2025-11-17 00:50:11.227 | Server s106 ready at 0.0.0.0:7006
+I [/home/ubuntu/mako/src/deptran/communicator.cc:14] 2025-11-17 00:50:11.227 | setup paxos communicator
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:11.227 | connect to site: 127.0.0.1:7001 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:11.227 | connect to site: 127.0.0.1:7101 (attempt 0)
+E [/home/ubuntu/mako/src/rrr/rpc/client.cpp:179] 2025-11-17 00:50:11.227 | rrr::Client: connect(127.0.0.1:7101): Connection refused
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.226 | connect to site: 127.0.0.1:7101 (attempt 1)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.226 | connect to site: 127.0.0.1:7201 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.226 | connect to site: 127.0.0.1:7301 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.226 | connect to site: 127.0.0.1:7002 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.226 | connect to site: 127.0.0.1:7102 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.226 | connect to site: 127.0.0.1:7202 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.226 | connect to site: 127.0.0.1:7302 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.226 | connect to site: 127.0.0.1:7003 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.226 | connect to site: 127.0.0.1:7103 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.226 | connect to site: 127.0.0.1:7203 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.226 | connect to site: 127.0.0.1:7303 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.226 | connect to site: 127.0.0.1:7004 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.226 | connect to site: 127.0.0.1:7104 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.226 | connect to site: 127.0.0.1:7204 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.226 | connect to site: 127.0.0.1:7304 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.226 | connect to site: 127.0.0.1:7005 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.226 | connect to site: 127.0.0.1:7105 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.226 | connect to site: 127.0.0.1:7205 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.226 | connect to site: 127.0.0.1:7305 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.226 | connect to site: 127.0.0.1:7006 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.226 | connect to site: 127.0.0.1:7106 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.226 | connect to site: 127.0.0.1:7206 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.226 | connect to site: 127.0.0.1:7306 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/paxos_main_helper.cc:100] 2025-11-17 00:50:12.226 | site 0 launched!
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.226 | connect to site: 127.0.0.1:7101 (attempt 1)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.226 | connect to site: 127.0.0.1:7201 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.226 | connect to site: 127.0.0.1:7301 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.226 | connect to site: 127.0.0.1:7002 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.226 | connect to site: 127.0.0.1:7102 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.226 | connect to site: 127.0.0.1:7101 (attempt 1)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.226 | connect to site: 127.0.0.1:7101 (attempt 1)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.226 | connect to site: 127.0.0.1:7202 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.226 | connect to site: 127.0.0.1:7201 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.226 | connect to site: 127.0.0.1:7302 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.227 | connect to site: 127.0.0.1:7003 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.227 | connect to site: 127.0.0.1:7201 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.227 | connect to site: 127.0.0.1:7301 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.227 | connect to site: 127.0.0.1:7103 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.227 | connect to site: 127.0.0.1:7002 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.227 | connect to site: 127.0.0.1:7102 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.227 | connect to site: 127.0.0.1:7203 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.227 | connect to site: 127.0.0.1:7202 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.227 | connect to site: 127.0.0.1:7302 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.227 | connect to site: 127.0.0.1:7303 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.227 | connect to site: 127.0.0.1:7003 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.227 | connect to site: 127.0.0.1:7103 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.227 | connect to site: 127.0.0.1:7203 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.227 | connect to site: 127.0.0.1:7303 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.227 | connect to site: 127.0.0.1:7004 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.227 | connect to site: 127.0.0.1:7104 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.227 | connect to site: 127.0.0.1:7004 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.227 | connect to site: 127.0.0.1:7204 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.227 | connect to site: 127.0.0.1:7304 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.227 | connect to site: 127.0.0.1:7005 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.227 | connect to site: 127.0.0.1:7105 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.227 | connect to site: 127.0.0.1:7205 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.227 | connect to site: 127.0.0.1:7305 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.227 | connect to site: 127.0.0.1:7006 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.227 | connect to site: 127.0.0.1:7104 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.227 | connect to site: 127.0.0.1:7106 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.227 | connect to site: 127.0.0.1:7206 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.227 | connect to site: 127.0.0.1:7204 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.227 | connect to site: 127.0.0.1:7301 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.227 | connect to site: 127.0.0.1:7002 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.227 | connect to site: 127.0.0.1:7102 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.227 | connect to site: 127.0.0.1:7304 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.227 | connect to site: 127.0.0.1:7202 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.227 | connect to site: 127.0.0.1:7005 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.227 | connect to site: 127.0.0.1:7302 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.227 | connect to site: 127.0.0.1:7003 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.227 | connect to site: 127.0.0.1:7105 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.227 | connect to site: 127.0.0.1:7103 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.227 | connect to site: 127.0.0.1:7203 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.227 | connect to site: 127.0.0.1:7303 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.227 | connect to site: 127.0.0.1:7004 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.227 | connect to site: 127.0.0.1:7104 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.227 | connect to site: 127.0.0.1:7204 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.227 | connect to site: 127.0.0.1:7205 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.227 | connect to site: 127.0.0.1:7304 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.227 | connect to site: 127.0.0.1:7005 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.227 | connect to site: 127.0.0.1:7105 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.227 | connect to site: 127.0.0.1:7205 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.227 | connect to site: 127.0.0.1:7305 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.227 | connect to site: 127.0.0.1:7305 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.227 | connect to site: 127.0.0.1:7006 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.227 | connect to site: 127.0.0.1:7006 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.227 | connect to site: 127.0.0.1:7106 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.227 | connect to site: 127.0.0.1:7106 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.227 | connect to site: 127.0.0.1:7206 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.227 | connect to site: 127.0.0.1:7206 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.227 | connect to site: 127.0.0.1:7306 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/paxos_main_helper.cc:100] 2025-11-17 00:50:12.227 | site 8 launched!
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.227 | connect to site: 127.0.0.1:7306 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/paxos_main_helper.cc:100] 2025-11-17 00:50:12.227 | site 4 launched!
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.227 | connect to site: 127.0.0.1:7101 (attempt 1)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.227 | connect to site: 127.0.0.1:7201 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.227 | connect to site: 127.0.0.1:7101 (attempt 1)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.227 | connect to site: 127.0.0.1:7301 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.227 | connect to site: 127.0.0.1:7002 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.227 | connect to site: 127.0.0.1:7102 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.227 | connect to site: 127.0.0.1:7201 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.228 | connect to site: 127.0.0.1:7202 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.228 | connect to site: 127.0.0.1:7302 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.228 | connect to site: 127.0.0.1:7003 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.228 | connect to site: 127.0.0.1:7103 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.228 | connect to site: 127.0.0.1:7301 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.228 | connect to site: 127.0.0.1:7203 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.228 | connect to site: 127.0.0.1:7303 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.228 | connect to site: 127.0.0.1:7002 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.228 | connect to site: 127.0.0.1:7004 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.228 | connect to site: 127.0.0.1:7102 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.228 | connect to site: 127.0.0.1:7104 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.228 | connect to site: 127.0.0.1:7202 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.228 | connect to site: 127.0.0.1:7204 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.228 | connect to site: 127.0.0.1:7304 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.228 | connect to site: 127.0.0.1:7302 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.228 | connect to site: 127.0.0.1:7005 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.228 | connect to site: 127.0.0.1:7003 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.228 | connect to site: 127.0.0.1:7105 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.228 | connect to site: 127.0.0.1:7103 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.228 | connect to site: 127.0.0.1:7205 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.228 | connect to site: 127.0.0.1:7203 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.228 | connect to site: 127.0.0.1:7305 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.228 | connect to site: 127.0.0.1:7303 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.228 | connect to site: 127.0.0.1:7006 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.228 | connect to site: 127.0.0.1:7106 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.228 | connect to site: 127.0.0.1:7206 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.228 | connect to site: 127.0.0Disk persistence disabled by DISABLE_DISK flag
+.1:7306 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/paxos_main_helper.cc:100] 2025-11-17 00:50:12.228 | site 20 launched!
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.228 | connect to site: 127.0.0.1:7004 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.228 | connect to site: 127.0.0.1:7104 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.228 | connect to site: 127.0.0.1:7204 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.228 | connect to site: 127.0.0.1:7304 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.228 | connect to site: 127.0.0.1:7005 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.228 | connect to site: 127.0.0.1:7105 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.228 | connect to site: 127.0.0.1:7205 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.228 | connect to site: 127.0.0.1:7305 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.228 | connect to site: 127.0.0.1:7006 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.228 | connect to site: 127.0.0.1:7106 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.228 | connect to site: 127.0.0.1:7206 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.228 | connect to site: 127.0.0.1:7306 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/paxos_main_helper.cc:100] 2025-11-17 00:50:12.228 | site 12 launched!
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.228 | connect to site: 127.0.0.1:7306 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/paxos_main_helper.cc:100] 2025-11-17 00:50:12.228 | site 16 launched!
+I [/home/ubuntu/mako/src/deptran/paxos_main_helper.cc:107] 2025-11-17 00:50:12.228 | done waiting for server setup threads.
+I [/home/ubuntu/mako/src/deptran/paxos_worker.cc:249] 2025-11-17 00:50:12.228 | heartbeat setup for s101 on 0.0.0.0:17001
+I [/home/ubuntu/mako/src/deptran/paxos_worker.cc:249] 2025-11-17 00:50:12.228 | heartbeat setup for s102 on 0.0.0.0:17002
+I [/home/ubuntu/mako/src/deptran/paxos_worker.cc:249] 2025-11-17 00:50:12.229 | heartbeat setup for s103 on 0.0.0.0:17003
+I [/home/ubuntu/mako/src/deptran/paxos_worker.cc:249] 2025-11-17 00:50:12.229 | heartbeat setup for s104 on 0.0.0.0:17004
+I [/home/ubuntu/mako/src/deptran/paxos_worker.cc:249] 2025-11-17 00:50:12.229 | heartbeat setup for s105 on 0.0.0.0:17005
+I [/home/ubuntu/mako/src/deptran/paxos_worker.cc:249] 2025-11-17 00:50:12.229 | heartbeat setup for s106 on 0.0.0.0:17006
+I [/home/ubuntu/mako/src/deptran/paxos_main_helper.cc:114] 2025-11-17 00:50:12.229 | server workers' communicators setup
+allocator::Initialize()
+  hugepgsize: 2097152
+  use MADV_WILLNEED: 1
+  mmap() region [0x7cbcfae00000, 0x7cbd3b800000)
+cpu0 owns [0x7cbcfae00000, 0x7cbd05a00000)
+cpu1 owns [0x7cbd05a00000, 0x7cbd10600000)
+cpu2 owns [0x7cbd10600000, 0x7cbd1b200000)
+cpu3 owns [0x7cbd1b200000, 0x7cbd25e00000)
+cpu4 owns [0x7cbd25e00000, 0x7cbd30a00000)
+cpu5 owns [0x7cbd30a00000, 0x7cbd3b600000)
+Database Benchmark:
+  pid: 4711
+settings:
+  num-cpus    : 2
+  num-threads : 6
+  shardIndex  : 0
+  paxos_proc_name  : localhost
+  nshards     : 1
+  is_micro    : 0
+  is_replicated : 1
+  var-encode  : yes
+  allocator   : jemalloc
+system properties:
+  tuple_prefetch          : no
+  btree_node_prefetch     : yes
+tpcc settings:
+  cross_partition_transactions : 1
+  read_only_snapshots          : 1
+  partition_locks              : 0
+  separate_tree_per_partition  : 1
+  new_order_remote_item_pct    : 1
+  new_order_fast_id_gen        : 1
+  uniform_item_dist            : 0
+  order_status_scan_hack       : 0
+  workload_mix                 : [45, 43, 4, 4, 4]
+new table is createded with name: customer_0, table-id: 1, on shard-server id:0
+new table is createded with name: customer_1, table-id: 2, on shard-server id:0
+new table is createded with name: customer_2, table-id: 3, on shard-server id:0
+new table is createded with name: customer_3, table-id: 4, on shard-server id:0
+new table is createded with name: customer_4, table-id: 5, on shard-server id:0
+new table is createded with name: customer_5, table-id: 6, on shard-server id:0
+new table is createded with name: customer_name_idx_0, table-id: 7, on shard-server id:0
+new table is createded with name: customer_name_idx_1, table-id: 8, on shard-server id:0
+new table is createded with name: customer_name_idx_2, table-id: 9, on shard-server id:0
+new table is createded with name: customer_name_idx_3, table-id: 10, on shard-server id:0
+new table is createded with name: customer_name_idx_4, table-id: 11, on shard-server id:0
+new table is createded with name: customer_name_idx_5, table-id: 12, on shard-server id:0
+new table is createded with name: district_0, table-id: 13, on shard-server id:0
+new table is createded with name: district_1, table-id: 14, on shard-server id:0
+new table is createded with name: district_2, table-id: 15, on shard-server id:0
+new table is createded with name: district_3, table-id: 16, on shard-server id:0
+new table is createded with name: district_4, table-id: 17, on shard-server id:0
+new table is createded with name: district_5, table-id: 18, on shard-server id:0
+new table is createded with name: history_0, table-id: 19, on shard-server id:0
+new table is createded with name: history_1, table-id: 20, on shard-server id:0
+new table is createded with name: history_2, table-id: 21, on shard-server id:0
+new table is createded with name: history_3, table-id: 22, on shard-server id:0
+new table is createded with name: history_4, table-id: 23, on shard-server id:0
+new table is createded with name: history_5, table-id: 24, on shard-server id:0
+new table is createded with name: new_order_0, table-id: 25, on shard-server id:0
+new table is createded with name: new_order_1, table-id: 26, on shard-server id:0
+new table is createded with name: new_order_2, table-id: 27, on shard-server id:0
+new table is createded with name: new_order_3, table-id: 28, on shard-server id:0
+new table is createded with name: new_order_4, table-id: 29, on shard-server id:0
+new table is createded with name: new_order_5, table-id: 30, on shard-server id:0
+new table is createded with name: oorder_0, table-id: 31, on shard-server id:0
+new table is createded with name: oorder_1, table-id: 32, on shard-server id:0
+new table is createded with name: oorder_2, table-id: 33, on shard-server id:0
+new table is createded with name: oorder_3, table-id: 34, on shard-server id:0
+new table is createded with name: oorder_4, table-id: 35, on shard-server id:0
+new table is createded with name: oorder_5, table-id: 36, on shard-server id:0
+new table is createded with name: oorder_c_id_idx_0, table-id: 37, on shard-server id:0
+new table is createded with name: oorder_c_id_idx_1, table-id: 38, on shard-server id:0
+new table is createded with name: oorder_c_id_idx_2, table-id: 39, on shard-server id:0
+new table is createded with name: oorder_c_id_idx_3, table-id: 40, on shard-server id:0
+new table is createded with name: oorder_c_id_idx_4, table-id: 41, on shard-server id:0
+new table is createded with name: oorder_c_id_idx_5, table-id: 42, on shard-server id:0
+new table is createded with name: order_line_0, table-id: 43, on shard-server id:0
+new table is createded with name: order_line_1, table-id: 44, on shard-server id:0
+new table is createded with name: order_line_2, table-id: 45, on shard-server id:0
+new table is createded with name: order_line_3, table-id: 46, on shard-server id:0
+new table is createded with name: order_line_4, table-id: 47, on shard-server id:0
+new table is createded with name: order_line_5, table-id: 48, on shard-server id:0
+new table is createded with name: stock_0, table-id: 49, on shard-server id:0
+new table is createded with name: stock_1, table-id: 50, on shard-server id:0
+new table is createded with name: stock_2, table-id: 51, on shard-server id:0
+new table is createded with name: stock_3, table-id: 52, on shard-server id:0
+new table is createded with name: stock_4, table-id: 53, on shard-server id:0
+new table is createded with name: stock_5, table-id: 54, on shard-server id:0
+new table is createded with name: stock_data_0, table-id: 55, on shard-server id:0
+new table is createded with name: stock_data_1, table-id: 56, on shard-server id:0
+new table is createded with name: stock_data_2, table-id: 57, on shard-server id:0
+new table is createded with name: stock_data_3, table-id: 58, on shard-server id:0
+new table is createded with name: stock_data_4, table-id: 59, on shard-server id:0
+new table is createded with name: stock_data_5, table-id: 60, on shard-server id:0
+new table is createded with name: warehouse_0, table-id: 61, on shard-server id:0
+new table is createded with name: warehouse_1, table-id: 62, on shard-server id:0
+new table is createded with name: warehouse_2, table-id: 63, on shard-server id:0
+new table is createded with name: warehouse_3, table-id: 64, on shard-server id:0
+new table is createded with name: warehouse_4, table-id: 65, on shard-server id:0
+new table is createded with name: warehouse_5, table-id: 66, on shard-server id:0
+new table is createded with name: item, table-id: 67, on shard-server id:0
+20251017-00:50.15-230402(us) 04711 * ParseOldFormat  (configuration.cc:66): Using old configuration format
+20251017-00:50.15-230434(us) 04711 * ParseOldFormat  (configuration.cc:66): Using old configuration format
+[TRANSPORT] Using default: rrr
+[TRANSPORT] Using default: rrr
+20251017-00:50.15-232315(us) 04711 * Initialize      (rrr_rpc_backend.cc:85): RrrRpcBackend initialized on 127.0.0.1:31011 (listening on 0.0.0.0:31011)
+20251017-00:50.15-232356(us) 04711 * FastTransport   (fasttransport.cc:116): FastTransport initialized with rrr/rpc backend on 127.0.0.1:31011
+20251017-00:50.15-232372(us) 04711 * Initialize      (rrr_rpc_backend.cc:85): RrrRpcBackend initialized on 127.0.0.1:31012 (listening on 0.0.0.0:31012)
+20251017-00:50.15-232385(us) 04711 * FastTransport   (fasttransport.cc:116): FastTransport initialized with rrr/rpc backend on 127.0.0.1:31012
+20251017-00:50.15-232398(us) 04711 * RunEventLoop    (rrr_rpc_backend.cc:508): RrrRpcBackend::RunEventLoop: Starting event loop
+20251017-00:50.15-232433(us) 04711 * RunEventLoop    (rrr_rpc_backend.cc:508): RrrRpcBackend::RunEventLoop: Starting event loop
+20251017-00:50.15-233685(us) 04711 ! run             (bench.cc:357):     # of loaders size:6
+start worker:2637
+[INFO] finished loading warehouse
+[INFO]   * average warehouse record length: 97 bytes
+PinToWarehouseId(): coreid=3 pinned to whse=1 (partid=0)
+num batches: 30
+PinToWarehouseId(): coreid=4 pinned to whse=1 (partid=0)
+PinToWarehouseId(): coreid=5 pinned to whse=1 (partid=0)
+PinToWarehouseId(): coreid=2 pinned to whse=1 (partid=0)
+PinToWarehouseId(): coreid=2 pinned to whse=2 (partid=1)
+PinToWarehouseId(): coreid=2 pinned to whse=3 (partid=2)
+PinToWarehouseId(): coreid=2 pinned to whse=4 (partid=3)
+PinToWarehouseId(): coreid=2 pinned to whse=5 (partid=4)
+PinToWarehouseId(): coreid=2 pinned to whse=6 (partid=5)
+[INFO] finished loading district
+[INFO]   * average district record length: 99 bytes
+PinToWarehouseId(): coreid=5 pinned to whse=2 (partid=1)
+[INFO] finished loading item
+[INFO]   * average item record length: 84.1739 bytes
+PinToWarehouseId(): coreid=4 pinned to whse=2 (partid=1)
+PinToWarehouseId(): coreid=5 pinned to whse=3 (partid=2)
+PinToWarehouseId(): coreid=5 pinned to whse=4 (partid=3)
+PinToWarehouseId(): coreid=4 pinned to whse=3 (partid=2)
+PinToWarehouseId(): coreid=5 pinned to whse=5 (partid=4)
+PinToWarehouseId(): coreid=5 pinned to whse=6 (partid=5)
+PinToWarehouseId(): coreid=3 pinned to whse=2 (partid=1)
+PinToWarehouseId(): coreid=4 pinned to whse=4 (partid=3)
+[INFO] finished loading order
+[INFO]   * average order_line record length: 11.2511 bytes
+[INFO]   * average oorder record length: 7.88727 bytes
+[INFO]   * average new_order record length: 12 bytes
+PinToWarehouseId(): coreid=4 pinned to whse=5 (partid=4)
+PinToWarehouseId(): coreid=4 pinned to whse=6 (partid=5)
+[INFO] finished loading customer
+[INFO]   * average customer record length: 153.954 bytes 
+PinToWarehouseId(): coreid=3 pinned to whse=3 (partid=2)
+PinToWarehouseId(): coreid=3 pinned to whse=4 (partid=3)
+PinToWarehouseId(): coreid=3 pinned to whse=5 (partid=4)
+PinToWarehouseId(): coreid=3 pinned to whse=6 (partid=5)
+[INFO] finished loading stock
+[INFO]   * average stock record length: 8 bytes
+timed region dataloading took 10621.3 ms
+DB size: 4018.8 MB
+[0, 0, 0] txns persisted in loading phase
+20251017-00:50.25-854985(us) 04711 ! run             (bench.cc:410):     # of nthreads:6
+starting benchmark...
+--------------Finish loading data and wait for others completing load phase ------------
+tpcc: worker id 8 => warehouses [1, 2)
+tpcc: worker id 9 => warehouses [2, 3)
+tpcc: worker id 10 => warehouses [3, 4)
+tpcc: worker id 11 => warehouses [4, 5)
+tpcc: worker id 12 => warehouses [5, 6)
+tpcc: worker id 13 => warehouses [6, 7)
+No JEMALLOC_NO_RENAME
+20251017-00:50.25-858235(us) 04711 * ParseOldFormat  (configuration.cc:66): Using old configuration format
+20251017-00:50.25-858533(us) 04711 * ParseOldFormat  (configuration.cc:66): Using old configuration format
+[TRANSPORT] Using default: rrr
+No JEMALLOC_NO_RENAME
+20251017-00:50.25-858747(us) 04711 * Initialize      (rrr_rpc_backend.cc:85): RrrRpcBackend initialized on 127.0.0.1:31000 (listening on 0.0.0.0:31000)
+20251017-00:50.25-858773(us) 04711 * FastTransport   (fasttransport.cc:116): FastTransport initialized with rrr/rpc backend on 127.0.0.1:31000
+20251017-00:50.25-859000(us) 04711 * ParseOldFormat  (configuration.cc:66): Using old configuration format
+20251017-00:50.25-859230(us) 04711 * ParseOldFormat  (configuration.cc:66): Using old configuration format
+20251017-00:50.25-859387(us) 04711 * ParseOldFormat  (configuration.cc:66): Using old configuration format
+[TRANSPORT] Using default: rrr
+20251017-00:50.25-859520(us) 04711 * Initialize      (rrr_rpc_backend.cc:85): RrrRpcBackend initialized on 127.0.0.1:31001 (listening on 0.0.0.0:31001)
+20251017-00:50.25-859528(us) 04711 * FastTransport   (fasttransport.cc:116): FastTransport initialized with rrr/rpc backend on 127.0.0.1:31001
+20251017-00:50.25-859662(us) 04711 * ParseOldFormat  (configuration.cc:66): Using old configuration format
+No JEMALLOC_NO_RENAME
+20251017-00:50.25-860175(us) 04711 * ParseOldFormat  (configuration.cc:66): Using old configuration format
+20251017-00:50.25-860348(us) 04711 * ParseOldFormat  (configuration.cc:66): Using old configuration format
+[TRANSPORT] Using default: rrr
+20251017-00:50.25-860503(us) 04711 * Initialize      (rrr_rpc_backend.cc:85): RrrRpcBackend initialized on 127.0.0.1:31002 (listening on 0.0.0.0:31002)
+20251017-00:50.25-860520(us) 04711 * FastTransport   (fasttransport.cc:116): FastTransport initialized with rrr/rpc backend on 127.0.0.1:31002
+20251017-00:50.25-860666(us) 04711 * ParseOldFormat  (configuration.cc:66): Using old configuration format
+No JEMALLOC_NO_RENAME
+20251017-00:50.25-861172(us) 04711 * ParseOldFormat  (configuration.cc:66): Using old configuration format
+20251017-00:50.25-861356(us) 04711 * ParseOldFormat  (configuration.cc:66): Using old configuration format
+[TRANSPORT] Using default: rrr
+20251017-00:50.25-861492(us) 04711 * Initialize      (rrr_rpc_backend.cc:85): RrrRpcBackend initialized on 127.0.0.1:31003 (listening on 0.0.0.0:31003)
+20251017-00:50.25-861500(us) 04711 * FastTransport   (fasttransport.cc:116): FastTransport initialized with rrr/rpc backend on 127.0.0.1:31003
+20251017-00:50.25-861643(us) 04711 * ParseOldFormat  (configuration.cc:66): Using old configuration format
+No JEMALLOC_NO_RENAME
+20251017-00:50.25-861987(us) 04711 * ParseOldFormat  (configuration.cc:66): Using old configuration format
+20251017-00:50.25-862125(us) 04711 * ParseOldFormat  (configuration.cc:66): Using old configuration format
+[TRANSPORT] Using default: rrr
+20251017-00:50.25-862264(us) 04711 * Initialize      (rrr_rpc_backend.cc:85): RrrRpcBackend initialized on 127.0.0.1:31004 (listening on 0.0.0.0:31004)
+20251017-00:50.25-862270(us) 04711 * FastTransport   (fasttransport.cc:116): FastTransport initialized with rrr/rpc backend on 127.0.0.1:31004
+20251017-00:50.25-862391(us) 04711 * ParseOldFormat  (configuration.cc:66): Using old configuration format
+No JEMALLOC_NO_RENAME
+20251017-00:50.25-862925(us) 04711 * ParseOldFormat  (configuration.cc:66): Using old configuration format
+20251017-00:50.25-863092(us) 04711 * ParseOldFormat  (configuration.cc:66): Using old configuration format
+[TRANSPORT] Using default: rrr
+20251017-00:50.25-863208(us) 04711 * Initialize      (rrr_rpc_backend.cc:85): RrrRpcBackend initialized on 127.0.0.1:31005 (listening on 0.0.0.0:31005)
+20251017-00:50.25-863216(us) 04711 * FastTransport   (fasttransport.cc:116): FastTransport initialized with rrr/rpc backend on 127.0.0.1:31005
+20251017-00:50.25-863343(us) 04711 * ParseOldFormat  (configuration.cc:66): Using old configuration format
+20251017-00:50.25-874872(us) 04711 ! run             (bench.cc:461):     start the running time, runTime:30
+20251017-00:50.25-874902(us) 04711 ! run             (bench.cc:473):     runtime time left:30000 ms, bool:1
+we can start a advancer
+start the advancer thread...
+20251017-00:50.26-891479(us) 04711 ! run             (bench.cc:473):     runtime time left:29000 ms, bool:1
+20251017-00:50.27-910929(us) 04711 ! run             (bench.cc:473):     runtime time left:28000 ms, bool:1
+20251017-00:50.28-933144(us) 04711 ! run             (bench.cc:473):     runtime time left:27000 ms, bool:1
+20251017-00:50.29-950485(us) 04711 ! run             (bench.cc:473):     runtime time left:26000 ms, bool:1
+20251017-00:50.30-970257(us) 04711 ! run             (bench.cc:473):     runtime time left:25000 ms, bool:1
+20251017-00:50.31-991954(us) 04711 ! run             (bench.cc:473):     runtime time left:24000 ms, bool:1
+20251017-00:50.33-9742(us) 04711 ! run             (bench.cc:473):     runtime time left:23000 ms, bool:1
+20251017-00:50.34-33341(us) 04711 ! run             (bench.cc:473):     runtime time left:22000 ms, bool:1
+20251017-00:50.35-55511(us) 04711 ! run             (bench.cc:473):     runtime time left:21000 ms, bool:1
+20251017-00:50.36-73926(us) 04711 ! run             (bench.cc:473):     runtime time left:20000 ms, bool:1
+20251017-00:50.37-93933(us) 04711 ! run             (bench.cc:473):     runtime time left:19000 ms, bool:1
+20251017-00:50.38-117432(us) 04711 ! run             (bench.cc:473):     runtime time left:18000 ms, bool:1
+20251017-00:50.39-139203(us) 04711 ! run             (bench.cc:473):     runtime time left:17000 ms, bool:1
+20251017-00:50.40-174377(us) 04711 ! run             (bench.cc:473):     runtime time left:16000 ms, bool:1
+20251017-00:50.41-198303(us) 04711 ! run             (bench.cc:473):     runtime time left:15000 ms, bool:1
+20251017-00:50.42-215275(us) 04711 ! run             (bench.cc:473):     runtime time left:14000 ms, bool:1
+20251017-00:50.43-243010(us) 04711 ! run             (bench.cc:473):     runtime time left:13000 ms, bool:1
+20251017-00:50.44-263715(us) 04711 ! run             (bench.cc:473):     runtime time left:12000 ms, bool:1
+20251017-00:50.45-294401(us) 04711 ! run             (bench.cc:473):     runtime time left:11000 ms, bool:1
+20251017-00:50.46-320992(us) 04711 ! run             (bench.cc:473):     runtime time left:10000 ms, bool:1
+20251017-00:50.47-341826(us) 04711 ! run             (bench.cc:473):     runtime time left:9000 ms, bool:1
+20251017-00:50.48-357618(us) 04711 ! run             (bench.cc:473):     runtime time left:8000 ms, bool:1
+20251017-00:50.49-378975(us) 04711 ! run             (bench.cc:473):     runtime time left:7000 ms, bool:1
+20251017-00:50.50-400123(us) 04711 ! run             (bench.cc:473):     runtime time left:6000 ms, bool:1
+20251017-00:50.51-426547(us) 04711 ! run             (bench.cc:473):     runtime time left:5000 ms, bool:1

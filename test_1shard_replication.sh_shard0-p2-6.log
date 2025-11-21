@@ -1,0 +1,368 @@
+=========================================
+Configuration:
+=========================================
+  Number of shards:  1
+  Shard index:       0
+  Number of threads: 6
+  Cluster:           p2
+  Micro benchmark:   disabled
+  Replicated mode:   enabled
+=========================================
+20251017-00:50.11-187126(us) 04710 * ParseOldFormat  (configuration.cc:66): Using old configuration format
+I [/home/ubuntu/mako/src/deptran/paxos_main_helper.cc:78] 2025-11-17 00:50:11.187 | PWD : /home/ubuntu/mako
+I [/home/ubuntu/mako/src/deptran/paxos_main_helper.cc:273] 2025-11-17 00:50:11.187 | starting process 4710
+I [/home/ubuntu/mako/src/deptran/config.cc:290] 2025-11-17 00:50:11.187 | LoadYML: config/1leader_2followers/paxos6_shardidx0.yml
+I [/home/ubuntu/mako/src/deptran/config.cc:290] 2025-11-17 00:50:11.189 | LoadYML: config/occ_paxos.yml
+I [/home/ubuntu/mako/src/deptran/paxos_main_helper.cc:282] 2025-11-17 00:50:11.189 | server_infos, number of sites: 6, proc_name: p2
+I [/home/ubuntu/mako/src/deptran/paxos_main_helper.cc:288] 2025-11-17 00:50:11.201 | parition id of each Paxos group is 5, site-name: s306, site-id: 22
+I [/home/ubuntu/mako/src/deptran/paxos_main_helper.cc:288] 2025-11-17 00:50:11.212 | parition id of each Paxos group is 4, site-name: s305, site-id: 18
+I [/home/ubuntu/mako/src/deptran/paxos_main_helper.cc:288] 2025-11-17 00:50:11.224 | parition id of each Paxos group is 3, site-name: s304, site-id: 14
+I [/home/ubuntu/mako/src/deptran/paxos_main_helper.cc:288] 2025-11-17 00:50:11.231 | parition id of each Paxos group is 2, site-name: s303, site-id: 10
+I [/home/ubuntu/mako/src/deptran/paxos_main_helper.cc:288] 2025-11-17 00:50:11.237 | parition id of each Paxos group is 1, site-name: s302, site-id: 6
+I [/home/ubuntu/mako/src/deptran/paxos_main_helper.cc:288] 2025-11-17 00:50:11.243 | parition id of each Paxos group is 0, site-name: s301, site-id: 2
+I [/home/ubuntu/mako/src/deptran/paxos_main_helper.cc:294] 2025-11-17 00:50:11.243 | running machine-id: 2
+I [/home/ubuntu/mako/src/deptran/paxos_main_helper.cc:88] 2025-11-17 00:50:11.243 | launching site: 2, bind address 0.0.0.0:7201
+I [/home/ubuntu/mako/src/deptran/paxos_main_helper.cc:88] 2025-11-17 00:50:11.243 | launching site: 6, bind address 0.0.0.0:7202
+I [/home/ubuntu/mako/src/deptran/paxos_worker.cc:192] 2025-11-17 00:50:11.243 | [service]loc_id: 2, name: s301, proc: p2, id: 2
+starting server at 0.0.0.0:7201I [/home/ubuntu/mako/src/deptran/paxos_worker.cc:192] 2025-11-17 00:50:11.243 | [service]loc_id: 2, name: s302, proc: p2, id: 6
+
+starting server at 0.0.0.0:7202
+I [/home/ubuntu/mako/src/deptran/paxos_worker.cc:215] 2025-11-17 00:50:11.243 | Server s301 ready at 0.0.0.0:7201
+I [/home/ubuntu/mako/src/deptran/communicator.cc:14] 2025-11-17 00:50:11.243 | setup paxos communicator
+I [/home/ubuntu/mako/src/deptran/paxos_worker.cc:215] 2025-11-17 00:50:11.243 | Server s302 ready at 0.0.0.0:7202
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:11.243 | connect to site: 127.0.0.1:7001 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:14] 2025-11-17 00:50:11.243 | setup paxos communicator
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:11.243 | connect to site: 127.0.0.1:7001 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:11.243 | connect to site: 127.0.0.1:7101 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:11.243 | connect to site: 127.0.0.1:7101 (attempt 0)
+E [/home/ubuntu/mako/src/rrr/rpc/client.cpp:179] 2025-11-17 00:50:11.243 | rrr::Client: connect(127.0.0.1:7101): Connection refused
+E [/home/ubuntu/mako/src/rrr/rpc/client.cpp:179] 2025-11-17 00:50:11.243 | rrr::Client: connect(127.0.0.1:7101): Connection refused
+I [/home/ubuntu/mako/src/deptran/paxos_main_helper.cc:88] 2025-11-17 00:50:11.243 | launching site: a, bind address 0.0.0.0:7203
+I [/home/ubuntu/mako/src/deptran/paxos_main_helper.cc:88] 2025-11-17 00:50:11.243 | launching site: e, bind address 0.0.0.0:7204
+I [/home/ubuntu/mako/src/deptran/paxos_main_helper.cc:88] 2025-11-17 00:50:11.243 | launching site: 12, bind address 0.0.0.0:7205
+I [/home/ubuntu/mako/src/deptran/paxos_worker.cc:192] 2025-11-17 00:50:11.243 | [service]loc_id: 2, name: s303, proc: p2, id: 10
+starting server at 0.0.0.0:7203
+I [/home/ubuntu/mako/src/deptran/paxos_worker.cc:215] 2025-11-17 00:50:11.243 | Server s303 ready at 0.0.0.0:7203
+I [/home/ubuntu/mako/src/deptran/communicator.cc:14] 2025-11-17 00:50:11.243 | setup paxos communicator
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:11.243 | connect to site: 127.0.0.1:7001 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:11.243 | connect to site: 127.0.0.1:7101 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/paxos_worker.cc:192] 2025-11-17 00:50:11.243 | [service]loc_id: 2, name: s305, proc: p2, id: 18
+starting server at 0.0.0.0:7205
+I [/home/ubuntu/mako/src/deptran/paxos_worker.cc:215] 2025-11-17 00:50:11.243 | Server s305 ready at 0.0.0.0:7205
+I [/home/ubuntu/mako/src/deptran/communicator.cc:14] 2025-11-17 00:50:11.243 | setup paxos communicator
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:11.243 | connect to site: 127.0.0.1:7001 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:11.243 | connect to site: 127.0.0.1:7101 (attempt 0)
+E [/home/ubuntu/mako/src/rrr/rpc/client.cpp:179] 2025-11-17 00:50:11.243 | rrr::Client: connect(127.0.0.1:7101): Connection refused
+E [/home/ubuntu/mako/src/rrr/rpc/client.cpp:179] 2025-11-17 00:50:11.244 | rrr::Client: connect(127.0.0.1:7101): Connection refused
+I [/home/ubuntu/mako/src/deptran/paxos_main_helper.cc:103] 2025-11-17 00:50:11.244 | waiting for server setup threads.
+I [/home/ubuntu/mako/src/deptran/paxos_main_helper.cc:88] 2025-11-17 00:50:11.244 | launching site: 16, bind address 0.0.0.0:7206
+I [/home/ubuntu/mako/src/deptran/paxos_worker.cc:192] 2025-11-17 00:50:11.244 | [service]loc_id: 2, name: s306, proc: p2, id: 22
+I [/home/ubuntu/mako/src/deptran/paxos_worker.cc:192] 2025-11-17 00:50:11.244 | [service]loc_id: 2, name: s304, proc: p2, id: 14
+starting server at 0.0.0.0:7206
+I [/home/ubuntu/mako/src/deptran/paxos_worker.cc:215] 2025-11-17 00:50:11.244 | Server s306 ready at 0.0.0.0:7206
+I [/home/ubuntu/mako/src/deptran/communicator.cc:14] 2025-11-17 00:50:11.244 | setup paxos communicator
+starting server at 0.0.0.0:7204
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:11.244 | connect to site: 127.0.0.1:7001 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/paxos_worker.cc:215] 2025-11-17 00:50:11.244 | Server s304 ready at 0.0.0.0:7204
+I [/home/ubuntu/mako/src/deptran/communicator.cc:14] 2025-11-17 00:50:11.244 | setup paxos communicator
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:11.244 | connect to site: 127.0.0.1:7001 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:11.244 | connect to site: 127.0.0.1:7101 (attempt 0)
+E [/home/ubuntu/mako/src/rrr/rpc/client.cpp:179] 2025-11-17 00:50:11.244 | rrr::Client: connect(127.0.0.1:7101): Connection refused
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:11.244 | connect to site: 127.0.0.1:7101 (attempt 0)
+E [/home/ubuntu/mako/src/rrr/rpc/client.cpp:179] 2025-11-17 00:50:11.244 | rrr::Client: connect(127.0.0.1:7101): Connection refused
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.243 | connect to site: 127.0.0.1:7101 (attempt 1)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.243 | connect to site: 127.0.0.1:7201 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.243 | connect to site: 127.0.0.1:7301 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.243 | connect to site: 127.0.0.1:7002 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.243 | connect to site: 127.0.0.1:7102 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.243 | connect to site: 127.0.0.1:7202 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.243 | connect to site: 127.0.0.1:7302 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.243 | connect to site: 127.0.0.1:7101 (attempt 1)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.244 | connect to site: 127.0.0.1:7201 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.244 | connect to site: 127.0.0.1:7003 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.244 | connect to site: 127.0.0.1:7301 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.244 | connect to site: 127.0.0.1:7103 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.244 | connect to site: 127.0.0.1:7002 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.244 | connect to site: 127.0.0.1:7203 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.244 | connect to site: 127.0.0.1:7102 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.244 | connect to site: 127.0.0.1:7303 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.244 | connect to site: 127.0.0.1:7202 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.244 | connect to site: 127.0.0.1:7004 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.244 | connect to site: 127.0.0.1:7302 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.244 | connect to site: 127.0.0.1:7104 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.244 | connect to site: 127.0.0.1:7204 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.244 | connect to site: 127.0.0.1:7101 (attempt 1)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.244 | connect to site: 127.0.0.1:7201 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.244 | connect to site: 127.0.0.1:7301 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.244 | connect to site: 127.0.0.1:7002 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.244 | connect to site: 127.0.0.1:7304 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.244 | connect to site: 127.0.0.1:7102 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.244 | connect to site: 127.0.0.1:7101 (attempt 1)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.244 | connect to site: 127.0.0.1:7201 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.244 | connect to site: 127.0.0.1:7005 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.244 | connect to site: 127.0.0.1:7105 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.244 | connect to site: 127.0.0.1:7205 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.244 | connect to site: 127.0.0.1:7003 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.244 | connect to site: 127.0.0.1:7305 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.244 | connect to site: 127.0.0.1:7301 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.244 | connect to site: 127.0.0.1:7006 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.244 | connect to site: 127.0.0.1:7002 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.244 | connect to site: 127.0.0.1:7106 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.244 | connect to site: 127.0.0.1:7102 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.244 | connect to site: 127.0.0.1:7206 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.244 | connect to site: 127.0.0.1:7306 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.244 | connect to site: 127.0.0.1:7202 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/paxos_main_helper.cc:100] 2025-11-17 00:50:12.244 | site 2 launched!
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.244 | connect to site: 127.0.0.1:7302 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.244 | connect to site: 127.0.0.1:7003 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.244 | connect to site: 127.0.0.1:7103 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.244 | connect to site: 127.0.0.1:7203 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.244 | connect to site: 127.0.0.1:7303 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.244 | connect to site: 127.0.0.1:7202 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.244 | connect to site: 127.0.0.1:7004 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.244 | connect to site: 127.0.0.1:7302 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.244 | connect to site: 127.0.0.1:7104 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.244 | connect to site: 127.0.0.1:7003 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.244 | connect to site: 127.0.0.1:7204 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.244 | connect to site: 127.0.0.1:7103 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.244 | connect to site: 127.0.0.1:7304 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.244 | connect to site: 127.0.0.1:7203 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.244 | connect to site: 127.0.0.1:7005 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.244 | connect to site: 127.0.0.1:7303 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.244 | connect to site: 127.0.0.1:7105 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.244 | connect to site: 127.0.0.1:7004 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.244 | connect to site: 127.0.0.1:7205 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.244 | connect to site: 127.0.0.1:7104 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.244 | connect to site: 127.0.0.1:7204 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.244 | connect to site: 127.0.0.1:7304 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.244 | connect to site: 127.0.0.1:7103 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.244 | connect to site: 127.0.0.1:7005 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.244 | connect to site: 127.0.0.1:7203 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.244 | connect to site: 127.0.0.1:7105 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.244 | connect to site: 127.0.0.1:7303 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.244 | connect to site: 127.0.0.1:7205 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.244 | connect to site: 127.0.0.1:7004 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.244 | connect to site: 127.0.0.1:7305 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.244 | connect to site: 127.0.0.1:7006 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.244 | connect to site: 127.0.0.1:7106 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.244 | connect to site: 127.0.0.1:7206 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.244 | connect to site: 127.0.0.1:7306 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/paxos_main_helper.cc:100] 2025-11-17 00:50:12.244 | site 10 launched!
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.244 | connect to site: 127.0.0.1:7104 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.244 | connect to site: 127.0.0.1:7204 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.244 | connect to site: 127.0.0.1:7304 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.244 | connect to site: 127.0.0.1:7005 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.244 | connect to site: 127.0.0.1:7105 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.244 | connect to site: 127.0.0.1:7205 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.244 | connect to site: 127.0.0.1:7101 (attempt 1)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.244 | connect to site: 127.0.0.1:7201 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.244 | connect to site: 127.0.0.1:7301 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.244 | connect to site: 127.0.0.1:7002 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.244 | connect to site: 127.0.0.1:7101 (attempt 1)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.244 | connect to site: 127.0.0.1:7102 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.244 | connect to site: 127.0.0.1:7201 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.245 | connect to site: 127.0.0.1:7301 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.245 | connect to site: 127.0.0.1:7002 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.245 | connect to site: 127.0.0.1:7102 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.245 | connect to site: 127.0.0.1:7202 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.245 | connect to site: 127.0.0.1:7302 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.245 | connect to site: 127.0.0.1:7202 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.245 | connect to site: 127.0.0.1:7003 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.245 | connect to site: 127.0.0.1:7103 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.245 | connect to site: 127.0.0.1:7302 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.245 | connect to site: 127.0.0.1:7203 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.245 | connect to site: 127.0.0.1:7003 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.245 | connect to site: 127.0.0.1:7303 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.245 | connect to site: 127.0.0.1:7103 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.245 | connect to site: 127.0.0.1:7004 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.245 | connect to site: 127.0.0.1:7203 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.245 | connect to site: 127.0.0.1:7104 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.245 | connect to site: 127.0.0.1:7303 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.245 | connect to site: 127.0.0.1:7204 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.245 | connect to site: 127.0.0.1:7004 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.245 | connect to site: 127.0.0.1:7304 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.245 | connect to site: 127.0.0.1:7104 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.245 | connect to site: 127.0.0.1:7005 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.245 | connect to site: 127.0.0.1:7204 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.245 | connect to site: 127.0.0.1:7304 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.245 | connect to site: 127.0.0.1:7105 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.245 | connect to site: 127.0.0.1:7005 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.245 | connect to site: 127.0.0.1:7205 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.245 | connect to site: 127.0.0.1:7105 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.245 | connect to site: 127.0.0.1:7305 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.245 | connect to site: 127.0.0.1:7006 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.245 | connect to site: 127.0.0.1:7205 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.245 | connect to site: 127.0.0.1:7106 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.245 | connect to site: 127.0.0.1:7305 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.245 | connect to site: 127.0.0.1:7206 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.245 | connect to site: 127.0.0.1:7006 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.245 | connect to site: 127.0.0.1:7106 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.245 | connect to site: 127.0.0.1:7306 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.245 | connect to site: 127.0.0.1:7206 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/paxos_main_helper.cc:100] 2025-11-17 00:50:12.245 | site 14 launched!
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.245 | connect to site: 127.0.0.1:7306 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.244 | connect to site: 127.0.0.1:7305 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.245 | connect to site: 127.0.0.1:7305 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.248 | connect to site: 127.0.0.1:7006 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.248 | connect to site: 127.0.0.1:7106 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.248 | connect to site: 127.0.0.1:7206 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.248 | connect to site: 127.0.0.1:7306 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/paxos_main_helper.cc:100] 2025-11-17 00:50:12.248 | site 6 launched!
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.248 | connect to site: 127.0.0.1:7006 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.248 | connect to site: 127.0.0.1:7106 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.248 | connect to site: 127.0.0.1:7206 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/communicator.cc:174] 2025-11-17 00:50:12.248 | connect to site: 127.0.0.1:7306 (attempt 0)
+I [/home/ubuntu/mako/src/deptran/paxos_main_helper.cc:100] 2025-11-17 00:50:12.248 | site 18 launched!
+I [/home/ubuntu/mako/src/deptran/paxos_main_helper.cc:100] 2025-11-17 00:50:12.248 | site 22 launched!
+I [/home/ubuntu/mako/src/deptran/paxos_main_helper.cc:107] 2025-11-17 00:50:12.248 | done waiting for server setup threads.
+I [/home/ubuntu/mako/src/deptran/paxos_worker.cc:249] 2025-11-17 00:50:12.248 | heartbeat setup for s301 on 0.0.0.0:17201
+I [/home/ubuntu/mako/src/deptran/paxos_worker.cc:249] 2025-11-17 00:50:12.248 | heartbeat setup for s302 on 0.0.0.0:17202
+I [/home/ubuntu/mako/src/deptran/paxos_worker.cc:249] 2025-11-17 00:50:12.248 | heartbeat setup for s303 on 0.0.0.0:17203
+I [/home/ubuntu/mako/src/deptran/paxos_worker.cc:249] 2025-11-17 00:50:12.248 | heartbeat setup for s304 on 0.0.0.0:17204
+I [/home/ubuntu/mako/src/deptran/paxos_worker.cc:249] 2025-11-17 00:50:12.248 | heartbeat setup for s305 on 0.0.0.0:17205
+I [/home/ubuntu/mako/src/deptran/paxos_worker.cc:249] 2025-11-17 00:50:12.248 | heartbeat setup for s306 on 0.0.0.0:17206
+I [/home/ubuntu/mako/src/deptran/paxos_main_helper.cc:114] 2025-11-17 00:50:12.248 | server workers' communicators setup
+allocator::Initialize()
+  hugepgsize: 2097152
+  use MADV_WILLNEED: 1
+  mmap() region [0x7e1a9f600000, 0x7e1ae0000000)
+cpu0 owns [0x7e1a9f600000, 0x7e1aaa200000)
+cpu1 owns [0x7e1aaa200000, 0x7e1ab4e00000)
+cpu2 owns [0x7e1ab4e00000, 0x7e1abfa00000)
+cpu3 owns [0x7e1abfa00000, 0x7e1aca600000)
+cpu4 owns [0x7e1aca600000, 0x7e1ad5200000)
+cpu5 owns [0x7e1ad5200000, 0x7e1adfe00000)
+Database Benchmark:
+  pid: 4710
+settings:
+  num-cpus    : 2
+  num-threads : 6
+  shardIndex  : 0
+  paxos_proc_name  : p2
+  nshards     : 1
+  is_micro    : 0
+  is_replicated : 1
+  var-encode  : yes
+  allocator   : jemalloc
+system properties:
+  tuple_prefetch          : no
+  btree_node_prefetch     : yes
+20251017-00:50.16-253190(us) 04710 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/6, noops_cnt:0, replay_batch:82, wait_time:1s
+
+20251017-00:50.17-253287(us) 04710 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/6, noops_cnt:0, replay_batch:175, wait_time:2s
+
+20251017-00:50.18-254181(us) 04710 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/6, noops_cnt:0, replay_batch:255, wait_time:3s
+
+20251017-00:50.19-254429(us) 04710 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/6, noops_cnt:0, replay_batch:335, wait_time:4s
+
+20251017-00:50.20-254543(us) 04710 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/6, noops_cnt:0, replay_batch:414, wait_time:5s
+
+20251017-00:50.21-255285(us) 04710 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/6, noops_cnt:0, replay_batch:460, wait_time:6s
+
+20251017-00:50.22-255360(us) 04710 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/6, noops_cnt:0, replay_batch:463, wait_time:7s
+
+20251017-00:50.23-255424(us) 04710 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/6, noops_cnt:0, replay_batch:467, wait_time:8s
+
+20251017-00:50.24-255917(us) 04710 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/6, noops_cnt:0, replay_batch:469, wait_time:9s
+
+20251017-00:50.25-256074(us) 04710 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/6, noops_cnt:0, replay_batch:473, wait_time:10s
+
+we can start a advancer
+start the advancer thread...
+20251017-00:50.26-259188(us) 04710 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/6, noops_cnt:0, replay_batch:485, wait_time:11s
+
+20251017-00:50.27-259321(us) 04710 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/6, noops_cnt:0, replay_batch:540, wait_time:12s
+
+20251017-00:50.28-261310(us) 04710 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/6, noops_cnt:0, replay_batch:591, wait_time:13s
+
+20251017-00:50.29-261412(us) 04710 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/6, noops_cnt:0, replay_batch:642, wait_time:14s
+
+20251017-00:50.30-261577(us) 04710 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/6, noops_cnt:0, replay_batch:694, wait_time:15s
+
+20251017-00:50.31-261670(us) 04710 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/6, noops_cnt:0, replay_batch:742, wait_time:16s
+
+20251017-00:50.32-261728(us) 04710 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/6, noops_cnt:0, replay_batch:792, wait_time:17s
+
+20251017-00:50.33-261831(us) 04710 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/6, noops_cnt:0, replay_batch:842, wait_time:18s
+
+20251017-00:50.34-261918(us) 04710 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/6, noops_cnt:0, replay_batch:892, wait_time:19s
+
+20251017-00:50.35-262024(us) 04710 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/6, noops_cnt:0, replay_batch:943, wait_time:20s
+
+20251017-00:50.36-262124(us) 04710 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/6, noops_cnt:0, replay_batch:990, wait_time:21s
+
+20251017-00:50.37-264414(us) 04710 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/6, noops_cnt:0, replay_batch:1041, wait_time:22s
+
+20251017-00:50.38-264554(us) 04710 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/6, noops_cnt:0, replay_batch:1086, wait_time:23s
+
+20251017-00:50.39-265677(us) 04710 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/6, noops_cnt:0, replay_batch:1136, wait_time:24s
+
+20251017-00:50.40-265997(us) 04710 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/6, noops_cnt:0, replay_batch:1185, wait_time:25s
+
+20251017-00:50.41-266099(us) 04710 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/6, noops_cnt:0, replay_batch:1235, wait_time:26s
+
+20251017-00:50.42-266616(us) 04710 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/6, noops_cnt:0, replay_batch:1286, wait_time:27s
+
+20251017-00:50.43-266698(us) 04710 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/6, noops_cnt:0, replay_batch:1332, wait_time:28s
+
+20251017-00:50.44-267309(us) 04710 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/6, noops_cnt:0, replay_batch:1381, wait_time:29s
+
+20251017-00:50.45-267462(us) 04710 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/6, noops_cnt:0, replay_batch:1429, wait_time:30s
+
+20251017-00:50.46-267560(us) 04710 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/6, noops_cnt:0, replay_batch:1480, wait_time:31s
+
+20251017-00:50.47-267673(us) 04710 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/6, noops_cnt:0, replay_batch:1528, wait_time:32s
+
+20251017-00:50.48-268443(us) 04710 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/6, noops_cnt:0, replay_batch:1576, wait_time:33s
+
+20251017-00:50.49-268535(us) 04710 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/6, noops_cnt:0, replay_batch:1623, wait_time:34s
+
+20251017-00:50.50-269244(us) 04710 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/6, noops_cnt:0, replay_batch:1672, wait_time:35s
+
+20251017-00:50.51-269714(us) 04710 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/6, noops_cnt:0, replay_batch:1718, wait_time:36s
+
+20251017-00:50.52-313032(us) 04710 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/6, noops_cnt:0, replay_batch:1727, wait_time:37s
+
+20251017-00:50.53-714426(us) 04710 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/6, noops_cnt:0, replay_batch:1801, wait_time:38s
+
+20251017-00:50.54-717661(us) 04710 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/6, noops_cnt:0, replay_batch:1801, wait_time:39s
+
+20251017-00:50.55-719320(us) 04710 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/6, noops_cnt:0, replay_batch:1801, wait_time:40s
+
+20251017-00:50.56-719451(us) 04710 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/6, noops_cnt:0, replay_batch:1801, wait_time:41s
+
+20251017-00:50.57-719593(us) 04710 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/6, noops_cnt:0, replay_batch:1801, wait_time:42s
+
+20251017-00:50.58-719716(us) 04710 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/6, noops_cnt:0, replay_batch:1801, wait_time:43s
+
+20251017-00:50.59-719840(us) 04710 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/6, noops_cnt:0, replay_batch:1801, wait_time:44s
+
+20251017-00:51.00-719992(us) 04710 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/6, noops_cnt:0, replay_batch:1801, wait_time:45s
+
+20251017-00:51.01-720120(us) 04710 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/6, noops_cnt:0, replay_batch:1801, wait_time:46s
+
+20251017-00:51.02-720283(us) 04710 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/6, noops_cnt:0, replay_batch:1801, wait_time:47s
+
+20251017-00:51.03-720438(us) 04710 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/6, noops_cnt:0, replay_batch:1801, wait_time:48s
+
+20251017-00:51.04-720638(us) 04710 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/6, noops_cnt:0, replay_batch:1801, wait_time:49s
+
+20251017-00:51.05-720789(us) 04710 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/6, noops_cnt:0, replay_batch:1801, wait_time:50s
+
+20251017-00:51.06-720941(us) 04710 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/6, noops_cnt:0, replay_batch:1801, wait_time:51s
+
+20251017-00:51.07-721068(us) 04710 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/6, noops_cnt:0, replay_batch:1801, wait_time:52s
+
+20251017-00:51.08-721199(us) 04710 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/6, noops_cnt:0, replay_batch:1801, wait_time:53s
+
+20251017-00:51.09-721332(us) 04710 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/6, noops_cnt:0, replay_batch:1801, wait_time:54s
+
+20251017-00:51.10-721517(us) 04710 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/6, noops_cnt:0, replay_batch:1801, wait_time:55s
+
+20251017-00:51.11-721663(us) 04710 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/6, noops_cnt:0, replay_batch:1801, wait_time:56s
+
+20251017-00:51.12-721793(us) 04710 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/6, noops_cnt:0, replay_batch:1801, wait_time:57s
+
+20251017-00:51.13-721937(us) 04710 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/6, noops_cnt:0, replay_batch:1801, wait_time:58s
+
+bash/shard.sh: line 41:  4710 Killed                  ./build/dbtest --num-threads 6 --shard-index 0 --shard-config /home/ubuntu/mako/src/mako/config/local-shards1-warehouses6.yml -F config/1leader_2followers/paxos6\_shardidx0.yml -F config/occ_paxos.yml -P p2 --is-replicated
