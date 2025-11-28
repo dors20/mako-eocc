@@ -40,6 +40,12 @@
 template <template <typename> class Transaction, typename P>
   class base_txn_btree;
 
+// Forward declaration for batch validator
+namespace mako {
+  template <template <typename> class Protocol, typename Traits>
+  class BatchValidator;
+}
+
 class transaction_unusable_exception {};
 class transaction_read_only_exception {};
 
@@ -408,6 +414,8 @@ class transaction : public transaction_base {
   template <template <typename> class, typename>
     friend class base_txn_btree;
   friend Protocol<Traits>;
+  // Friend for batch validation (parallel validation access to protected members)
+  friend class mako::BatchValidator<Protocol, Traits>;
 
 public:
 

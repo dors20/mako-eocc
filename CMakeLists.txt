@@ -129,7 +129,7 @@ set(ERPC_CFLAGS_DPDK
   -Isrc/mako
   -I${ERPC_PATH}/src
   -DERPC_DPDK=true
-  -march=native
+  -march=x86-64
   # ${DPDK_CXXFLAGS} 
   -DERPC_LOG_LEVEL=6
   -DERPC_TESTING=false
@@ -151,7 +151,7 @@ set(ERPC_CFLAGS_IB
   -Isrc/mako
   -I${ERPC_PATH}/src
   -DERPC_INFINIBAND=true
-  -march=native
+  -march=x86-64
   -DERPC_LOG_LEVEL=6
   -DERPC_TESTING=false
   -DGFLAGS_IS_A_DLL=0
@@ -172,7 +172,7 @@ set(ERPC_CFLAGS_ETH
   -Isrc/mako
   -I${ERPC_PATH}/src
   -DERPC_FAKE=true
-  -march=native
+  -march=x86-64
   -DERPC_LOG_LEVEL=6
   -DERPC_TESTING=false
   -DGFLAGS_IS_A_DLL=0
@@ -208,6 +208,8 @@ option(DISABLE_DISK "Disable disk persistence" OFF)
 option(FAIL_NEW_VERSION "Enable fail new version" ON)
 option(SIMULATE_ONE_SHARD_PER_THREAD "Simulate one shard per thread" OFF)
 option(TRACKING_ROLLBACK "Enable rollback tracking" OFF)
+option(ENABLE_BATCH_VALIDATION "Enable parallel batch validation" OFF)
+option(ENABLE_OPENMP "Enable OpenMP for parallel validation" OFF)
 
 # Masstree configuration
 set(MASSTREE_CONFIG "CC=${CMAKE_C_COMPILER} CXX=${CMAKE_CXX_COMPILER} --enable-max-key-len=1024")
@@ -334,6 +336,21 @@ if(SIMULATE_ONE_SHARD_PER_THREAD)
 endif()
 if(TRACKING_ROLLBACK)
   list(APPEND CXXFLAGS -DTRACKING_ROLLBACK)
+endif()
+if(ENABLE_BATCH_VALIDATION)
+  list(APPEND CXXFLAGS -DENABLE_BATCH_VALIDATION)
+  message(STATUS "Parallel batch validation enabled")
+endif()
+if(ENABLE_OPENMP)
+  find_package(OpenMP)
+  if(OpenMP_CXX_FOUND)
+    list(APPEND CXXFLAGS ${OpenMP_CXX_FLAGS})
+    list(APPEND LDFLAGS ${OpenMP_CXX_FLAGS})
+    message(STATUS "OpenMP found: ${OpenMP_CXX_VERSION}")
+    message(STATUS "OpenMP flags: ${OpenMP_CXX_FLAGS}")
+  else()
+    message(WARNING "OpenMP requested but not found. Parallel validation will use std::thread.")
+  endif()
 endif()
 list(APPEND CXXFLAGS
   -include ${W}/masstree/config.h
@@ -596,6 +613,8 @@ file(GLOB_RECURSE DEPTRAN_SRC
 list(FILTER DEPTRAN_SRC EXCLUDE REGEX "src/deptran/s_main.cc")
 list(FILTER DEPTRAN_SRC EXCLUDE REGEX "src/deptran/paxos_main_helper.cc")
 list(FILTER DEPTRAN_SRC EXCLUDE REGEX "src/bench/paxos_lib/.*")
+# Exclude instrumented scheduler (reference file only)
+list(FILTER DEPTRAN_SRC EXCLUDE REGEX ".*scheduler_instrumented\\.cc$")
 
 # Build libtxlog as a shared library
 add_library(txlog SHARED
@@ -755,6 +774,35 @@ add_apps(paxos_async_commit_test src/mako/benchmarks/paxos_async_commit_test.cc)
 add_apps(basic src/mako/benchmarks/ut/basic.cc)
 add_apps(erpc_client src/mako/benchmarks/ut/erpc_client.cc)
 add_apps(erpc_server src/mako/benchmarks/ut/erpc_server.cc)
+
+# Batch validation stress test
+add_executable(test_batch_validation_stress test_batch_validation_stress.cc)
+target_include_directories(test_batch_validation_stress PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/mako
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/mako/masstree
+    ${CMAKE_CURRENT_SOURCE_DIR}/third-party/erpc/src
+    ${CMAKE_CURRENT_SOURCE_DIR}/third-party/erpc/third_party/asio/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/src
+    ${CMAKE_CURRENT_SOURCE_DIR}/examples
+)
+target_compile_options(test_batch_validation_stress PRIVATE ${BENCH_CXXFLAGS})
+target_link_libraries(test_batch_validation_stress
+    mako
+    erpc
+    rust_lib
+    txlog
+    ${BENCH_LDFLAGS}
+    yaml-cpp
+    pthread
+    numa
+    event_pthreads
+    rocksdb
+    ${LIBEVENT_LDFLAGS}
+    ${GFLAGS_LDFLAGS}
+    ${PROTOBUF_LDFLAGS}
+    ${JEMALLOC_LDFLAGS}
+)
+add_dependencies(test_batch_validation_stress mako erpc rust_lib txlog)
 
 # RPC benchmark binary
 add_executable(rpcbench test/rpcbench.cc test/benchmark_service.cc)

@@ -3,6 +3,10 @@
 
 #include "txn.h"
 #include "lockguard.h"
+#ifdef ENABLE_BATCH_VALIDATION
+#include "txn_occ_batch_validation.h"
+#include <cstdlib>
+#endif
 
 // base definitions
 
@@ -332,15 +336,64 @@ transaction<Protocol, Traits>::commit(bool doThrow)
       VERBOSE(std::cerr << "commit tid: <read-only>" << std::endl);
     }
 
-    // do read validation
+    // do read validation (with optional parallel batch validation)
     {
       PERF_DECL(
           static std::string probe3_name(
             std::string(__PRETTY_FUNCTION__) + std::string(":read_validation:")));
       ANON_REGION(probe3_name.c_str(), &transaction_base::g_txn_commit_probe3_cg);
 
+#ifdef ENABLE_BATCH_VALIDATION
+      // Try to use batch validation if enabled
+      static bool batch_validation_enabled = []() {
+        const char* env = std::getenv("MAKO_ENABLE_BATCH_VALIDATION");
+        bool enabled = env && (std::string(env) == "1" || std::string(env) == "true");
+        if (enabled) {
+          // Initialize batch validator on first use
+          auto& validator = GetBatchValidator<Protocol, Traits>();
+          static std::atomic<bool> init_done{false};
+          bool expected = false;
+          if (init_done.compare_exchange_strong(expected, true)) {
+            size_t batch_size = 32;
+            size_t max_wait_us = 1000;
+            const char* batch_size_env = std::getenv("MAKO_BATCH_VALIDATION_SIZE");
+            if (batch_size_env) {
+              batch_size = std::stoul(batch_size_env);
+            }
+            const char* max_wait_env = std::getenv("MAKO_BATCH_VALIDATION_MAX_WAIT_US");
+            if (max_wait_env) {
+              max_wait_us = std::stoul(max_wait_env);
+            }
+            validator.Init(batch_size, max_wait_us);
+          }
+        }
+        return enabled;
+      }();
+      
+      // Use batch validation for parallel validation
+      bool skip_individual_validation_flag = false;
+      if (batch_validation_enabled) {
+        auto& validator = GetBatchValidator<Protocol, Traits>();
+        // Add to batch - blocks until batch is validated in parallel
+        bool validation_passed = validator.AddToBatch(this);
+        
+        // Check if validation completed in batch
+        if (state == TXN_ABRT) {
+          // Validation failed in batch - abort
+          goto do_abort;
+        }
+        
+        if (validation_passed) {
+          // Validation passed in batch - skip individual validation and proceed
+          skip_individual_validation_flag = true;
+        }
+        // Batch not yet full or validation in progress - continue with individual validation
+        // (fallback for edge cases)
+      }
+#endif
+
       // check the nodes we actually read are still the latest version
-      if (!read_set.empty()) {
+      if (!skip_individual_validation_flag && !read_set.empty()) {
         typename read_set_map::iterator it     = read_set.begin();
         typename read_set_map::iterator it_end = read_set.end();
         for (; it != it_end; ++it) {
@@ -368,7 +421,7 @@ transaction<Protocol, Traits>::commit(bool doThrow)
       }
 
       // check btree versions have not changed
-      if (!absent_set.empty()) {
+      if (!skip_individual_validation_flag && !absent_set.empty()) {
         typename absent_set_map::iterator it     = absent_set.begin();
         typename absent_set_map::iterator it_end = absent_set.end();
         for (; it != it_end; ++it) {

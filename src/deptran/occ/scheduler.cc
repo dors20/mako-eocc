@@ -10,10 +10,25 @@
 #include "tx.h"
 #include "scheduler.h"
 
+#ifdef OCC_ANALYSIS_ENABLED
+#include "occ_analysis.h"
+#endif
+
 namespace janus {
 
 SchedulerOcc::SchedulerOcc() : SchedulerClassic() {
   mdb_txn_mgr_ = make_shared<mdb::TxnMgrOCC>();
+}
+
+SchedulerOcc::~SchedulerOcc() {
+#ifdef OCC_ANALYSIS_ENABLED
+  // Print statistics when scheduler is destroyed (end of benchmark)
+  // Use Log_info to ensure it prints even if stdout is redirected
+  Log_info("==========================================");
+  Log_info("OCC Analysis Statistics (Scheduler Destroyed)");
+  Log_info("==========================================");
+  printAnalysisStatistics();
+#endif
 }
 
 mdb::Txn* SchedulerOcc::get_mdb_txn(const i64 tid) {
@@ -37,6 +52,12 @@ mdb::Txn* SchedulerOcc::get_mdb_txn(const i64 tid) {
 }
 
 bool SchedulerOcc::DoPrepare(txnid_t tx_id) {
+#ifdef OCC_ANALYSIS_ENABLED
+  auto& profiler = PerformanceProfiler::getInstance();
+  profiler.startValidation(tx_id);
+  profiler.startVersionCheck(tx_id);
+#endif
+
   // do nothing here?
   auto tx_box = dynamic_pointer_cast<TxOcc>(GetOrCreateTx(tx_id));
   // TODO do version control, locks, etc.
@@ -47,10 +68,19 @@ bool SchedulerOcc::DoPrepare(txnid_t tx_id) {
 
   // only do version check on leader.
   if (tx_box->is_leader_hint_ && !txn->version_check()) {
+#ifdef OCC_ANALYSIS_ENABLED
+    profiler.endVersionCheck(tx_id);
+    profiler.endValidation(tx_id, false);
+    AbortTracker::getInstance().recordAbort(tx_id, OCCAbortReason::VERSION_CONFLICT, AbortType::VERSION_STALE);
+#endif
         Log_debug("txn: occ validation failed. id %" PRIx64 "site: %x", (int64_t)tx_id, (int)this->site_id_);
     txn->__debug_abort_ = 1;
     return false;
   } else {
+#ifdef OCC_ANALYSIS_ENABLED
+    profiler.endVersionCheck(tx_id);
+    profiler.startReadLock(tx_id);
+#endif
     // now lock the commit
     for (auto &it : txn->ver_check_read_) {
       Row *row = it.first.row;
@@ -72,12 +102,21 @@ bool SchedulerOcc::DoPrepare(txnid_t tx_id) {
           vr->unlock_row_by(txn->id());
         }
         txn->locks_.clear();
+#ifdef OCC_ANALYSIS_ENABLED
+        profiler.endReadLock(tx_id);
+        profiler.endValidation(tx_id, false);
+        AbortTracker::getInstance().recordAbort(tx_id, OCCAbortReason::READ_LOCK_FAILED, AbortType::LOCK_CONTENTION);
+#endif
         Log_debug("txn: occ read locks failed. id %" PRIx64 ", site: %x, is-leader: %d", (int64_t)tx_id, (int)this->site_id_, tx_box->is_leader_hint_);
         txn->__debug_abort_ = 1;
         return false;
       }
       insert_into_map(txn->locks_, row, -1);
     }
+#ifdef OCC_ANALYSIS_ENABLED
+    profiler.endReadLock(tx_id);
+    profiler.startWriteLock(tx_id);
+#endif
     for (auto &it : txn->updates_) {
       Row *row = it.first;
       auto v_row = (VersionedRow *) row;
@@ -98,12 +137,22 @@ bool SchedulerOcc::DoPrepare(txnid_t tx_id) {
           vr->unlock_row_by(txn->id());
         }
         txn->locks_.clear();
+#ifdef OCC_ANALYSIS_ENABLED
+        profiler.endWriteLock(tx_id);
+        profiler.endValidation(tx_id, false);
+        AbortTracker::getInstance().recordAbort(tx_id, OCCAbortReason::WRITE_LOCK_FAILED, AbortType::LOCK_CONTENTION);
+#endif
         Log_debug("txn: occ write locks failed. id %" PRIx64 "site: %x", (int64_t)tx_id, (int)this->site_id_);
         txn->__debug_abort_ = 1;
         return false;
       }
       insert_into_map(txn->locks_, row, -1);
     }
+#ifdef OCC_ANALYSIS_ENABLED
+    profiler.endWriteLock(tx_id);
+    profiler.endValidation(tx_id, true);
+    AbortTracker::getInstance().recordCommit(tx_id);
+#endif
     Log_debug("txn: %llx occ locks succeed.", (int64_t)tx_id);
     txn->__debug_abort_ = 0;
     txn->verified_ = true;
@@ -197,5 +246,13 @@ void SchedulerOcc::DoCommit(Tx& tx) {
   txn->release_resource();
   delete mdb_txn_;
 }
+
+#ifdef OCC_ANALYSIS_ENABLED
+void SchedulerOcc::printAnalysisStatistics() const {
+  AbortTracker::getInstance().printStatistics();
+  PerformanceProfiler::getInstance().printStatistics();
+  FalseAbortAnalyzer::getInstance().printAnalysis();
+}
+#endif
 
 } // namespace janus
