@@ -72,12 +72,33 @@ cleanup_processes() {
     echo "Cleanup complete."
 }
 
+# Determine a safe level of parallelism for make invocations.
+resolve_make_jobs() {
+    local jobs
+    if [ -n "${CI_MAKE_JOBS:-}" ]; then
+        jobs="$CI_MAKE_JOBS"
+    elif command -v nproc >/dev/null 2>&1; then
+        jobs="$(nproc)"
+    else
+        jobs=1
+    fi
+
+    if [[ ! "$jobs" =~ ^[0-9]+$ ]] || [ "$jobs" -lt 1 ]; then
+        jobs=1
+    fi
+
+    echo "$jobs"
+}
+
 # Function 1: Compile
 compile() {
     echo "========================================="
     echo "Running: ./ci/ci.sh compile"
     echo "========================================="
-    make -j32
+    local make_jobs
+    make_jobs="$(resolve_make_jobs)"
+    echo "Building with make -j${make_jobs}"
+    make -j"${make_jobs}"
     # Generate configuration
     bash ./src/mako/update_config.sh
 }
