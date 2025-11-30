@@ -1,0 +1,26 @@
+# Command: ./build/simpleTransaction
+# Working dir: /home/azureuser/mako-eocc
+20251029-16:52.21-991370(us) 476788 * ParseOldFormat  (configuration.cc:66): Using old configuration format
+20251029-16:52.21-991981(us) 476788 * ParseOldFormat  (configuration.cc:66): Using old configuration format
+20251029-16:52.21-992323(us) 476788 * ParseOldFormat  (configuration.cc:66): Using old configuration format
+=== Mako Transaction Tests  ===
+[TRANSPORT] Using default: rrr
+20251029-16:52.21-992540(us) 476788 * Initialize      (rrr_rpc_backend.cc:58): RrrRpcBackend::Initialize: poll_thread_worker_ created, is_some=1
+20251029-16:52.21-992642(us) 476788 * Initialize      (rrr_rpc_backend.cc:88): RrrRpcBackend initialized on 127.0.0.1:31000 (listening on 0.0.0.0:31000)
+20251029-16:52.21-992655(us) 476788 * FastTransport   (fasttransport.cc:116): FastTransport initialized with rrr/rpc backend on 127.0.0.1:31000
+20251029-16:52.21-993035(us) 476788 * ParseOldFormat  (configuration.cc:66): Using old configuration format
+
+--- Testing Basic Transactions ---
+new table is createded with name: customer_0, table-id: 1, on shard-server id:0
+existing table is createded with name: customer_0, table-id: 1, on shard-server id:0
+[[32mPASS[0m] Write 5 records
+[[32mPASS[0m] Read and verify 5 records
+[[32mPASS[0m] Table scan verification
+
+--- Testing OverwrittenOperations ---
+new table is createded with name: overwritten_table, table-id: 2, on shard-server id:0
+[[32mPASS[0m] value check
+
+[32mAll tests completed successfully![0m
+
+# Exit code: 0

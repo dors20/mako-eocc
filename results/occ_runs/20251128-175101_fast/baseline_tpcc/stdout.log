@@ -1,0 +1,5 @@
+# Command: ./build/dbtest --bench tpcc --config config/occ.yml --num-threads 2 --runtime 15
+# Working dir: /home/azureuser/mako-eocc
+./build/dbtest: unrecognized option '--bench'
+
+# Exit code: 1

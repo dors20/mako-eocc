@@ -1,0 +1,34 @@
+{
+  "name": "batch_validation_stress_reorder_prod",
+  "description": "Batch validation + txn reordering (degree-product FVS) on stress harness.",
+  "mode": "fast",
+  "command_template": "./build/test_batch_validation_stress {threads} {txns_per_thread}",
+  "command": [
+    "./build/test_batch_validation_stress",
+    "2",
+    "500"
+  ],
+  "placeholders": {
+    "threads": 2,
+    "txns_per_thread": 500,
+    "batch_size": 16,
+    "batch_wait_us": 1000
+  },
+  "env": {
+    "MAKO_ENABLE_BATCH_VALIDATION": "1",
+    "MAKO_ENABLE_TXN_REORDER": "1",
+    "MAKO_TXN_REORDER_FVS": "prod",
+    "MAKO_BATCH_VALIDATION_SIZE": "16",
+    "MAKO_BATCH_VALIDATION_MAX_WAIT_US": "1000"
+  },
+  "workdir": "/home/azureuser/mako-eocc",
+  "timestamp": "20251129-165220",
+  "dry_run": false,
+  "metrics": {
+    "duration_seconds": 0.011,
+    "committed": 932.0,
+    "aborted": 68.0,
+    "abort_rate": 6.8,
+    "throughput_tps": 84727.0
+  }
+}

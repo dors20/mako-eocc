@@ -10,10 +10,17 @@
 #include <unordered_set>
 #include <chrono>
 #include <algorithm>
+#include <cstdio>
+#include <cstdlib>
+#include <cctype>
 #ifdef _OPENMP
 #include <omp.h>
 #endif
+#include "occ_reorder/txn_batch_metadata.h"
+#include "occ_reorder/txn_reorder_controller.h"
 #include "txn.h"
+#include "occ_reorder/batch_validation_counters.h"
+#include "occ_reorder/batch_validation_trace.h"
 #include "macros.h"
 #include "thread.h"
 #include "core.h"
@@ -93,6 +100,7 @@ private:
   size_t max_wait_us_;
   size_t num_validation_threads_;
   bool enabled_;
+  bool txn_reorder_enabled_{false};
 
   // Batch management
   std::mutex batch_mutex_;
@@ -105,25 +113,36 @@ private:
   
   // Statistics (using function-local statics to avoid template static member issues)
   static event_counter& get_batch_validations_counter() {
-    static event_counter ctr("batch_validations");
-    return ctr;
+    return occ::batch_validations_counter();
   }
   static event_counter& get_batch_validated_txns_counter() {
-    static event_counter ctr("batch_validated_txns");
-    return ctr;
+    return occ::batch_validated_txns_counter();
   }
   static event_counter& get_batch_aborted_txns_counter() {
-    static event_counter ctr("batch_aborted_txns");
-    return ctr;
+    return occ::batch_aborted_txns_counter();
   }
   static event_avg_counter& get_avg_batch_size_counter() {
-    static event_avg_counter ctr("avg_batch_size");
-    return ctr;
+    return occ::avg_batch_size_counter();
   }
   static event_avg_counter& get_avg_batch_validation_time_counter() {
-    static event_avg_counter ctr("avg_batch_validation_time_us");
-    return ctr;
+    return occ::avg_batch_validation_time_counter();
   }
+  static event_counter& get_txn_reorder_attempts_counter() {
+    return occ::txn_reorder_attempts_counter();
+  }
+  static event_counter& get_txn_reorder_applied_counter() {
+    return occ::txn_reorder_applied_counter();
+  }
+  static event_counter& get_txn_reorder_removed_counter() {
+    return occ::txn_reorder_removed_counter();
+  }
+  static event_counter& get_txn_reorder_cycles_counter() {
+    return occ::txn_reorder_cycles_counter();
+  }
+
+  static void EnsureCounterReporterRegistered();
+  static void ReportCountersAtExit();
+  static void PrintCounter(const char* name);
 
 public:
   BatchValidator()
@@ -131,10 +150,21 @@ public:
       max_wait_us_(DEFAULT_MAX_WAIT_US),
       num_validation_threads_(DEFAULT_NUM_VALIDATION_THREADS),
       enabled_(false),
-      pending_batch_(nullptr) {}
+      pending_batch_(nullptr) {
+    (void) get_batch_validations_counter();
+    (void) get_batch_validated_txns_counter();
+    (void) get_batch_aborted_txns_counter();
+    (void) get_avg_batch_size_counter();
+    (void) get_avg_batch_validation_time_counter();
+    (void) get_txn_reorder_attempts_counter();
+    (void) get_txn_reorder_applied_counter();
+    (void) get_txn_reorder_removed_counter();
+    (void) get_txn_reorder_cycles_counter();
+  }
 
   ~BatchValidator() {
     shutdown();
+    ReportCountersAtExit();
   }
 
   /**
@@ -147,6 +177,12 @@ public:
     max_wait_us_ = max_wait_us;
     num_validation_threads_ = num_threads;
     enabled_ = true;
+    EnsureCounterReporterRegistered();
+    const char* reorder_env = std::getenv("MAKO_ENABLE_TXN_REORDER");
+    if (reorder_env) {
+      std::string flag(reorder_env);
+      txn_reorder_enabled_ = (flag == "1" || flag == "true" || flag == "TRUE");
+    }
     
     // Initialize pending batch
     pending_batch_ = std::make_unique<ValidationBatch>(batch_size_);
@@ -298,11 +334,95 @@ private:
     get_avg_batch_size_counter().offer(batch.txns.size());
     
     auto start_time = std::chrono::high_resolution_clock::now();
-    
-    // Initialize results vector
-    batch.results.resize(batch.txns.size());
+    batch.results.clear();
     batch.completed_count.store(0);
     batch.validated_count.store(0);
+    if (BatchValidationTraceEnabled()) {
+      std::fprintf(stderr,
+                   "[batch_validation] validating batch size=%zu reorder=%s\n",
+                   batch.txns.size(),
+                   txn_reorder_enabled_ ? "on" : "off");
+    }
+
+    if (txn_reorder_enabled_) {
+      get_txn_reorder_attempts_counter().inc();
+      auto plan = occ::TxnReorderController<Protocol, Traits>::Plan(batch.txns);
+      if (plan.cycle_components > 0) {
+        get_txn_reorder_cycles_counter().inc(plan.cycle_components);
+      }
+      if (plan.removed_nodes > 0) {
+        get_txn_reorder_removed_counter().inc(plan.removed_nodes);
+      }
+      if (plan.applied) {
+        get_txn_reorder_applied_counter().inc();
+        if (BatchValidationTraceEnabled()) {
+          std::fprintf(stderr,
+                       "[txn_reorder] plan graph_nodes=%zu edges=%zu removed=%zu "
+                       "cycle_components=%zu applied=1\n",
+                       plan.graph_nodes,
+                       plan.graph_edges,
+                       plan.removed_nodes,
+                       plan.cycle_components);
+        }
+        std::unordered_map<uint64_t, size_t> index_map;
+        index_map.reserve(batch.txns.size());
+        batch.results.assign(batch.txns.size(), ValidationResult());
+        for (size_t i = 0; i < batch.txns.size(); ++i) {
+          batch.results[i].txn = batch.txns[i];
+          index_map.emplace(reinterpret_cast<uint64_t>(batch.txns[i]), i);
+        }
+
+        auto place_result = [&](txn_type* txn,
+                                bool valid,
+                                transaction_base::abort_reason reason) {
+          auto it =
+              index_map.find(reinterpret_cast<uint64_t>(txn));
+          if (it == index_map.end()) {
+            return;
+          }
+          batch.results[it->second] = ValidationResult(txn, valid, reason);
+        };
+
+        for (auto* txn : plan.aborted) {
+          place_result(txn, false, transaction_base::ABORT_REASON_USER);
+          txn->state = transaction_base::TXN_ABRT;
+          txn->reason = transaction_base::ABORT_REASON_USER;
+          get_batch_aborted_txns_counter().inc();
+        }
+
+        for (auto* txn : plan.ordered) {
+          bool valid = ValidateTransactionReadSet(txn);
+          auto reason = valid ? transaction_base::ABORT_REASON_NONE
+                              : transaction_base::ABORT_REASON_READ_NODE_INTEREFERENCE;
+          place_result(txn, valid, reason);
+          if (valid) {
+            get_batch_validated_txns_counter().inc();
+          } else {
+            txn->state = transaction_base::TXN_ABRT;
+            txn->reason = reason;
+            get_batch_aborted_txns_counter().inc();
+          }
+        }
+
+        auto end_time = std::chrono::high_resolution_clock::now();
+        auto duration_us = std::chrono::duration_cast<std::chrono::microseconds>(
+            end_time - start_time)
+                               .count();
+        get_avg_batch_validation_time_counter().offer(duration_us);
+        return;
+      }
+      if (BatchValidationTraceEnabled()) {
+        std::fprintf(stderr,
+                     "[txn_reorder] plan graph_nodes=%zu edges=%zu removed=%zu "
+                     "cycle_components=%zu applied=0\n",
+                     plan.graph_nodes,
+                     plan.graph_edges,
+                     plan.removed_nodes,
+                     plan.cycle_components);
+      }
+    }
+
+    batch.results.resize(batch.txns.size());
     
     // Parallel validation: distribute across threads
     #ifdef _OPENMP
@@ -337,11 +457,8 @@ private:
     for (size_t i = 0; i < batch.results.size(); ++i) {
       if (batch.results[i].valid) {
         get_batch_validated_txns_counter().inc();
-        // Transaction passed validation - ready to proceed to write phase
-        // State remains TXN_ACTIVE, will proceed to TXN_COMMITED
       } else {
         get_batch_aborted_txns_counter().inc();
-        // Transaction failed validation - abort
         batch.txns[i]->state = transaction_base::TXN_ABRT;
         batch.txns[i]->reason = batch.results[i].reason;
       }
@@ -349,6 +466,63 @@ private:
   }
 
 };
+
+template <template <typename> class Protocol, typename Traits>
+void BatchValidator<Protocol, Traits>::EnsureCounterReporterRegistered() {
+#ifdef ENABLE_EVENT_COUNTERS
+  static std::once_flag register_once;
+  std::call_once(register_once, []() {
+    std::atexit(&BatchValidator::ReportCountersAtExit);
+  });
+#endif
+}
+
+template <template <typename> class Protocol, typename Traits>
+void BatchValidator<Protocol, Traits>::ReportCountersAtExit() {
+#ifdef ENABLE_EVENT_COUNTERS
+  static std::once_flag emit_once;
+  std::call_once(emit_once, []() {
+    std::fprintf(stderr, "--- batch_validation_counters ---\n");
+    PrintCounter("batch_validations");
+    PrintCounter("batch_validated_txns");
+    PrintCounter("batch_aborted_txns");
+    PrintCounter("avg_batch_size");
+    PrintCounter("avg_batch_validation_time_us");
+    std::fprintf(stderr, "--- txn_reorder_counters ---\n");
+    PrintCounter("txn_reorder_attempts");
+    PrintCounter("txn_reorder_applied");
+    PrintCounter("txn_reorder_removed_txns");
+    PrintCounter("txn_reorder_cycles_detected");
+  });
+#endif
+}
+
+template <template <typename> class Protocol, typename Traits>
+void BatchValidator<Protocol, Traits>::PrintCounter(const char* name) {
+#ifdef ENABLE_EVENT_COUNTERS
+  counter_data data;
+  if (!event_counter::stat(name, data)) {
+    return;
+  }
+  if (data.type_ == counter_data::TYPE_COUNT) {
+    std::fprintf(stderr,
+                 "%s: count=%llu\n",
+                 name,
+                 static_cast<unsigned long long>(data.count_));
+  } else {
+    const double avg =
+        data.count_ ? static_cast<double>(data.sum_) / static_cast<double>(data.count_) : 0.0;
+    std::fprintf(stderr,
+                 "%s: count=%llu, max=%llu, avg=%.2f\n",
+                 name,
+                 static_cast<unsigned long long>(data.count_),
+                 static_cast<unsigned long long>(data.max_),
+                 avg);
+  }
+#else
+  (void) name;
+#endif
+}
 
 } // namespace mako
 

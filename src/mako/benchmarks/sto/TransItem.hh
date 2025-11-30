@@ -70,6 +70,10 @@ class TransItem {
         return Packer<T>::unpack(key_);
     }
 
+  const void* raw_key() const {
+    return key_;
+  }
+
     template <typename T>
     T& read_value() {
         assert(has_read());

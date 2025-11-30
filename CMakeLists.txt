@@ -208,6 +208,7 @@ option(DISABLE_DISK "Disable disk persistence" OFF)
 option(FAIL_NEW_VERSION "Enable fail new version" ON)
 option(SIMULATE_ONE_SHARD_PER_THREAD "Simulate one shard per thread" OFF)
 option(TRACKING_ROLLBACK "Enable rollback tracking" OFF)
+option(EVENT_COUNTERS "Enable system event counters" ON)
 option(ENABLE_BATCH_VALIDATION "Enable parallel batch validation" OFF)
 option(ENABLE_OPENMP "Enable OpenMP for parallel validation" OFF)
 
@@ -951,6 +952,12 @@ if(BUILD_TESTS)
     target_compile_options(test_rpc PRIVATE ${TEST_COMPILE_OPTIONS})
     target_link_libraries(test_rpc ${TEST_LINK_LIBS} ${GTEST_LIBRARIES} ${GTEST_MAIN_LIBRARIES} pthread)
     add_test(NAME test_rpc COMMAND test_rpc)
+    
+    add_executable(test_occ_reorder test/test_occ_reorder.cc)
+    target_include_directories(test_occ_reorder PRIVATE ${TEST_INCLUDE_DIRS} ${GTEST_INCLUDE_DIRS})
+    target_compile_options(test_occ_reorder PRIVATE ${TEST_COMPILE_OPTIONS})
+    target_link_libraries(test_occ_reorder ${TEST_LINK_LIBS} ${GTEST_LIBRARIES} ${GTEST_MAIN_LIBRARIES} pthread)
+    add_test(NAME test_occ_reorder COMMAND test_occ_reorder)
     
     # Atomic Lock Tests - Commented out due to crashes
     # add_executable(test_alock test/test_alock.cc)

@@ -1,0 +1,28 @@
+{
+  "name": "baseline_stress",
+  "description": "Baseline sequential validation using test_batch_validation_stress.",
+  "mode": "fast",
+  "command_template": "./build/test_batch_validation_stress {threads} {txns_per_thread}",
+  "command": [
+    "./build/test_batch_validation_stress",
+    "2",
+    "500"
+  ],
+  "placeholders": {
+    "threads": 2,
+    "txns_per_thread": 500
+  },
+  "env": {
+    "MAKO_ENABLE_BATCH_VALIDATION": "0"
+  },
+  "workdir": "/home/azureuser/mako-eocc",
+  "timestamp": "20251130-033525",
+  "dry_run": false,
+  "metrics": {
+    "duration_seconds": 0.006,
+    "committed": 932.0,
+    "aborted": 68.0,
+    "abort_rate": 6.8,
+    "throughput_tps": 155333.0
+  }
+}

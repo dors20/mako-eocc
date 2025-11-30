@@ -1,0 +1,37 @@
+{
+  "name": "batch_validation_stress",
+  "description": "Batch validation enabled for test_batch_validation_stress.",
+  "mode": "fast",
+  "command_template": "./build/test_batch_validation_stress {threads} {txns_per_thread}",
+  "command": [
+    "./build/test_batch_validation_stress",
+    "2",
+    "500"
+  ],
+  "placeholders": {
+    "threads": 2,
+    "txns_per_thread": 500,
+    "batch_size": 16,
+    "batch_wait_us": 1000
+  },
+  "env": {
+    "MAKO_ENABLE_BATCH_VALIDATION": "1",
+    "MAKO_BATCH_VALIDATION_SIZE": "16",
+    "MAKO_BATCH_VALIDATION_MAX_WAIT_US": "1000"
+  },
+  "workdir": "/home/azureuser/mako-eocc",
+  "timestamp": "20251130-072741",
+  "dry_run": false,
+  "metrics": {
+    "duration_seconds": 0.021,
+    "committed": 932.0,
+    "aborted": 68.0,
+    "abort_rate": 6.8,
+    "throughput_tps": 44381.0
+  },
+  "event_counters": {
+    "batch_validations": 588,
+    "batch_validated_txns": 932,
+    "avg_batch_size": 588
+  }
+}

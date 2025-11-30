@@ -1,0 +1,9 @@
+session,scenario,description,mode,timestamp,duration_seconds,committed,aborted,abort_rate,throughput_tps,runtime_seconds,n_commits,agg_throughput_tps,agg_abort_rate_per_sec,avg_latency_ms
+20251128-181545_fast,dbtest_baseline_tpcc,Baseline dbtest TPCC run (sequential validation) using default config.,fast,20251128-181545,,,,,,30.2229,1205345.0,80271.0,12.3416,0.0243252
+20251128-175705_fast,baseline_stress,Baseline sequential validation using test_batch_validation_stress.,fast,20251128-175705,0.006,932.0,68.0,6.8,155333.0,,,,,
+20251128-175705_fast,batch_validation_stress,Batch validation enabled for test_batch_validation_stress.,fast,20251128-175705,0.006,932.0,68.0,6.8,155333.0,,,,,
+20251128-181639_fast,dbtest_batch_validation_tpcc,dbtest TPCC run with batch validation enabled.,fast,20251128-181639,,,,,,30.2293,1213983.0,80798.7,13.6953,0.0241563
+20251128-182014_fast,dbtest_baseline_tpcc,Baseline dbtest TPCC run (sequential validation) using default config.,fast,20251128-182014,,,,,,30.2235,1199458.0,80493.6,12.0105,0.0242551
+20251128-182014_fast,baseline_stress,Baseline sequential validation using test_batch_validation_stress.,fast,20251128-182014,0.006,932.0,68.0,6.8,155333.0,,,,,
+20251128-182014_fast,batch_validation_stress,Batch validation enabled for test_batch_validation_stress.,fast,20251128-182014,0.006,932.0,68.0,6.8,155333.0,,,,,
+20251128-182014_fast,dbtest_batch_validation_tpcc,dbtest TPCC run with batch validation enabled.,fast,20251128-182014,,,,,,30.2193,1222260.0,81217.9,12.4093,0.0240274

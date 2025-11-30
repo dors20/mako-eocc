@@ -1,0 +1,3197 @@
+Parallel Strong Connectivity Based on Faster Reachability
+Letong Wang
+
+Xiaojun Dong
+
+Yan Gu
+
+Yihan Sun
+
+UC Riverside
+lwang323@ucr.edu
+
+UC Riverside
+xdong038@ucr.edu
+
+UC Riverside
+ygu@cs.ucr.edu
+
+UC Riverside
+yihans@cs.ucr.edu
+
+arXiv:2303.04934v2 [cs.DC] 15 May 2023
+
+Abstract
+
+Computing SCC is useful in many applications inside and outside
+computer science, and is widely used in database and data management applications [4, 82, 103]. For example, analyzing SCC on
+social networks can identify communities [76] or estimate influence
+propagation [80]. Applying SCC on the 𝑘-NN graph (each point
+links to its 𝑘-nearest neighbors) for spatial data points is widely
+used in unsupervised learning [67, 90, 91]. Many other fundamental
+problems in CS use SCC as an important primitive, such as graph
+matching [41], topological sort [26, 86], graph contraction [31],
+and code analysis [85]. SCC is also widely-used on various types
+of graphs in other disciplines, e.g., lattice graphs [32] in material
+science, on E. coli network [46] in computer biology [77], on food
+web analysis in ecology systems [6], and more [78].
+Sequentially, Kosaraju’s algorithm [5] and Tarjan’s algorithm [100]
+find all SCCs in a graph in 𝑂 (𝑚) work (number of operations). However, sequential algorithms can be slow to process today’s large
+real-world graphs. For example, on the Hyperlink12 [74] graph
+with billions of edges, Tarjan’s SCC algorithm finishes in more than
+half an hour (see Tab. 2). Hence, it is of great importance to seek
+parallel SCC solutions. Although SCC is also widely studied in parallel (see the literature review in Sec. 7), most existing algorithms are
+optimized based on two assumptions for the input graph: (1) with
+a low diameter and/or (2) with one large SCC. Many algorithms
+(e.g., iSpan [57] and Multi-step [97]) first use breadth-first searches
+(BFS) to identify the largest SCC and then run a subsequent coloring phase to find all other SCCs with 𝑂 (𝑚 ′𝐷) work. Here 𝑚 ′ is
+the edges not in the largest SCC. When either of the assumptions
+is not satisfied, these algorithms will incur significant extra work
+than the 𝑂 (𝑚) sequential algorithms, which cannot be compensated by parallelism. Another solution in the GBBS library [35, 37]
+implements the BGSS algorithm [18]. BGSS uses log 𝑛 rounds of
+multi-reachability searches, and each of them starts from a subset
+of source vertices 𝑆 and finds all pairs of vertices (𝑣, 𝑠), where 𝑠 ∈ 𝑆
+and 𝑠 { 𝑣. BGSS has 𝑂 (𝑚 log 𝑛) work that is independent of the
+two assumptions. However, the GBBS implementation uses parallel
+BFS to implement reachability searches, which process vertices
+with the same distance (referred to as a frontier) in each round.
+This approach incurs 𝑂 (𝐷) rounds of global synchronization. As
+each of the synchronization is costly, this implementation incurs
+high scheduling overhead and can be slow when 𝐷 is large.
+Unfortunately, many applications of SCC have sparse input
+graphs with a large diameter 𝐷. For example, the 𝑘-NN graphs
+used in unsupervised learning [67, 90, 91] and lattice graphs used
+√
+in computational chemistry [32] can have 𝐷 = Θ( 𝑛) (see Tab. 2).
+We tested existing SCC algorithms on graphs with both small diameters (e.g., social networks) and large diameters (e.g., 𝑘-NN and
+lattice graphs), all widely used in real-world SCC applications. Fig. 1
+shows that existing SCC algorithms work well for certain social
+networks but perform badly on other graphs. On average, for 𝑘-NN
+
+Computing strongly connected components (SCC) is among the
+most fundamental problems in graph processing. As today’s realworld graphs are getting larger and larger, parallel SCC is increasingly important. SCC is challenging in the parallel setting and is
+particularly hard on large-diameter graphs. Many existing parallel
+SCC implementations can be even slower than Tarjan’s sequential
+algorithm on large-diameter graphs.
+To tackle this challenge, we propose an efficient parallel SCC
+implementation using a new parallel reachability algorithm. Our
+solution is based on a novel idea referred to as vertical granularity
+control (VGC). It breaks the synchronization barriers to increase
+parallelism and hide scheduling overhead. To use VGC in our SCC
+algorithm, we also design an efficient data structure called the parallel hash bag. It uses parallel dynamic resizing to avoid redundant
+work in maintaining frontiers (vertices processed in a round).
+We implement the parallel SCC algorithm by Blelloch et al. (J.
+ACM, 2020) using our new parallel reachability algorithm. We compare our implementation to the state-of-the-art systems, including
+GBBS, iSpan, Multi-step, and our highly optimized Tarjan’s (sequential) algorithm, on 18 graphs, including social, web, 𝑘-NN, and
+lattice graphs. On a machine with 96 cores, our implementation is
+the fastest on 16 out of 18 graphs. On average (geometric means)
+over all graphs, our SCC is 6.0× faster than the best previous parallel code (GBBS), 12.8× faster than Tarjan’s sequential algorithms,
+and 2.7× faster than the best existing implementation on each graph.
+We believe that our techniques are of independent interest. We
+also apply our parallel hash bag and VGC scheme to other graph
+problems, including connectivity and least-element lists (LE-lists).
+Our implementations improve the performance of the state-of-theart parallel implementations for these two problems.
+
+CCS Concepts
+• Theory of computation → Shared memory algorithms; Graph
+algorithms analysis.
+
+Keywords
+Parallel Algorithms, Graph Algorithms, Strong Connectivity, Reachability, Graph Analytics
+
+1
+
+Introduction
+
+Computing strongly connected components (SCCs) is among the
+most fundamental problems in graph processing. Given a directed
+graph 𝐺 = (𝑉 , 𝐸), we denote 𝑛 = |𝑉 | and 𝑚 = |𝐸|. We use 𝐷 as the
+diameter of 𝐺. For simplicity, we assume 𝑚 ≥ 𝑛, but all algorithms
+in this paper works for any 𝑛 and 𝑚. For two vertices 𝑣, 𝑢 ∈ 𝑉 ,
+we use 𝑢 { 𝑣 to denote that a path exists from 𝑢 to 𝑣. Two vertices 𝑣 and 𝑢, are strongly connected if 𝑢 { 𝑣 and 𝑣 { 𝑢. An
+SCC is a maximal set of vertices on the graph that are strongly
+connected. The SCC problem is to compute a mapping from each
+vertex to a unique label for its strongly connected component.
+1
+
+(1) Two general techniques (vertical granularity control and
+parallel hash bag) to optimize the performance of graph traversal.
+(2) Fast implementations on SCC, CC, and LE-lists using the proposed techniques. Our SCC algorithm greatly outperforms existing
+implementations.
+(3) In-depth experimental evaluation of the problems and the
+optimizations in this paper across multiple types of graphs.
+
+and lattice graphs, all existing parallel SCC algorithms on a 96-core
+machine are slower than the sequential Tarjan’s algorithm.
+In this paper, we propose an efficient SCC implementation
+with high parallelism on a wide range of graphs. We also use
+the BGSS algorithm to bound the work. The core of our idea is to
+improve parallelism by avoiding 𝑂 (𝐷) rounds of synchronization
+in reachability searches and thus reducing the scheduling overhead.
+To do this, we propose a novel idea referred to as the vertical granularity control (VGC) optimization. The high-level idea of VGC is
+to break the synchronization barriers and increase parallelism.
+Particularly, for the reachability queries, unlike parallel BFS that
+only visits the neighbors of the vertices in the frontier, we want
+to visit a much larger set of vertices that can be multiple hops
+away. This is achieved by a “local search” algorithm that allows
+each vertex in the frontier to visit more than direct neighbors in
+one round. We will discuss more details of VGC and local search in
+Sec. 3.1 and 3.2. This approach saves most synchronization rounds
+and improves the performance, especially on large-diameter graphs.
+We note that one technical difficulty in VGC and local search
+is to handle the non-determinism in generating the next frontier—
+all vertices in the frontier explore their proximity in parallel, in
+a random order decided by the runtime scheduling. This disables
+the “edge-revisit” approach in existing BFS algorithms [35], which
+first process the frontier to count the size of the next frontier and
+preallocate memory and then revisit the frontier to output vertices
+to the next frontier. We present more details about this challenge
+in Sec. 2 and 3.3. To maintain the frontier more efficiently (and
+correctly) in VGC, we propose a novel data structure called the
+parallel hash bag. It supports efficient insertion and extract-all
+operations for an unordered set structure and dynamic resizing in an
+efficient manner. Our parallel hash bag is similar to a resizable hash
+table but avoids copying on resizing. We maintain a multiple-level
+structure in exponentially growing sizes. We use atomic operations
+to enable concurrent insertions and a sampling scheme to support
+resizing. Our hash bag is theoretically-efficient and fast in practice.
+We describe the details of the hash bag in Sec. 3.3.
+Using these techniques, our new SCC approach achieves good
+performance on various graphs (see Fig. 1), all widely used in realworld, including the largest publicly available graph (HL12) with 3.6
+billion vertices and 128 billion edges. Among all implementations,
+our SCC achieves the best performance on 16 out of 18 graphs. As
+expected, our SCC performs particularly well on large-diameter
+graphs (𝑘-NN and lattice graphs). Compared to the fastest running
+time among existing parallel algorithms on each graph, our implementation is 2.3–12× faster on large-diameter graphs, and up to
+3.7× faster on low-diameter graphs. Our results show that the good
+performance of our SCC mainly comes from VGC (using 3–200×
+fewer rounds than BFS, see Fig. 10) and hash bags (see Fig. 9). We
+release our code on github [105].
+We believe that our proposed techniques are general and can be
+applied to many graph algorithms. As proofs-of-concept, we apply
+the proposed techniques to two more algorithms: connected components (CC) and least-element lists (LE-lists). Using our new techniques, our solutions outperform the state-of-the-art algorithms by
+up to 3.2× on CC and 10× on LE-lists. We overview these problems
+in Sec. 5 and present the experimental results in Sec. 6.4.
+We summarize our contributions as follows.
+
+2
+
+Preliminaries
+
+Notations and Computational Model. We use 𝑂˜ (𝑓 (𝑛)) to denote 𝑂 (𝑓 (𝑛) · polylog(𝑛)). We use 𝑂 (𝑓 (𝑛)) with high probability
+(whp) in 𝑛 to demote 𝑂 (𝑘 𝑓 (𝑛)) with probability at least 1 − 𝑛 −𝑘 for
+𝑘 ≥ 1. We omit “in 𝑛” with clear context. For a graph 𝐺 = (𝑉 , 𝐸),
+we denote 𝑛 = |𝑉 |, 𝑚 = |𝐸|, and 𝐷 as the diameter of the graph.
+This paper uses work-span (or work-depth) model for nested
+parallelism based on fork-join and binary forking [17, 31] for theoretical analysis. We assume a set of threads that share the memory.
+Each thread acts like a sequential RAM, plus a fork instruction
+to create two new child threads running in parallel. When both
+children finish, the parent thread continues, implying a synchronization. The computation can be executed by a randomized workstealing scheduler in practice. We assume unit-cost atomic operation compare_and_swap(𝑝, 𝑣 old , 𝑣 new ) (or CAS), which atomically
+reads the memory location pointed to by 𝑝, and write value 𝑣 new to
+it if the current value is 𝑣 old . It returns true if successful and false
+otherwise. An algorithm’s work is the total number of instructions
+and the span (depth) is the length of the longest sequence of dependent instructions in the computation. Our algorithm uses the
+scheduler in Parlaylib [14] to support fork-join parallelism.
+Reachability Search. Given a directed graph 𝐺 = (𝑉 , 𝐸) and a set
+of source vertices 𝑆 ⊆ 𝑉 , a (forward) reachability search finds the
+set of reachable pairs from any source {(𝑠, 𝑡) : 𝑠 ∈ 𝑆, 𝑡 ∈ 𝑉 , 𝑠 { 𝑡 }.
+We say a vertex 𝑣 is reachable from 𝑠 if 𝑠 { 𝑣, and reachable to 𝑠
+if 𝑣 { 𝑠. We define backward reachability search as searching in the
+reverse direction of the edges (i.e., on the transpose graph 𝐺𝑇 ). We
+use single-reachability search to refer to the case where |𝑆 | = 1,
+and use multi-reachability search otherwise. Fig. 2 illustrates
+single- and multi-reachability searches.
+Many SCC algorithms are based on reachability searches [10, 18,
+30, 57, 88, 97, 102]. The key idea is that 1) all vertices reachable both
+from and to a vertex 𝑣 are in the same SCC, and 2) two vertices are
+in the same SCC iff. they have the same reachability information
+from any source. Therefore, an edge (𝑢, 𝑣) is not in any SCC (and can
+be removed) if 𝑢 and 𝑣 have different reachability information from
+any source. We call such edges cross edges. We present an example
+in Fig. 2. We use a 2 × 2 lattice as the reachability information of a
+vertex (called the signature of it). An edge connecting two vertices
+with different signatures is a cross edge, and can be removed.
+Some theoretical results show that a single-reachability search
+can be done in 𝑂˜ (𝑚) work and 𝑜 (𝑛) span [42, 55]. However, the
+hidden terms in the bounds are large, and these algorithms are
+unlikely to be practical. In practice, BFS with 𝑂 (𝑚) work is used
+for reachability searches [35, 97]. It works well on low-diameter
+graphs but performs poorly on large-diameter graphs. We review
+parallel BFS algorithms for reachability search later in this section.
+2
+
+LJ
+Ours
+75.8
+GBBS 24.5
+iSpan 58.5
+MultiStep 20.7
+Seq
+1.00
+
+Social
+TW MEAN
+317 155
+185 67.3
+c
+54.4 33.6
+1.00 1.00
+
+Web
+SD CW HL14 HL12 MEAN HH5
+52.7 33.4 30.1 19.1 31.7 2.16
+19.7 14.6 9.22 5.05 10.8 0.11
+21.7
+n
+n
+n
+0.57
+55.8
+n
+n
+n
+0.20
+1.00 1.00 1.00 1.00 1.00 1.00
+
+CH5
+0.77
+0.05
+0.20
+0.02
+1.00
+
+GL2
+5.67
+1.13
+t
+0.41
+1.00
+
+GL5
+5.58
+0.46
+t
+0.25
+1.00
+
+KNN
+GL10 GL15 GL20 COS5 MEAN SQR
+6.24 5.42 5.60 58.6 5.26 26.8
+0.76 0.83 0.92 15.8 0.63 1.39
+0.26 0.39 0.49
+t
+0.36 3.47
+1.30 1.07 1.08 3.29 0.46 1.23
+1.00 1.00 1.00 1.00 1.00 1.00
+
+REC
+13.5
+0.41
+1.32
+0.30
+1.00
+
+Lattice
+Overall
+SQR' REC' MEAN
+5.00 3.75 9.08
+12.9
+1.45 0.60 0.84
+2.13
+0.26 0.70 0.96
+1.18
+2.16 0.92 0.93
+1.35
+1.00 1.00 1.00
+1.00
+
+0
+0.25
+0.5
+1
+2
+4
+8
+16
+>32
+
+Figure 1: The heatmap of relative speedup for parallel SCC algorithms over the sequential algorithm using 96 cores (192 hyperthreads). Larger/white background means better. “Seq”= Tarjan’s algorithm [100]. The numbers indicate how many times a parallel algorithm is faster than Tarjan’s
+sequential algorithm (< 1 means slower). The three baseline algorithms [35, 57, 97] are introduced in Sec. 6. “t”= timeout (> 5 hours). “c”= crash. “n”= no
+support. Strikethrough numbers mean a wrong number of SCCs reported. Complete results are in Tab. 2.
+SCCs: {ABCK}, {DEF}, {GH}, {I}, {J}, {L}.
+A
+A
+A
+D
+D
+D
+C
+C
+C
+Reachability Info Representation:
+From To Hollow squares
+B
+B
+B
+A
+A mean not reachable
+K
+K
+K
+E
+E
+E From To Solid squares
+F
+F
+F
+G
+G mean reachable
+
+J
+(a)
+
+L
+
+I
+
+H
+
+G
+
+J
+(b)
+
+L
+
+I
+
+H
+
+J
+(c)
+
+G
+
+L
+
+I
+
+H
+
+G
+
+E.g.,
+
+means:
+
+reachable from A, not reachable to A;
+not reachable from G, reachable to G
+
+Result after running step (b)
+Single-reachability search on A Multi-reachability search on A and G
+Figure 2: Example of single- and multi-reachability searches and reachability-based SCC algorithms. The SCCs are {𝐴, 𝐵, 𝐶, 𝐾 }, {𝐷, 𝐸, 𝐹 }, {𝐺, 𝐻 },
+{𝐼 }, {𝐽 }, {𝐿 }. (a). Single-reachability search results on 𝐴. (b). Multi-reachability search results on 𝐴 and 𝐺. The reachability information (referred to as the
+signature) of a vertex is shown as a 2 × 2 lattice. (c). After running multi-reachability searches from 𝐴 and 𝐺, we can identify two SCCs: all orange vertices
+(reachable from and to 𝐴) and all green vertices (reachable from and to 𝐺). Two vertices are in the same SCC only if they have the same signature. Thus, all
+cross edges (endpoints with different signatures) are removed. Later steps in the SCC algorithm only need to process the blue vertices and edges in (c).
+
+Parallel BFS. We briefly review parallel BFS, because it is used in
+previous work for reachability search, and some of the concepts are
+also used in our algorithm. There are many BFS algorithms (e.g., [13,
+79, 111]). We review the version in Ligra [94], as it is widely-used in
+other graph libraries [34–36], and more importantly, later extended
+to multi-BFS that can be used in multi-reachabilty searches needed
+by our SCC algorithm. We start with BFS from a single source 𝑠 ∈ 𝑉
+(high-level idea in Alg. 2). The algorithm maintains a frontier of
+vertices to explore in each round, starting from the source, and
+finishes in 𝐷 rounds. In round 𝑖, the algorithm processes (visits their
+neighbors) the current frontier F𝑖 , and puts all their (unvisited)
+neighbors to the next frontier F𝑖+1 . If multiple vertices in F𝑖 attempt
+to add the same vertex to F𝑖+1 , a compare_and_swap is used to
+guarantee that only one will succeed. In existing libraries [35, 94],
+processing F𝑖 involves visiting all incident edges of F𝑖 twice. The
+first visit decides the successfully visited neighbors for each 𝑣 ∈ F𝑖 ,
+and assigns the right size of memory in F𝑖+1 for each of them. The
+second visit lets each 𝑣 ∈ F𝑖 write these neighbors to F𝑖+1 . We call
+this the edge-revisit scheme, and we will show how our hash bag
+avoids the second visit and improve the performance.
+This idea has been extended to multiple sources 𝑆 ⊆ 𝑉 with two
+changes [35]. First, a parallel hash table 𝑇 [95] is used to maintain
+the reachability pairs (𝑣, 𝑠) where 𝑣 ∈ 𝑉 and 𝑠 ∈ 𝑆. Second, for
+each 𝑣 ∈ F𝑖 and its successfully visited neighbor 𝑢, we find all pairs
+(𝑣, 𝑠) from the hash table 𝑇 , and add (𝑢, 𝑠) to 𝑇 if (𝑢, 𝑠) ∉ 𝑇 . The
+number of reachability pairs generated by the BGSS algorithm is
+proved to be 𝑂 (𝑛 log 𝑛) whp [15].
+One challenge of using parallel BFS for reachability queries is the
+large cost to create and synchronize threads between rounds, which
+is especially expensive for large-diameter graphs (more rounds
+needed). In this paper, we will show how our new techniques reduces the scheduling overhead to achieve better parallelism.
+
+Algorithm 1: The BGSS algorithm for parallel SCC [18]
+Input: A directed graph 𝐺 = (𝑉 , 𝐸)
+Output: The component label 𝐿 [ ·] of each vertex.
+1 𝐿 ← {−1, . . . , −1}
+𝑖−1
+2 Partition 𝑉 into log 𝑛 batches 𝑃 1.. log 𝑛 , where |𝑃𝑖 | = 2
+′
+3 𝑉 ←𝑉
+4 for 𝑖 ← 1, . . . , log 𝑛 do
+5
+F ← {𝑣 ∈ 𝑃𝑖 ∩ 𝑉 ′ }
+⊲ Initial frontier
+// MultiReach skips an edge (𝑢, 𝑣) if 𝐿 (𝑢) ≠ 𝐿 (𝑣)
+6
+𝐿out ← MultiReach(𝐺, 𝐿, F)
+⊲ Forward reachable pairs
+7
+𝐿in ← MultiReach(𝐺𝑇 , 𝐿, F)
+⊲ Backward reachable pairs
+8
+parallel_for_each 𝑖 ∈ 𝑉 ′ do
+9
+𝑅1 ← {𝑣 | (𝑣, 𝑖) ∈ 𝐿in }
+⊲ Reachable to 𝑖
+10
+𝑅2 ← {𝑣 | (𝑣, 𝑖) ∈ 𝐿out }
+⊲ Reachable from 𝑖
+11
+if 𝑅1 ∩ 𝑅2 ≠ ∅ then 𝐿 [𝑖 ] ← max𝑣∈𝑅1 ∩𝑅2 𝑣
+12
+else 𝐿 [𝑖 ] ← hash(𝐿 [𝑖 ], 𝑅1 , 𝑅2 )
+13
+𝑉 ′ ← 𝑉 ′ \ {𝑖 | ∃(𝑣, 𝑖) ∈ 𝐿in ∩ 𝐿out }
+14 return 𝐿
+
+The BGSS Algorithm. Our parallel SCC solution uses the BGSS
+SCC algorithm [18] based on reachability searches, which is shown
+in Alg. 1. To achieve good parallelism while bounding the work,
+the BGSS algorithm uses log 𝑛 batches of reachability searches.
+The algorithm first randomly permutes the vertices and groups
+them into batches of sizes 1, 2, 4, 8, ... in a prefix-doubling manner (the multiplier is not necessary to be 2, but can be any constant 𝛽 > 1). In the 𝑖-th round, the algorithm uses batch 𝑖 with
+2𝑖−1 vertices as the sources to run (forward and backward) multireachability searches, marks SCCs, and removes cross edges. In
+this way, the BGSS algorithm takes 𝑂 (𝑊𝑅 (𝑛, 𝑚) log 𝑛) expected
+work and 𝑂 ((𝐷𝑅 (𝑛, 𝑚) + log 𝑛) log 𝑛) span whp, where 𝑊𝑅 (𝑛, 𝑚)
+and 𝐷𝑅 (𝑛, 𝑚) are the work, and span for a reachability search on a
+graph with 𝑛 vertices and 𝑚 edges. The BGSS algorithm was implemented by Dhulipala et al. as part of the GBBS library [35, 37],
+which uses (multi-)BFS for reachability searches (see more details
+later). There are two SCC algorithms in GBBS, and we refer to the
+RandomGreedy version, as it is faster in most of our tests.
+3
+
+(Note: The computational structures
+are executed top-down)
+
+Algorithm 2: Framework of Parallel BFS
+Input: A directed graph 𝐺 = (𝑉 , 𝐸) and a source 𝑠 ∈ 𝑉
+F0 = {𝑠 }
+2 𝑖 ←0
+3 while F𝑖 ≠ ∅ do
+4
+Process all 𝑣 ∈ F𝑖 and their edges in parallel, put all their unvisited
+neighbors (but avoid duplicates) to F𝑖+1
+5
+𝑖 ←𝑖 +1
+1
+
+Parallel
+For-loops
+Run
+sequentially
+Run sequentially
+
+(a)
+
+for reachability searches, where the number of rounds is proportional to the diameter of the graph. On many real-world sparse
+graphs with large diameters, both the frontier size and the average
+degree are small, which leads to two challenges. First, every parallel
+task (roughly processing one vertex in the frontier) is small, and
+the cost of distributing the tasks to the processor can be much more
+than the actual computation. Second, the number of rounds is large,
+resulting in many rounds of distributing and synchronizing threads.
+Audience familiar with parallel programming must know the
+concept of granularity control (aka. coarsening), aiming to avoid
+the overhead caused by generating unnecessary parallel tasks. For
+computations with sufficient parallelism, e.g., a parallel for-loop of
+size 𝑛 ≫ 𝑝 where 𝑝 is the number of processors, most existing parallel software (e.g., [2, 14, 64]) will automatically stop recursively
+creating parallel tasks at a certain subproblem size and switch to
+a sequential execution (see Fig. 3(a)) to hide the scheduling overhead. We refer to this classic approach as the horizontal granularity
+control (HCG) since it merges the computation on the same level
+(sibling leaf nodes in Fig. 3(a)).
+Unfortunately, this idea does not directly apply to reachability
+searches or similar problems on sparse graphs. HGC is used when
+there is excessive parallelism to saturate all processors. However,
+when processing sparse graphs, the issue becomes that we have
+insufficient computation (frontiers with small sizes) to saturate the
+all processors for good parallelism, and grouping sibling (horizontal) computation in the same round only makes it worse. To tackle
+this challenge, we propose a novel and very different approach,
+referred to as vertical granularity control (VCG). The high-level idea
+is still to increase each task size to hide the scheduling overhead,
+but we merge the computation across different levels to acquire
+more work and saturate all processors in each round (an example
+in Fig. 3(b)). In this way, we break the synchronization points and
+reduce scheduling overhead. Note that this also means that VGC is
+unlikely to be automatic (unlike HGC)—breaking the synchronization structures may significantly change the computation and needs
+careful redesign of the algorithm (in our case, we need the new
+data structure hash bag to deal with non-determinism, see Sec. 3.3).
+
+Table 1: Notations used in this paper.
+
+Fast Parallel Algorithm for Reachability
+
+To implement an efficient parallel SCC algorithm, we use the BGSS
+algorithm to bound the work, and present novel ideas for fast reachability search to enable high parallelism. In this section, we present
+two main techniques in this paper: the vertical granularity control (VGC) with the hash bag data structure. Our VGC optimization is designed to address the challenge of low parallelism in
+computing SCC on sparse and large-diameter graphs. The goal is
+to enable a proper size for each parallel task to hide the scheduling
+overhead. Our idea is to let each vertex search out multiple hops
+in each parallel task, and thus the number of needed rounds in
+reachability searches is reduced. The details of the local search is
+in Sec. 3.1. While the high-level idea sounds simple, this brings
+up the challenge of non-determinism—each vertex may explore
+multiple hops and the explored neighborhood depend on runtime
+scheduling, which results in some complication in generating the
+frontier by the edge-revisit scheme (see Line 14). Therefore, we
+propose a data structure called the parallel hash bag, to maintain
+the frontier more efficiently. Our hash bag is theoretically-efficient
+and fast in practice, and more details are given in Sec. 3.3.
+Combining both techniques, we achieve fast single- and multireachability searches. Plugging them into Lines 6 and 7 in Alg. 1
+gives a high-performance parallel SCC algorithm. We believe that
+these techniques are general and useful in many graph algorithms.
+As proofs-of-concept, in Sec. 5, we apply the proposed ideas to two
+more algorithms: connected components (CC) and least-element
+lists (LE-lists), and show new algorithms with better performance.
+We present notation and parameters used in this paper in Tab. 1.
+
+3.1
+
+(b)
+
+Figure 3: An illustration of (a) the classic horizontal granularity
+control (HGC) and (b) our new vertical granularity control (VGC).
+We consider work-stealing schedulers. (a): The computation structure of
+parallel-for or divide-and-conquer algorithms. HGC groups computation in
+the same level and run sequentially, in order to reduce scheduling overhead.
+(b): The computation structure of several rounds of parallel-for, each starting from one thread and forking parallel tasks in a nested fashion. Each of
+them can be considered as a round (processing a frontier) in a parallel graph
+algorithm. VGC groups computations in different rounds and run sequentially, in order to reduce scheduling overhead. It breaks the synchronization
+points and reduces the number of rounds.
+
+General notations and vertical granularity control:
+𝑛 The number of vertices in a graph.
+𝑚 The number of edges in a graph.
+𝑃 The number of processors available.
+𝛽 The multiplier of prefix-doubling for SCC, LDD, and LE-List
+algorithms. Usually 𝛽 ∈ (1, 2]. We use 𝛽 = 1.5 in our system.
+𝜏
+The threshold for vertical granularity control, which is the
+upper bound of visited neighborhood size per node. We use
+𝜏 = 512 as the default value.
+Hash Bag:
+𝜆 The first chunk size of hash bag. Theoretically, 𝜆 = Ω ( (𝑃 +
+log 𝑛) log 𝑛). We set 𝜆 = 210 in our system.
+𝜎 The threshold of number of samples to trigger hash bag resizing.
+Theoretically, 𝜎 = Ω (log 𝑛). We use 𝜎 = 50 in our system.
+
+3
+
+(e.g., each
+processing
+a frontier)
+
+Vertical Granularity Control
+
+In this section, we present our vertical granularity control (VGC)
+optimization. As mentioned, previous work [35] uses parallel BFS
+4
+
+A
+B
+
+C
+Frontier
+
+D
+E
+F
+G
+H
+
+J 𝐴’s local queue:
+D B J E
+✓  ✓ 
+
+K 𝐵’s local queue:
+L
+
+E K M L
+✓ ✓ ✓ ✓
+
+M
+
+𝐶’s local search
+skipped
+
+Next frontier: M L F G H
+✓: successful visit : unsuccessful visit
+ Checked but skipped
+
+(for multi-reachability) that support atomic updates. As such, all
+searches on the same processor can reuse the same stack space for
+different local queues.
+Using VGC, we can reduce the number of rounds and thus the
+scheduling overhead since vertices in multiple hops can be visited in
+one round. Fig. 10 shows that VGC reduces the number of rounds in
+reachability searches by 3–200× and greatly improves performance.
+Although our idea of using (on-the-fly) shortcuts for VGC is intuitive, two technical challenges remain. The first is load balancing—
+vertices can have various degrees and neighborhood patterns, and
+one vertex may explore a large neighborhood region sequentially.
+We discuss the control of granularity (the local search size) in
+Sec. 3.2. The second is non-determinism. In VGC, each vertex can
+search out several hops, and the explored region depends on runtime scheduling. Hence, we cannot use the edge-revisit scheme in
+previous work (Line 14) since the second visit may not perform the
+same computation as the first one. To tackle this, we propose the
+hash bag data structure to efficiently maintain the frontier.
+
+✓ Processed in the local queue
+✓ Added to the next frontier
+Edges:
+A Current frontier
+Successful
+Processed in the
+Unsuccessful D local queue
+Not visited
+L In next frontier
+
+Figure 4: A possible execution of a local search. The initial frontier is
+{𝐴, 𝐵, 𝐶 } and 𝜏 = 4. 𝐴 successfully visits one neighbor 𝐷. As its local queue
+is not full, it then visits 𝐷’s neighbor 𝐵 (skipped) and 𝐽 . 𝐽 visits 𝐸 but fails.
+No more vertex are left in 𝐴’s local queue. 𝐵 visits 𝐸, and 𝐸 visits 𝐾 and
+𝑀. Then, 𝐾 visits 𝐿 and add it to the queue. Now 𝐵’s queue is full. The
+unfinished vertices 𝑀 and 𝐿 will be flushed to the next frontier. 𝐶 has four
+(≥ 𝜏) neighbors, so we directly check all neighbors and add successful ones
+(𝐹 , 𝐺, and 𝐻 ) to the next frontier. We process 2-hop neighbors from the
+frontier in one round.
+
+In the rest of this section, we will show how to apply VGC to reachability searches and achieve good parallelism. Our motivation is
+from some theory work for parallel reachability algorithms.
+Motivations from the Theory Work and Our Solution. To reduce the number of rounds in BFS-like algorithms, many theoretical
+results use shortcuts [20, 28, 42, 55, 61, 92, 104] to reduce the diameter of the graph. Unfortunately, these approaches can be impractical because they incur high overhead for storing the shortcuts,
+increased memory footprint, and a significant preprocessing cost
+(e.g., Fineman’s algorithm [42] has 𝑂 (𝑚 log6 𝑛 + 𝑛 log10 𝑛) preprocessing work). Hence, these algorithms are unlikely to beat the
+𝑂 (𝑚) Tarjan’s sequential algorithm using modern computers with
+tens to hundreds of processors.
+To perform VGC without much overhead, we wish to add shortcuts but avoids explicitly generating them. Instead of shortcutting
+every vertex [20, 92], which can be costly, we only shortcut those
+in the current frontier, so that a vertex in the frontier can perform
+some work in the next several rounds “in advance” to enable VGC.
+Without shortcutting, visiting the same vertices may take multiple rounds to finish. We wish to process the shortcuts locally and
+sequentially to avoid space overhead. For each vertex 𝑣 being processed, we shortcut it to some (nearest) vertices reachable from 𝑣
+on the fly by a local search from 𝑣, such that we do not need to
+store the shortcuts. Our local search is similar to the sequential BFS
+algorithm. We maintain a local queue starting from 𝑣 and visit
+each of its neighbor 𝑢. We will set all sources reachable to 𝑣 as
+reachable to 𝑢. If any of these sources 𝑠 is new to 𝑢, we add (𝑢, 𝑠) as
+a reachable pair, and add 𝑢 to the tail of the local queue. We then
+move to process the next vertex in the local queue. This process
+terminates when we have performed “sufficient work” in the local
+search, and we discuss how to control the granularity in Sec. 3.2.
+We call it the “local” queue since we allocate it in the stack memory that is not visible to other processors. This avoids allocating
+arrays from the global memory (the heap space), which can be
+costly (and complicated) in parallel. The local searches from different vertices in the frontier are independent and in parallel with
+each other. The only information that one search needs is whether
+a vertex has been visited or not, which can be maintained using
+a boolean array (for single-reachability) or a parallel hash table
+
+3.2
+
+Control of Granularity
+
+The goal to control granularity is to make each task large enough
+and hide the cost of scheduling it. However, we cannot let them
+be arbitrarily large since they are executed sequentially and may
+cause load-imbalance. We wish to let all threads perform (roughly)
+a similar amount of work. In our implementation, we control the
+number of visited vertices in each local search by a parameter
+𝜏, including both successful and unsuccessful ones. This number
+provide an estimation of the workload for each local search.
+In particular, when processing a vertex 𝑣 in the frontier, we
+first check the number of 𝑣’s outgoing neighbors. If it is more
+than 𝜏, we process all its neighbors in parallel as in the standard
+way, since we have sufficient work to do and no more shortcuts
+are needed. Otherwise, we start the local search and maintain a
+counter 𝑡 starting from zero. When processing a vertex 𝑣 in the
+local queue, we increment 𝑡 for every neighbor visited, successfully
+or unsuccessfully. Note that since the local search is performed
+sequentially, there is no race condition in maintaining the counters.
+We stop the local search either when the queue becomes empty (all
+possible vertices have been visited), or when the counter reaches 𝜏
+(this task is reasonably large). For all remaining vertices in the
+local queue, we directly add them to the next frontier. Conceptually,
+we shortcut 𝑣 to the 𝜏 nearest vertices that otherwise may need
+multiple rounds to reach. We present an illustration in Fig. 4. The
+desired granularity can be controlled by the parameter 𝜏.
+Intuitively, we can choose the parameter 𝜏 empirically based
+on traditional HGC base-case size: usually using base-case size
+around 1000 operations is sufficient to hide scheduling overheads.
+We also experimentally study the value of 𝜏 in Sec. 6.3. Compared
+to plain BFS (no VGC used), we noticed that the performance on
+most graphs (both large- and low-diameter graphs) except three
+graphs improved using any 1 < 𝜏 ≤ 216 . Overall, the performance
+is not sensitive in a large parameter space 26 ≤ 𝜏 ≤ 212 on almost
+all graphs. We simply set 𝜏 = 29 as the default value, which is
+similar to typical HGC threshold. One can control granularity using
+other measures such as the number of generated reachability pairs
+or successfully visited vertices. We believe that the measure of
+5
+
+1 struct Hashbag {
+2
+double 𝛼;
+// desired load factor
+3
+data* bag;
+4
+int* tail;
+// tail of chunk 𝑖
+5
+int* sample;
+// #samples of chunk 𝑖
+6
+int r = 0;
+// current chunk id
+7
+Hashbag(int n) {
+// constructor
+8
+allocate tail[] and sample[] of size ⌈log 𝑛+𝜆
+𝛼 ⌉;
+9
+initialize sample[] and tail[] to 0;
+10
+tail[0] = 𝜆;
+11
+for (i = 1; i< ⌈log 𝑛+𝜆
+𝛼 ⌉; i++) tail[i] = tail[i-1]*2;
+12
+bag = new data[tail[i-1]];}
+13
+void insert(data k) {
+14
+r’ = r;
+15
+if (sampled successfully) {
+16
+// Lines 17−18: fetch_and_add using compare_and_swap
+17
+t = sample[r’];
+18
+while (!compare_and_swap(&sample[r’], t, t+1)) {
+19
+if (sample[r’] too large) {
+// current chunk is full
+20
+try_resize(r’);
+21
+return insert(k); } } }
+22
+i = random position in tail[r’-1]..tail[r’]
+23
+while (!compare_and_swap(&bag[i],∅,k)) {
+24
+i = next(i);
+// linear probe to find the next slot
+25
+if (has probed more than 𝜅 times) {
+26
+try_resize(r’);
+27
+return insert(k); } } }
+28
+void try_resize(int r’) {compare_and_swap(&r, r’,r’+1);}}
+
+granularity is independent with the idea of VGC. We plan to explore
+more criteria to control granularity for VGC in future work.
+
+3.3
+
+Parallel Hash Bag
+
+As mentioned, VGC brings up the challenge in maintaining the
+frontier efficiently. Recall that in parallel BFS, the “edge-revisit”
+scheme first visits all edges incident the frontier to decide the successfully visited vertices, and then revisits all edges to output them
+to a consecutive array as the next frontier. Since the candidate of
+the next frontier F𝑖+1 are all neighbors of F𝑖 , we can use a boolean
+flag to record the success information and let the second visit do
+the same computation as the first time. However, with VGC, each
+vertex can search out several hops, and the order of the searches
+is decided by the runtime scheduling. Note that the local queue is
+stored in the stack space and discarded after the search. If we want
+to borrow the “edge-revisit” scheme in BFS, we need to explicitly
+store the information of the local queues, which can be very costly.
+To tackle this challenge, we propose a new data structure called
+parallel hash bag to maintain the frontier efficiently, such that
+the next frontier can be generated by visiting the edges only once.
+Our hash bag supports Insert, ExtractAll, and ForAll efficiently
+both in theory (work, span, and I/O) and in practice. We start with
+defining the interface of hash bags:
+• Insert(𝑣): add the element 𝑣 into the bag (resize if needed). It
+can be called concurrently by different threads.
+• ExtractAll(): extract all elements in the bag into an array and
+remove them from the bag.
+• ForAll(): apply a function to all elements in the bag in parallel.
+In hash bags, we require to know an upper bound 𝑛 of the total
+size, which is true for most applications of hash bags (e.g., 𝑛 = |𝑉 |
+for maintaining frontiers). We pre-allocate 𝑂 (𝑛) number of slots as
+an array bag to hold elements to be inserted. However, instead of
+directly using all the slots, we only use a prefix of them with 𝑂 (𝑠)
+in expectation, where 𝑠 is the current number of elements in the
+bag. This guarantees the efficiency for ExtractAll and ForAll
+since we only need to touch 𝑂 (𝑠) space to process 𝑠 elements. The
+problem then boils down to maintaining the right size of the used
+prefix and how to “resize” efficiently.
+We show (part of) the pseudocode of hash bags in Fig. 5 and an
+illustration in Fig. 6. The size of the bag is preset as Θ(𝑛/𝛼), where
+𝛼 is the desired load factor and 𝑛 is the upper bound of total size as
+mentioned before. We conceptually divide the bag into chunks and
+use them one by one. A resizing means moving to the next chunk
+for use. The chunks have doubling sizes of 𝜆, 2𝜆, 4𝜆 ..., where 𝜆 is a
+parameter for the first chunk size. At initialization, we set up an
+array tail [·] , where tail [𝑖] is the end index of the 𝑖-th chunk. We
+use a variable 𝑟 to indicate the current in-use chunk id, starting
+from 0. Elements are always inserted into the 𝑟 -th chunk (indices
+from tail [𝑟 − 1] to tail [𝑟 ] for 𝑟 ≥ 1).
+An Insert randomly selects an empty slot in this chunk (Line
+22), attempts to put the element in this slot using CAS, and linear
+probes if the CAS fails (Lines 23–24). Note that different from the
+hash table, the Insert on hash bags does not check duplicates, but
+all applications in our paper (maintaining frontiers) can ensure that
+no duplicates will be added to the bag. For example, duplicates can
+be checked before calling Insert, e.g., using a boolean flag for each
+
+Figure 5: Pseudocode for the hash bag.
+Current
+insert: CAS to a random position
+chunk id
+If sampled, FAA to sample[r] by 1
+𝑟=2
+insert
+insert
+…
+
+…
+
+tail[0]=𝜆 tail[1]=2𝜆
+sample[0]=50 sample[1]=51
+
+…
+
+CAS = compare_and_swap
+FAA = fetch_and_add
+CAS (&𝑟,
+2,
+sample[2] 3) when
+hits 50
+…
+
+tail[2]=4𝜆
+sample[2]=50
+
+…
+
+tail[3]=8𝜆
+sample[3]=0
+
+Figure 6: Parallel Hash Bag. The hash bag is a preallocated array of size
+𝑂 (𝑛), split into chunks of exponentially grown sizes, starting from 𝜆. tail [𝑖 ]
+is the last index to use for chunk 𝑖. The current chunk id is 𝑟 . An Insert
+puts the element to a random position in the current chunk (linear probe for
+conflict/collision). Each element is sampled at a certain rate. sample [𝑖 ] is
+the number of samples in chunk 𝑖. When the sample [𝑟 ] reaches a threshold
+(𝜎 = 50 in this example), we resize it by CAS 𝑟 to 𝑟 + 1.
+
+vertex to indicate if it is in the frontier (the array visit in Alg. 3,
+details explained below).
+To efficiently decide when resizing is needed, we use a sampling
+strategy to estimate the size of the hash bag. We use sample[·]
+to count the number of samples in chunk 𝑖, and resize when the
+number of samples hits 𝜎. We fix 𝜎 for all chunks, but set sample
+rate accordingly for each chunk as 𝜎/𝛼 divided by the chunk size.
+Conceptually, this means to trigger a resize once the load factor goes
+beyond 𝛼. The larger the chunk is, the smaller the sampling rate is.
+Theoretically, getting accurate estimations requires 𝜎 = Ω(log 𝑛).
+In Insert, we sample the element with the current rate. If sampled successfully, we increment sample[𝑟 ] (𝑟 is the current chunk)
+by 1 atomically by CAS (conceptually this is an atomic fetch_and_add
+operation). When sample[𝑖] hits 𝜎, a constant fraction of this chunk
+is full whp, so a resizing attempt is triggered (try_resize). Also,
+when we linear probe for more than a certain number of times, we
+6
+
+Algorithm 3: Parallel Single-Reachability Using Hash Bags
+
+also trigger a resizing (although this should be rare). In both cases,
+we resize by increasing 𝑟 by 1 using a CAS, and call Insert again to
+add this element to the new chunk.
+ExtractAll and ForAll are applied to all elements in bag[·] up
+to the current chunk 𝑟 (indices from 0 to 𝑡𝑎𝑖𝑙 [𝑟 ]). ExtractAll uses
+a standard parallel pack [54] to output all (non-empty) elements in
+an array and remove them from the bag in parallel. ForAll calls
+a parallel for-loop to apply the function on all elements (skip the
+empty slots).
+We present the framework on using a hash bag 𝐻 for reachability
+query in Alg. 3. Given the current frontier F𝑖 , we will visit all
+vertices in F𝑖 in parallel and perform local searches from them. We
+use an array of boolean flags visit [·] to record whether each vertex
+has been visited. When a vertex 𝑣 ∈ F𝑖 visits a vertex 𝑢, we will use
+CAS to set visit [𝑢] as true (Line 9). As mentioned, CAS guarantees
+that only one concurrent visit to 𝑢 will succeed. Note that if visit [u]
+is already true, this if-condition will also fail, which guarantees no
+duplicates in the hash bag. If the CAS succeeds, we call Insert(𝑢) to
+add 𝑢 to the hash bag. Note that if local search is enabled, vertices
+visited within the local search are not added to the next frontier
+(see details in Sec. 3.1). We omit such cases in the pseudocode for
+simplicity. Finally, when we finish exploring all the vertices in F𝑖 ,
+we extract (emit and clean) all vertices from the hash bag to form
+the next frontier (Line 11).
+Theoretical Analysis of Hash Bags. We now show the cost
+bounds of the hash bag.
+
+Input: A directed graph 𝐺 = (𝑉 , 𝐸) and a set sources 𝑆 ∈ 𝑉
+F0 = 𝑆
+2 visit [𝑣 ] ← false for all 𝑣 ∈ 𝑉 except visit [𝑠 ] ← 𝑡𝑟𝑢𝑒
+3 𝑖 ←0
+4 𝐻 ← Hashbag ()
+⊲ initial 𝐻 as an empty hash bag
+5 while F𝑖 ≠ ∅ do
+6
+parallel_for_each 𝑣 ∈ F𝑖 do
+7
+Visit 𝑣’s neighborhood, use local search if applicable
+8
+foreach 𝑢 visited by 𝑣 do ⊲ Processing a reachability pair (𝑣, 𝑢)
+9
+if compare_and_swap(&visit [𝑢 ], false, true) then (*)
+10
+𝐻 .Insert(𝑢)
+11
+F𝑖+1 ← 𝐻 .ExtractAll()
+⊲ pack elements and clean the bag
+12
+𝑖 ←𝑖 +1
+13 (*): Note: vertices visited within local searches will not be added
+1
+
+of these ideas are also adopted in other recent parallel SCC implementations or graph libraries [35, 50, 57, 73, 97]. We summarize
+the cost of our implementation in five categories: trimming, first
+SCC, multi-search, labeling, and hash table resizing. In Sec. 6.2,
+we show a running time breakdown based on these five categories.
+4.1 Trimming. The algorithm first filters all vertices with zero inor out-degrees, since they must be in isolated SCCs. It is used in
+almost all existing SCC implementations.
+4.2 Finding the first SCC. As the first reachability search in BGSS
+only contains one source, we use single-reachability to find the first
+SCC, and use the standard dense-backward [12, 94] optimization.
+This optimization is designed for single-BFS when the frontier is
+large. Instead of checking all the out-edges from F𝑖 , the dense mode
+checks each unvisited vertex 𝑢 and its in-neighbors. If any of 𝑢’s
+in-neighbor is in the previous frontier F𝑖 , 𝑢 must be reachable
+from the source, and we can skip the rest of the edges incident 𝑢
+to save work. We refer to this optimization as dense mode, and
+the aforementioned approach as sparse mode. We note that dense
+mode does not work in multi-reachability searches—even if we find
+a neighbor of 𝑢 in F𝑖 , we cannot skip the rest of the neighbors since
+they may come from different sources than 𝑣. Therefore, we only
+use dense mode in single-reachability searches.
+4.3 Multi-reachability search. Next, we start (log 𝑛) − 1 batches
+of multi-reachability searches in both forward and backward directions, where round 𝑖 uses 2𝑖 sources (Lines 6–7). During the multireachability search, we need a hash table to identify the duplicate
+reachability pairs. We use the phase-concurrent hash table [95]. To
+avoid high overhead in hash table resizing, we use a heuristic to
+estimate the hash table size, which is discussed below in Sec. 4.5.
+4.4 Labeling. After finding all reachability pairs, we mark all vertices strongly connected with any source as finished, and label them
+using the largest vertex id in this SCC (Line 11). For the other
+vertices, we need to compute their “signatures” of reachability to
+determine cross edges. We do this also by setting a label for them
+(Line 12), which is a hash value of the set of vertices reachable from
+and to 𝑣 (combining 𝑅1 , 𝑅2 with its current label). In this way, two
+vertices with different labels are in different SCCs. We set the hash
+value also as the largest vertex id among all vertex reachable from
+or to 𝑣. To avoid the cost of explicitly removing the cross edges, we
+
+Theorem 3.1. For a parallel hash bag of total size 𝑛 and first chunk
+size 𝜆 = Ω((𝑃 + log 𝑛) log 𝑛), inserting 𝑠 elements using 𝑃 processors
+costs 𝑂 (𝑠) expected work and 𝑂 (log 𝑠 log 𝑛) span whp, and listing or
+packing 𝑠 elements uses 𝑂 (𝑠 + 𝜆) work and 𝑂 (log 𝑠) span, both whp,
+with mild assumptions (see below).
+We provide the formal proof in the full in Appendix A. In the
+analysis, we assume the threads are loosely synchronized, where between two consecutive executions of Line 18, other processors can
+execute at most a constant number of instructions. This assumption
+is reasonable in practice and is used in analyzing other parallel algorithms such as the analysis of the work-stealing scheduler [3, 47].
+Note that the value 𝑃 is usually a small number (up to hundreds)
+in practice, and can generally be considered as polylogarithmic of
+input size 𝑛. In practice, we set 𝜆 = 210 and 𝜎 = 50. We pick 𝜎 = 50
+since it is close to log 𝑛. We use 𝜆 = 210 since our analysis indicates
+𝜆 should roughly be log2 𝑛. We tested 𝜆 for a large range and it
+affected the running time minimally for 28 ≤ 𝜆 ≤ 216 , so we simply
+use a single value for all tests.
+Our experiments show that hash bags are fast in practice due to
+the space efficiency and fewer memory accesses. Although we design hash bags for VGC, our experiments show that hash bag itself
+also improves the algorithms’ performance because it avoids scanning the frontier twice. When applying it to LE-lists (see Sec. 5.2),
+where we can use hash bags but not VGC, we also achieve up to
+10× speedup over existing implementations.
+
+4
+
+Implementation Details
+
+We use the techniques in Sec. 3 (VGC with hash bags) to implement
+reachability searches in the BGSS algorithm for SCC (Alg. 1). This
+section further presents some details in the implementation. Many
+7
+
+Algorithm 4: LDD-UF-JTB Algorithm for Connectivity [96]
+
+Algorithm 5: BGSS Algorithm for LE-Lists [18]
+
+Input: A graph 𝐺 = (𝑉 , 𝐸) with 𝑉 = {𝑣1 , . . . , 𝑣𝑛 }
+Output: The connectivity labels 𝐿 ( ·) of 𝑉
+1 𝐿 ← LDD(𝐺)
+2 parallel_for_each (𝑣, 𝑢) ∈ 𝐸 do
+3
+if Find(𝐿 (𝑣)) ≠ Find(𝐿 (𝑢)) then Union(𝐿 (𝑣), 𝐿 (𝑢))
+4 return 𝐿 ( ·)
+5 Function LDD(𝐺 = (𝑉 , 𝐸))
+6
+Set visit [𝑣 ] ← false and 𝐿 (𝑣) ← 𝑣 for all 𝑣 ∈ 𝑉
+7
+𝐵 ← Permute 𝑉 and group vertices into 𝑂 (log 𝑛) batches in
+exponentially increasing sizes
+8
+𝐹 ← 𝐵1
+9
+Set visit [𝑣 ] ← true for all 𝑣 ∈ 𝐵 1
+10
+for 𝑖 ← 2, . . . , |𝐵 | do
+11
+𝐹′ ← ∅
+12
+parallel_for_each 𝑣 ∈ 𝐹 do
+13
+parallel_for_each 𝑢 : (𝑢, 𝑣) ∈ 𝐸, visit [𝑢 ] = false do
+14
+visit [𝑢 ] ← true
+15
+𝐿 (𝑢) ← 𝐿 (𝑣)
+16
+Add 𝑢 to 𝐹 ′
+′
+17
+𝐹 = 𝐹 ∪ {𝑣 | 𝑣 ∈ 𝐵𝑖 and visit [𝑣 ] = false}
+18
+Set visit [𝑣 ] ← true for all 𝑣 ∈ 𝐵𝑖
+19
+return 𝐿 ( ·)
+
+Input: A graph 𝐺 = (𝑉 , 𝐸) with 𝑉 = {𝑣1 , . . . , 𝑣𝑛 }
+Output: The LE-lists 𝐿 ( ·) of 𝐺
+1 Set 𝛿 (𝑣) ← +∞ and 𝐿 (𝑣) ← ∅ for all 𝑣 ∈ 𝑉
+𝑖−1
+2 Partition 𝑉 into log 𝑛 batches 𝑃 1.. log 𝑛 , where |𝑃𝑖 | = 2
+3 for 𝑖 ← 1, . . . , log 𝑛 do
+4
+Apply multi-BFS from vertices in 𝑃𝑖 , and let
+𝑆 = { ⟨𝑢, 𝑣, 𝑑 (𝑣, 𝑢) ⟩ | 𝑣 ∈ 𝑃𝑖 , 𝑑 (𝑣, 𝑢) < 𝛿 (𝑢) }
+5
+parallel_for_each ⟨𝑢, 𝑣, 𝑑 ⟩ ∈ 𝑆 do 𝛿 (𝑢) ← min{𝛿 (𝑢), 𝑑 }
+6
+𝐿′ (𝑢) ← { (𝑢, 𝑣, 𝑖) ∈ 𝑆 }
+7
+Sort 𝐿′ (𝑢) based on the distances in decreasing order, filter out
+triples that violate constraints, and append 𝑣 (the second element)
+to 𝐿 (𝑢)
+8 return 𝐿 ( ·)
+
+in ConnectIt has overwhelming advantages on all graphs. LDD-UFJTB is one of the fastest algorithms, and our new version accelerates
+it by up to 3.2x compared to the original version in ConnectIt.
+LDD-UF-JTB has two major components: the first step uses lowdiameter decomposition (LDD) [75], and the finishing step uses
+the union-find structure by Jayanti et al. [56]. We apply our new
+techniques to the LDD step. An LDD of a graph means to find
+a decomposition (partition of vertices) of the graph where each
+component has a low diameter and the number of edges crossing
+components is small. This LDD step first randomly permutes all
+vertices, and then starts with a single source and searches out using
+BFS. Then in later rounds, new sources are added to the frontier
+(Line 17) in exponentially increasing batches (Line 7) along with
+the execution of BFS (Line 12 to Line 16). In our implementation,
+we increase the batch sizes by 1.2× in each round.
+Our implementation replaces the BFS in ConnectIt with the more
+efficient reachability algorithm with VGC optimization and the parallel hash bag. Similar to SCC, we do not need the BFS ordering in
+computing connectivity, so replacing BFS with (undirected) reachability searches is still correct. In this case, our algorithm can explore
+more vertices in one round, which leads to fewer rounds and better
+parallelism. LDD has only 𝑂 (log 𝑛) rounds (Line 10), so it is already
+reasonably fast. By using local search and parallel hash bag, we
+further improve its performance by 1.67× (geometric mean on all
+graphs). We present the experimental details in Sec. 6.4.
+
+just skip cross edges in later reachability searches if the endpoints
+have different labels.
+4.5 Heuristic for hash table resizing. The phase-concurrent hash
+table [95] requires knowing the upper bound of the size before concurrent insertions. With VGC, we do not know a tight upper bound
+of the number of reachability pairs (𝑣, 𝑠), since 𝑣 can be several hops
+away from 𝑠, and the number of possible pairs can be large. Instead,
+we compute the number of pairs 𝑎 in the previous frontier and the
+number of unfinished vertices 𝑏, and use max(0.3𝑏, 1.5𝑎) and round
+it up to the next power of 2 as the next hash table size. We resize our
+hash table once an insertion probes too many times. This heuristic
+is inspired by some recent analyses of the BGSS algorithm in [15].
+As shown in Fig. 9, on many graphs, resizing hash tables can be
+costly, and our heuristic effectively reduces this cost.
+
+5
+
+Other Relevant Algorithms
+
+5.2
+
+The two general techniques (VGC and parallel hash bag) introduced
+in Sec. 3 are general. In this section, we use them to accelerate two
+other graph algorithms. In particular, in Sec. 5.1 we show how to
+apply these techniques in a parallel graph connectivity algorithm,
+and in Sec. 5.2 we show that using parallel hash bag in the algorithm
+for least-element lists can lead to significantly faster performance.
+
+5.1
+
+Algorithm on Least-Element Lists (LE-Lists)
+
+Given an undirected graph 𝐺 = (𝑉 , 𝐸) with 𝑉 = {𝑣 1, . . . , 𝑣𝑛 } in a
+given random total order, a vertex 𝑢 is in vertex 𝑣’s least-element
+list (LE-list) if and only if there is no earlier vertex than 𝑢 in 𝑉
+that is closer to 𝑣 [27]. More formally, for 𝑑 (𝑢, 𝑣) being the shortest
+distance between 𝑢 and 𝑣, the LE-lists of 𝑣𝑖 is:
+
+𝐿(𝑣𝑖 ) = 𝑣 𝑗 ∈ 𝑉 | 𝑑 (𝑣𝑖 , 𝑣 𝑗 ) < min1≤𝑘< 𝑗 𝑑 (𝑣𝑖 , 𝑣𝑘 )
+
+Connected Components (CC)
+
+sorted by 𝑑 (𝑣𝑖 , 𝑣 𝑗 ).
+LE-lists have applications in estimating the influence of vertices
+in a network [25, 29, 39], estimating reachability set size [60, 84], and
+probabilistic tree embeddings of a graph [19, 59], which further have
+numerous applications. In this paper, we focus on the unweighted
+LE-lists algorithm, so the distances can be computed by BFS.
+The state-of-the-art parallel algorithm to compute LE-list is the
+BGSS algorithm (in the same paper as the BGSS SCC algorithm [18]).
+A pseudocode is given in Alg. 5. It first permutes the vertices 𝑉 ,
+
+Computing the connected components is one of the most widelystudied graph problems. A recent framework ConnectIt [36] implemented over 232 shared-memory parallel algorithms, based on
+numerous previous studies both theoretically [7, 16, 23, 35, 53, 93,
+94, 96, 99] and practically [13, 16, 35, 36, 94, 96].
+Since connectivity is not the main focus of this paper, we picked
+one of the algorithms from ConnectIt, referred to as “LDD-UF-JTB”,
+as a proof-of-concept to show the effectiveness and generality of the
+new techniques in this paper. We note that none of the algorithms
+8
+
+divides 𝑉 into log2 𝑛 batches of size 1, 2, 4, 8, ..., and processes one
+batch at a time. A tentative distance 𝛿 (·) is maintained for each
+vertex, initialized as +∞. In each batch, it runs multiple BFS from
+all vertices in the batch simultaneously, based on 𝛿 (·) from the
+previous batch. For a vertex 𝑣 ∈ 𝑉 , if its search reaches 𝑢 using a
+distance smaller than 𝛿 (𝑢), the algorithm add ⟨𝑢, 𝑣, 𝑑 (𝑣, 𝑢)⟩ to a set 𝑆.
+Finally, we use 𝑆 to update the tentative distance 𝛿 (·) in this round
+(Line 5), and the LE-list of each vertex (Lines 6 and 7). Blelloch
+et al. showed that running multi-BFS in log2 𝑛 batches enables
+parallelism, while the work is asymptotically the same. Each LE-list
+has size 𝑂 (log 𝑛) whp, and the entire algorithm runs 𝑂 (𝑚 log 𝑛)
+time. A preliminary implementation is given in ParlayLib [14],
+using multi-BFS discussed in Sec. 2.
+We note that we can use the parallel hash bag introduced in
+Sec. 3.3 to maintain the frontier in the multi-BFS, which avoids
+the second visit in multi-BFS. VGC is not directly applicable here
+because we need to preserve the BFS order. In addition, we use a
+parallel hash table [95] to check if a source-target pair is already
+visited. In the round 𝑖, if a source vertex 𝑣 in the current batch
+reaches 𝑢 by a distance shorter than 𝛿 [𝑢], and if (𝑣, 𝑢) are not in
+the hash table, we insert (𝑣, 𝑢) to the hash table and hash bag, and
+pack the hash bag as the next BFS frontier. We insert all such triples
+(𝑢, 𝑣, 𝑖) to a set 𝑆 (Line 4), where 𝑣 and 𝑢 are described as above, and
+𝑖 is the current round (which is also the distance between 𝑢 and
+𝑣). Our parallel LE-lists implementation outperforms the existing
+implementation from ParlayLib (from the authors of the BGSS LElists algorithm) by 4.34× on average.
+
+6
+
+probability 0.5, and from 𝑣 to 𝑢 otherwise, then remove duplicate
+edges. In SQR’ and REC’, for each vertex 𝑢 and each of its adjacent
+vertex 𝑣, we create an edge from 𝑢 to 𝑣 with probability 0.3, and
+from 𝑣 to 𝑢 with probability 0.3, and create no edge with probability
+0.4, then remove duplicate edges.
+To test our connectivity and LE-lists algorithms, we symmetrize
+all 18 directed graphs and use 4 more real-world undirected graphs,
+com-orkut (OK) [110], Friendster (FT) [110], RoadUSA (USA) [1],
+and Germany (GE) [1]. Graph details are given in Tab. 3.
+We call the social and web graphs low-diameter graphs as they
+usually have low diameters (roughly polylogarithmic in 𝑛). We call
+the 𝑘-NN and lattice graphs large-diameter graphs as their diameters
+√
+are large (roughly Θ( 𝑛)). When comparing the average running
+times across multiple graphs, we always use the geometric mean.
+Baseline Algorithms. We call all existing algorithms that we compare to the baselines. We compare the number of SCCs and the
+largest SCC size reported by each algorithm with SEQ to verify
+correctness. For SCC, we compare to GBBS [35, 37], iSpan [57],
+and Multi-step [97]. GBBS also implements the BGSS algorithm,
+so we also compare our breakdown and sequential running times
+with GBBS. We also implemented and compared to Tarjan’s sequential SCC algorithm [100]. We call it SEQ. On six graphs, iSpan’s
+results are off by 1, noted with “?” in Tab. 2. (We communicated
+with the authors but could not correct it.) Multi-step and iSpan
+do not support CW, HL12, and HL14 because they have more than
+232 edges. For connectivity, we apply our two techniques to the
+LDD-UF-JTB algorithm in ConnectIt [36, 36] and compare it to the
+original implementation in ConnectIt. For LE-lists, we compare to
+ParlayLib, which is the only public parallel LE-lists implementation
+to the best of our knowledge.
+We first summarize the overall performance of the algorithms
+and scalability tests in Sec. 6.1. Next, we show some experimental
+studies on performance breakdown in Sec. 6.2, and an in-depth
+study of VGC in Sec. 6.3. Finally, we provide a brief summary of
+our experimental results for connectivity and LE-lists in Sec. 6.4.
+
+Experiments
+
+Setup. We run our experiments on a 96-core (192 hyperthreads) machine with four Intel Xeon Gold 6252 CPUs and 1.5 TB of main memory. We implemented all algorithms in C++ using ParlayLib [14]
+for fork-join parallelism and parallel primitives (e.g., sorting). We
+use numactl -i all for parallel tests to interleave the memory
+pages across CPUs in a round-robin fashion. All reported numbers
+are the average running time of the last five out of six runs.
+We use 𝜏 = 29 in all tests except for those in Fig. 11 which
+studies the choice of 𝜏. We tested 18 directed graphs, including
+social networks, web graphs, 𝑘-NN graphs, and lattice graphs. All
+social, web, and 𝑘-NN graphs are real-world graphs, with up to 3.6
+billion vertices and up to 128 billion edges. The lattice graphs are
+generated by a similar model in [32], which uses SCC to study the
+percolation on isotropically directed lattices. Basic information on
+the graphs is given in Tab. 2. For social graphs, we use LiveJournal
+(LJ) [9] and Twitter (TW) [62]. For web graphs [74], we use sd-arc
+(SD), ClueWeb (CW), Hyperlink12 (HL12) and Hyperlink14 (HL14).
+𝑘-NN graphs are widely used in machine learning algorithms [24,
+45, 49, 58, 70, 71, 81, 89, 101]. In 𝑘-NN graphs, each vertex is a
+multi-dimensional data point and has 𝑘 edges pointing to its 𝑘nearest neighbors (excluding itself). We use Household with 𝑘 = 5
+(HH5) [40, 106], Chemical with 𝑘 = 5 (CH5) [44, 106], GeoLife with
+𝑘 = 2, 5, 10, 15, 20 (GL2, GL5, GL10, GL15, GL20) [106, 112], and
+Cosmo50 with 𝑘 = 5 (COS5) [63, 106]. We also created four lattice
+graphs [32], including two 104 × 104 2D-lattices (SQR and SQR’),
+and two 103 ×104 2D-lattices (REC and REC’). Each row and column
+in the lattice graphs are circular. In SQR and REC, for each vertex 𝑢
+and its adjacent vertex 𝑣, we add a directed edge from 𝑢 to 𝑣 with
+
+6.1
+
+Overall Performance
+
+We show the running times in Tab. 2 and a heatmap in Fig. 1. We
+mark the parallel running times slower than the sequential algorithms in red in Tab. 2. Our implementation is almost always the
+fastest except on SD and CH5. On CH5, we are 23% slower than
+SEQ. CH5 has a very large diameter (4000+) compared to its small
+size (4M vertices), and none of the parallel implementations outperform SEQ. On SD, we are only 4% slower than Multi-step with
+𝜏 = 29 . SD is one of the graphs that are dense and potentially has
+good parallelism, and thus may prefer smaller 𝜏. As we will show
+in Fig. 11, using 𝜏 ≤ 28 will achieve a better performance than all
+existing implementations on SD, but we keep the results in Tab. 2
+all using 𝜏 = 512 for simplicity. The highlighted columns in Tab. 2
+show the speedup of our algorithms to the best baseline (including
+SEQ) on each graph. Compared to the best baseline, we are up to
+10.2× faster and 3.1× faster on average.
+All the implementations perform favorably on all low-diameter
+graphs (5–317× faster than SEQ). Conceptually, all parallel implementations first use BFS-like algorithms to find the largest SCC. On
+all but one low-diameter graph, the largest SCC contains more than
+50% vertices. Therefore, using a parallel BFS (with optimizations
+9
+
+𝒎
+
+𝑫
+
+Graph Information
+|SCC 1 | |SCC 1 |%
+
+#SCC
+
+par.
+
+Ours
+seq. spd.
+
+par.
+
+4.85M 69.0M
+41.7M 1.47B
+
+16
+65
+
+971,232
+8,044,729
+
+0.038
+0.226
+
+1.06
+14.3
+
+27.7
+63.2
+
+0.118
+0.387
+
+1.44
+19.7
+
+12.1
+50.9
+
+0.050? 0.141
+c 1.32
+
+2.90
+71.7
+
+1.30
+1.71
+
+Social
+
+Tbest
+/ ours
+
+LJ
+TW
+
+Web
+
+Other Benchmarks
+iSpan MS SEQ
+
+SD
+89.2M 2.04B 241
+47,965,727
+CW
+978M 42.6B 666 774,373,029
+HL14 1.72B 64.4B 793 320,754,363
+HL12 3.56B 128B 5,275 1,827,543,757
+
+53.74%
+39,205,039
+79.15% 135,223,661
+18.60% 1,290,550,195
+51.28% 1,279,696,892
+
+1.96
+104
+17.6 1189
+20.6 1,622
+95.5 8528
+
+46.6
+67.4
+78.8
+89.3
+
+5.25
+110
+40.4 1,166
+67.3 2,041
+361 7,022
+
+21.0
+28.9
+30.3
+19.5
+
+4.78?
+n
+n
+n
+
+1.86
+n
+n
+n
+
+104
+589
+620
+1822
+
+0.95
+2.29
+3.27
+3.78
+
+KNN
+
+GBBS
+seq. spd.
+
+HH5
+CH5
+GL2
+GL5
+GL10
+GL15
+GL20
+COS5
+
+2.05M 10.2M 980
+4.21M 21.0M 4,550
+24.9M 49.8M 4,142
+24.9M 124M 12,059
+24.9M 249M 4,531
+24.9M 373M 5,491
+24.9M 498M 5,275
+321M 1.61B 1,148
+
+257,914
+497,331
+5,368
+860,403
+3,042,330
+3,239,156
+3,336,963
+301,413,787
+
+12.59%
+11.82%
+0.02%
+3.46%
+12.23%
+13.02%
+13.41%
+93.88%
+
+94,010
+248,227
+9,705,931
+3,198,626
+326,811
+187,646
+128,021
+2,273,690
+
+0.208
+0.557
+0.598
+0.865
+1.49
+2.09
+2.38
+3.22
+
+3.10
+5.83
+39.1
+45.8
+61.6
+75.5
+86.0
+284
+
+14.9
+10.5
+65.3
+53.0
+41.4
+36.1
+36.1
+88.2
+
+3.95
+8.39
+3.00
+10.5
+12.3
+13.7
+14.5
+12.0
+
+3.51
+5.84
+82.4
+91.0
+76.5
+84.5
+96.6
+367
+
+0.89
+0.70
+27.5
+8.69
+6.24
+6.15
+6.68
+30.7
+
+0.791
+2.15
+t
+t
+35.2
+29.4
+27.3
+t
+
+2.21 0.449
+17.6 0.427
+8.36 3.39
+19.1 4.83
+7.14 9.30
+10.6 11.3
+12.3 13.3
+57.4
+189
+
+2.16
+0.77
+5.01
+5.58
+4.79
+5.06
+5.18
+3.72
+
+Lattice
+
+𝒏
+
+SQR
+REC
+SQR’
+REC’
+
+100M 300M 10,002
+10M 30M 5,946
+100M 120M
+51
+10M 12M
+80
+
+99,101,606
+9,890,647
+58
+42
+
+99.10%
+98.91%
+0.00%
+0.00%
+
+829,495
+101,059
+78,052,793
+7,819,050
+
+0.577
+0.117
+1.38
+0.159
+
+24.7
+2.08
+105
+9.38
+
+42.8
+17.8
+76.3
+59.0
+
+11.1
+3.82
+4.76
+1.00
+
+28.5
+2.14
+243
+18.7
+
+2.57
+0.56
+51.0
+18.8
+
+4.45? 12.6
+1.19? 5.24
+26.4? 3.19
+0.851? 0.645
+
+3,828,682
+33,479,734
+
+78.98%
+80.38%
+
+15.5
+1.57
+6.90
+0.60
+
+7.72
+10.2
+2.31
+3.75
+
+Table 2: The running times (in seconds) of all tested algorithms on SCC. 𝑛 = number of vertices. 𝑚 = number of edges. 𝐷 = estimated diameter (a
+lower bound of the actual value). |SCC 1 | = largest strongly connected component (SCC) size. |SCC 1 |% = |SCC 1 |/𝑛, ratio of the largest SCC. #SCC = number
+of SCCs. “iSpan” = iSpan algorithm [57]. “MS” = Multi-step algorithm [97]. “SEQ” = classic sequential SCC [100]. “par.” = parallel running time (on 192
+hyperthreads). “seq.”= sequential running time. “spd.”= self-relative speedup. “?”= number of SCCs is different from other implementations. “t”= timeout
+(more than 5 hours). “c”= crash. “n”= no support. We set 𝜏 = 29 . The fastest runtime for each graph is underlined. Red numbers are parallel running times
+slower than SEQ.
+
+GBBS
+64
+16
+4
+1
+16
+4
+1
+.25
+
+SQR'
+
+0.0
+0.0
+
+0.2
+
+SD
+
+Multi-step
+64
+16
+4
+1
+.25
+64
+16
+4
+1
+.25
+
+GL5
+
+0.4
+
+0.6
+
+number of processors
+
+iSpan
+CW
+
+COS5
+
+0.8
+
+1.0
+
+1
+2
+4
+182
+24
+48
+9966h
+
+Ours
+TW
+
+1
+2
+4
+182
+24
+48
+9966h
+
+1.0
+512
+64
+0.8
+8
+0.61
+0.48
+1
+0.2
+.125
+
+1
+2
+4
+182
+24
+48
+9966h
+
+running time/Tarjan's
+
+such as dense modes) gives decent performance. Even so, using hash
+bags and VGC still gives good performance on low-diameter graphs,
+and we are faster (up to 3.8×) than the best baseline on all but one
+graphs. One interesting finding is that on TW, our implementation,
+GBBS, and Multi-step are faster than SEQ even running sequentially. Similar trends (running the parallel algorithm sequentially
+is faster than the classic sequential algorithm) have been observed
+in other BFS-like graph algorithms [94]. This is mostly due to the
+dense-mode optimization as described in Sec. 4.2. When the frontier
+size is large, triggering the dense mode can skip many edges, so the
+number of visited edges can be fewer than Θ(𝑚) as in the standard
+sequential solution. Another reason is that our implementation (and
+GBBS’s) using BFS is more I/O-friendly than Tarjan’s DFS-based
+algorithm.
+Our algorithm has dominating advantages on large-diameter
+graphs. On 𝑘-NN and lattice graphs, existing parallel implementations are slower than the sequential algorithms in 24 out of 36 tests.
+If we take the average time of the baseline parallel algorithms for
+𝑘-NN and lattice graphs, all of them are slower than SEQ (see the
+“MEAN” columns in Fig. 1). In comparison, our implementation is
+5.3× better than SEQ on 𝑘-NN graphs and 9.1× better on lattice
+graphs. We believe the high performance is from good parallelism.
+We study the scalability of our algorithm in the next paragraph.
+Scalability Tests. We show the speedup of four algorithms (ours,
+GBBS, iSpan, Multi-step) over the sequential Tajan’s algorithm
+on six representative graphs in Fig. 7. We vary the number of
+processors from 1 to 96h (192 hyperthreads). The red horizontal
+dot lines represent the running time of Tarjan’s algorithm (SEQ),
+above which means faster than Tarjan’s algorithm.
+
+Figure 7: Comparing speedup over Tarjan’s sequential algorithm on
+different algorithms on different number of processors. Larger is better. The red horizontal line indicates the running time of Tarjan’s algorithm.
+We omit an algorithm on a graph in cases of crash/timeout/no support.
+
+48
+9966h
+
+12
+
+4
+
+1
+
+self speedup
+
+64
+32
+16
+8
+4
+2
+1
+
+TW
+SD
+GL5
+SQR'
+CW
+COS5
+
+Figure 8: Self-relative
+speedup on different
+processor counts, with
+𝜏 = 29 on six graphs.
+
+number of processors
+
+On low-diameter graphs (TW, SD, and CW), all algorithms show
+reasonably good speedup. On large-diameter graphs (SQR’, GL5, and
+COS5), our algorithm achieves significantly better scalability than
+the baselines. Our algorithm is the only one that achieves almost
+linear speedup on all the six graphs. For all the other algorithms,
+their performance stops increasing (dropped or flattened) with more
+than 24 threads on one or more graphs. Multi-step shows good
+performance on SD, and has better performance than our algorithm
+
+10
+
+especially on a small number of threads. However, Multi-step does
+not scale well to more processors on most of the graphs.
+We also show the self-speedup of our algorithms on six graphs in
+Fig. 8. We vary the number of processors from 1 to 96h (192 hyperthreads). Due to page limitation, we do not show the curves for all
+graphs, but the self-speedup on all graphs on 96h (192 hyperthreads)
+is given in Tab. 2. Our self-speedup is more than 35 except for some
+very small graphs. This indicates that high parallelism is a crucial
+factor contributing to the high performance of our code. Compared
+to GBBS, the fastest previous parallel SCC implementation, our
+self-speedup is 1.2–32× better. With limited parallelism, GBBS can
+be slower than SEQ on 8 out of 14 large-diameter graphs—the BGSS
+SCC algorithm has 𝑂 (𝑚 log 𝑛) work compared to 𝑂 (𝑚) of Tarjan’s
+sequential algorithm, so with poor self-speedup, the parallelism
+cannot make up the factor of 𝑂 (log 𝑛) loss in the total work.
+We believe that our good performance comes from using hash
+bags (saving work on processing sparse frontiers) and VGC (reducing the number of rounds in reachability searches and improving
+parallelism). We will discuss more details by comparing the performance breakdown with GBBS in Sec. 6.2, and studying the benefit
+brought up by VGC in Sec. 6.3.
+
+6.2
+
+fair comparison. On all but one graphs, using hash bags greatly improve the performance in single- and/or multi-reachabilty searches.
+Comparing the total running time of reachability searches (red and
+blue bars), our algorithm is up to 4× faster than GBBS (2× faster
+on average), and the major improvement is from hash bags.
+Evaluating VGC. On top of our plain version, VGC improves
+the performance on almost all graphs. Note that for low-diameter
+graphs, since the number of needed rounds is small, there is sufficient parallelism to explore. Therefore, using VGC does not improve
+the performance too much. As mentioned, on SD, the performance
+drops slightly using local search with 𝜏 = 29 , but using smaller
+values of 𝜏 can still improve the performance (see Sec. 6.3). To
+keep the parameter setting simple, we still report the numbers with
+𝜏 = 29 in Tab. 2 and Fig. 9. The large-diameter graphs with the
+largest SCC as 50% of the graph (e.g., COS5, REC, and SQR) greatly
+benefit from VGC1 (using VGC in the single-reachability search to
+find the first SCC). Comparing “first-SCC” of plain and VGC1, VGC
+makes the performance 2.2–17× faster in the single-reachability
+search on COS5, SQR, and REC. All the other large-diameter graphs
+get significant improvement from VGC1 to final (using VGC also
+in multi-reachability searches). For all large-diameter graphs, the
+“multi-search” time in final is smaller than that in VGC1 (1.43–14.7×
+improvement). As we will show in Sec. 6.3, this is because VGC
+reduces the number of rounds in reachability searches by 3–200×.
+In summary, comparing our plain version with GBBS, we can see
+that hash bag and our heuristic on hash table resizing improves the
+performance over GBBS by about 1.5–4.3×. Comparing plain with
+VGC1 and final, we can see that VGC improves the performance in
+both single- and multi-reachability queries by up to 14.7×.
+
+Performance Breakdown
+
+To better understand the performance of our algorithm, we compare the performance breakdown with GBBS in Fig. 9 since GBBS
+is also based on the BGSS algorithm and we have similar framework. We compare the running time in six parts (see Sec. 4): 1)
+Trimming: trimming vertices with no in- or out-degrees; 2) First
+SCC: finding the first SCC using two single-reachability searches;
+3) Multi-search: all multi-reachability searches; 4) Hash Table
+Resizing: resizing the hash table storing reachability pairs; 5) Labeling and Others: assigning labels to vertices and other costs.
+We show the breakdown figure for all graphs in Fig. 9. We tested
+three versions of our algorithm: the plain version uses parallel
+hash bags without VGC, the “VGC1” version enables VGC in singlereachability to find the first SCC, and the “final” version fully
+enables VGC in both single- and multi-reachability search. We note
+that some graphs requires more time on First-SCC while the others
+spent more time on Multi-search because of different graph patterns,
+which is indicated by the value of |𝑆𝐶𝐶 1 |% as shown in Tab. 2.
+One straightforward improvement of our algorithm is from our
+better heuristic to estimate the hash table size (see details in Sec. 4),
+which avoids frequent size predicting and hash table resizing. This
+can be seen by comparing the time of “hash table resizing” (green
+bars) for GBBS and our versions. This optimization saves much
+time on almost all graphs. In the following, we use the breakdown
+results to illustrate the performance improvement from our two
+main techniques: the hash bag and VGC.
+Evaluating hash bags. Parallel hash bags improve the performance by maintaining the frontiers without the edge-revisiting
+scheme. Note that both our algorithm and GBBS use the BGSS algorithm and perform the same computation in each round, but GBBS
+uses edge-revisiting and our algorithm avoids that by using the
+hash bag. Therefore, we compare our plain version (i.e., disabling
+VGC) with GBBS to evaluate the improvement from hash bags,
+because the major difference between them is the use of hash bags.
+We also exclude the hash table resizing time (the green bars) for
+
+6.3
+
+In-depth Performance Study of VGC
+
+Reduced Number of Rounds. We study the improvement of VGC
+by reporting the number of rounds in the reachability searches with
+or without VGC (see Fig. 10). In a given graph, for all single- and
+multi-reachability searches in the SCC algorithm, we record the
+number of rounds 𝑦 needed in plain BFS and the number of rounds
+𝑥 with VGC enabled. We then plot all such points (𝑥, 𝑦) on a 2D
+plane to illustrate the effectiveness of local search, shown in Fig. 10.
+We also report the average ratio of 𝑦/𝑥 on the top of each figure.
+The conceptual “slope” indicated by the points illustrates the factor
+in the reduction of the number of rounds by using local search.
+For most of the graphs, especially the 𝑘-NN graphs, thousands of
+rounds were needed in each multi-reachability search using BFS.
+With VGC, the number of rounds is mostly within 100. Even for
+the cases where BFS only needs a few (10–100) rounds, VGC still
+reduces the number of rounds to be within 10 rounds (e.g., LJ,
+TW, COS5, SQR’, REC’). On all graphs, the number of rounds is
+reduced by 3–200×. As a result, the scheduling and synchronization
+overhead is greatly reduced.
+Choice of Parameter 𝜏. To understand the impact of 𝜏 values on
+performance, we record the speedup over our plain version (i.e.,
+no VGC) with different values of 𝜏 = 1 to 217 , and under different number of processors from 96h (192 hyperthreads) to 4. For
+page limitation, we show six graphs in Fig. 11 (at least one in each
+graph type). All the other graphs showed similar trends as one of
+the six examples. We start from the curves of 192 hyperthreads
+11
+
+0.3
+
+4
+
+0.2
+
+2
+
+0.1
+0.0
+
+GL5
+
+10.0
+7.5
+5.0
+2.5
+0.0
+
+0
+
+GL10
+
+10.0
+7.5
+5.0
+2.5
+0.0
+
+GL15
+
+HL14
+60
+40
+20
+0
+
+GL20
+
+15
+
+10.0
+7.5
+5.0
+2.5
+0.0
+
+GBB
+Pl S
+VGaCin
+Fina1
+l
+GBB
+Pl S
+VGaCin
+Fina1
+l
+
+CW
+
+40
+30
+20
+10
+0
+
+5
+
+5
+
+0
+
+0
+
+3
+
+200
+
+2
+
+100
+
+1
+
+0
+
+HH5
+
+4
+
+300
+
+COS5
+
+0
+
+SQR
+
+Other
+CH5
+
+8
+6
+4
+2
+0
+
+REC
+
+4
+
+10.0
+7.5
+5.0
+2.5
+0.0
+
+10
+
+10
+
+HL12
+
+Labeling
+
+2
+1
+
+SQR'
+
+4
+
+3
+2
+
+2
+
+1
+0
+
+GL2
+
+3
+
+0
+
+0
+
+REC'
+
+1.00
+0.75
+0.50
+0.25
+0.00
+
+GBB
+Pl S
+VGaCin
+Fina1
+l
+
+SD
+
+Hash Table Resizing
+
+GBB
+Pl S
+VGaCin
+Fina1
+l
+GBB
+Pl S
+VGaCin
+Fina1
+l
+
+0.100
+0.075
+0.050
+0.025
+0.000
+
+TW
+
+0.4
+
+Multi-search
+
+GBB
+Pl S
+VGaCin
+Fina1
+l
+GBB
+Pl S
+VGaCin
+Fina1
+l
+
+LJ
+
+First SCC
+
+GBB
+Pl S
+VGaCin
+Fina1
+l
+GBB
+Pl S
+VGaCin
+Fina1
+l
+
+Trimming
+
+Figure 9: SCC breakdown time (in seconds). 𝑦-axis is the running time in seconds. All settings are the same as Tab. 2. “Plain”= our implemen-
+
+tation with hash bags but not local search. “VGC1”= adding local search to the single-reachability search. “Final”= our final implementation
+with local search enabled on both single- and multi-reachability searches. The numbers on the top show the speedup of our implementations
+over GBBS (the first bar).
+
+HH5 avg=16
+
+CH5 avg=17
+
+4000
+3000
+2000
+1000
+0
+
+GL2 avg=202
+
+4
+8
+12
+16
+
+4000
+3000
+2000
+1000
+0
+
+0.96
+
+0
+20
+40
+60
+80
+
+0
+80
+160
+240
+
+0
+20
+40
+60
+
+1200
+900
+600
+300
+0
+
+0
+80
+160
+240
+
+HL12 avg=19
+
+4500
+3000
+1500
+0
+
+0.96
+
+HL14 avg=7
+
+0
+25
+50
+75
+100
+
+800
+600
+400
+200
+0
+
+0
+40
+80
+120
+160
+
+CW avg=20
+600
+450
+300
+150
+0
+
+0
+60
+120
+180
+240
+
+SD avg=14
+
+0
+25
+50
+75
+100
+
+240
+180
+120
+60
+0
+
+0
+150
+300
+450
+600
+
+TW avg=4
+
+0
+6
+12
+18
+24
+
+60
+45
+30
+15
+0
+
+2
+4
+6
+8
+
+LJ avg=3
+
+2
+4
+6
+
+# rounds without VGC
+
+1.0
+12
+0.88
+4
+0.6
+
+1.04
+
+1.00
+
+1.04
+
+# rounds with VGC
+
+1.00
+
+0
+150
+300
+450
+
+0
+150
+300
+450
+
+0
+60
+120
+180
+240
+
+GL10 avg=9 GL15 avg=7 GL20 avg=5 COS5 avg=14 SQR avg=35 REC avg=46 SQR' avg=26 REC' avg=21
+0.4 GL5 avg=38
+6000
+10000
+12000
+3200
+1000
+40
+4000
+45
+3000
+4500
+7500
+9000
+2400
+750
+30
+3000
+30
+2000
+0.2
+3000
+5000
+6000
+1600
+500
+2000
+20
+1000
+15
+1500
+2500
+3000
+800
+250
+1000
+10
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0.0
+0.0
+0.2
+0.4
+0.6
+0.8
+1.0
+
+Figure 10: Number of rounds with and without local search for each batch. All settings are the same as Tab. 2. Each data point (𝑥, 𝑦) means that in
+one reachability search, 𝑦 rounds are needed using local search, and 𝑥 rounds are needed without local search. The number “avg” for each graph is the average
+number of 𝑘 = 𝑦/𝑥 for all data points, which means, on average, using local search reduces the number of rounds needed by a factor of 𝑘.
+
+running time/no VGC
+
+TW
+
+192
+
+96
+2
+
+1
+
+48
+
+24
+1.0
+
+0
+1.0
+
+GL5
+
+0.0
+1.0
+
+COS5
+
+21
+
+28
+
+216
+
+0.0
+
+4
+
+we set 𝜏 = 29 as it gives the best overall performance across all
+graphs. Using 𝜏 = 29 , SD is the only graph that has worse performance than 𝜏 = 1. We note that SD still benefits from VGC with
+𝜏 ≤ 28 . Note that using larger 𝜏 suppresses parallelism, and for
+dense graphs with sufficient parallelism, a smaller 𝜏 may perform
+better. Although we choose the best parameter by using experiments on 96h, we also test how different numbers of processors 𝑃
+affect the choices of 𝜏. Interestingly, the trends are usually similar
+regardless of the number of threads used. With a smaller value of
+𝑃, the performance is less sensitive to the 𝜏 value. This is because
+𝜏 trades off between scheduling overhead and load balancing, and
+both affect the performance more when 𝑃 is large.
+We believe that an interesting future work is to set 𝜏 dynamically
+to achieve the best benefit from VGC, possibly based on the sparseness of the graph and the potential parallelism, e.g., the edge-vertex
+ratio 𝑚/𝑛, the number of processors 𝑃, or the frontier size.
+
+SQR'
+
+0.5
+
+0.5
+
+0.5
+
+CW
+
+0.5
+
+1
+
+0
+1.0
+
+0.0
+
+SD
+
+21
+
+28
+
+216
+
+0.0
+
+21
+
+28
+
+216
+
+Figure 11: Relative running time to 𝜏 = 1 on six graphs with 𝜏 range
+from 20 to 217 , 4 to 192 hyperthreads (96h). LJ has similar trends as TW.
+HL12 and HL14 show similar trends as CW. All 𝑘-NN and lattice graphs
+show similar trends as GL5, COS5 and SQR’.
+
+on different graphs. On all graphs except for LJ, TW and SD, we
+observe improvement as long as VGC is used (compared to plain
+BFS where 𝜏 = 1) for any 1 < 𝜏 ≤ 216 . Overall, the performance is
+not sensitive (and is always better than 𝜏 = 1) in a large parameter
+space 26 ≤ 𝜏 ≤ 212 on almost all graphs. Based on the results,
+
+6.4
+
+Experiments on Connectivity and LE-Lists
+
+Experiments on Connectivity. We implement the LDD-UF-JTB
+algorithm for graph connectivity in ConnectIt using our parallel
+12
+
+LE-Lists
+Ours Parlay Spd.
+
+New
+Graphs
+
+Social
+
+OK
+LJ
+TW
+FT
+
+0.010
+0.013
+0.093
+0.197
+
+0.008
+0.012
+0.099
+0.150
+
+0.76
+0.91
+1.05
+0.76
+
+0.577
+0.502
+4.88
+24.9
+
+2.63
+3.91
+3.41
+1.20
+
+OK [110]
+com-orkut
+𝑛 = 3𝑀
+𝑚 = 234𝑀
+
+Web
+
+SD
+CW
+HL14
+HL12
+
+0.222
+2.425
+3.694
+8.446
+
+0.271
+2.844
+4.463
+10.39
+
+1.22
+1.17
+1.21
+1.23
+
+13.9
+49.3 3.56
+out of memory
+out of memory
+out of memory
+
+FT [110]
+Friendster
+𝑛 = 65𝑀
+𝑚 = 3.6𝐵
+
+HH5
+CH5
+GL2
+GL5
+GL10
+GL15
+GL20
+COS5
+
+0.017
+0.035
+0.045
+0.074
+0.123
+0.147
+0.166
+1.310
+
+0.041
+0.026
+0.132
+0.177
+0.210
+0.236
+0.242
+2.697
+
+2.40
+0.76
+2.97
+2.40
+1.71
+1.61
+1.46
+2.06
+
+2.06
+5.38
+2.89
+12.4
+11.0
+11.7
+11.9
+132
+
+15.5
+54.2
+14.1
+68.1
+56.6
+59.2
+63.7
+329
+
+USA [1]
+RoadUSA
+𝑛 = 24𝑀
+𝑚 = 58𝑀
+GE [1]
+Germany
+𝑛 = 12𝑀
+𝑚 = 32𝑀
+
+Road
+
+USA
+GE
+
+0.045
+0.040
+
+0.092
+0.129
+
+2.07
+3.23
+
+14.9
+5.98
+
+101 6.74
+32.4 5.42
+
+Lattice
+
+SQR
+REC
+SQR’
+REC’
+
+0.161
+0.023
+0.134
+0.021
+
+0.290
+0.037
+0.275
+0.043
+
+1.80
+1.66
+2.06
+2.08
+
+45.4
+7.28
+46.8
+8.57
+
+184
+520?
+202?
+648?
+
+KNN
+
+Connectivity
+Ours DHS’21 Spd.
+
+1.52
+1.96
+16.6
+30.0
+
+7.55
+10.1
+4.87
+5.49
+5.15
+5.06
+5.37
+2.49
+
+state-of-the-art and released in 2022. Note that, unlike CC and SCC,
+here we can only use parallel hash bags for LE-lists but not VGC
+since the BFS traverse orders need to be preserved.
+On low-diameter graphs, our LE-list algorithm is 1.20–3.91×
+faster (2.73× on average) than ParlayLib’s implementation. On
+large-diameter graphs, the speedup increases to 2.49–10.1× (5.36×
+on average). We believe this is because hash bags maintain frontier
+more efficiently, and processing large-diameter graphs involve more
+rounds (frontiers). Both our and ParlayLib’s implementation are
+unable to compute the LE-lists of the three largest graphs CW, HL14,
+and HL12, because the output size of LE-lists is 𝑂 (𝑛 log 𝑛), which
+is larger than the memory of our machine. We also report the size
+of the LE-lists on each graph, and compare it to both ParlayLib’s
+implementation and Cohen’s sequential algorithm [27]. ParlayLib’s
+implementation does not report the correct numbers on REC, SQR’,
+and REC’, and this is probably why they have poor performance
+on these graphs.
+Overall, our algorithm is faster than ParlayLib’s implementation
+(the state-of-the-art implementation) on all graphs. On average,
+our version is 4.34× faster than ParlayLib’s implementation on
+graphs with correct answers. We note that it remains an interesting
+question on how to apply a similar local search to LE-lists. We plan
+to study it in future work.
+
+4.05
+71.4
+4.32
+75.7
+
+Table 3: Running time (in seconds) of connectivity and LE-Lists implementations. DHS’21=the LDD-UF-JTB connectivity implementation
+in ConnectIt [36]. Parlay=the LE-lists implementation in ParlayLib [14].
+Spd.=Baseline_time / our_time. “?”=results different from our parallel and
+sequential version, and the running time may not be accurate.
+
+7
+
+Related Work
+
+Parallel SCC has been widely studied. Prior to the BGSS algorithm based on (multi-)reachability searches, there had been other
+approaches. The first type of approach is based on parallelizing
+DFS [21, 22, 69]. However, since DFS is inherently sequential [83]
+and hard to be parallelized, these algorithms are shown to be slower
+than existing reachability-based solutions [57]. Another widelyadopted approach is based on single-reachability search (aka. the
+forward-backward search, or Fw-Bw) [30, 43, 50, 57, 73, 97, 108].
+However, Fw-Bw does not provide sufficient parallelism to find all
+SCCs. Hence, these systems only use Fw-Bw to find large SCCs and
+use other techniques such as coloring and trimming to find small
+SCCs, which do not have good theoretical guarantees. For this type
+of approach, we compared the two newest ones with the released
+code: Multi-step [97] and iSpan [57]. They perform well on graphs
+with a small diameter and a large SCC 1 (SCC 1 is the largest SCC in
+the graph), but do not work well on graphs with a large diameter
+or a small SCC 1 (e.g., the 𝑘-NN and lattice graphs in our tests).
+Parallel SCC has also been studied on other platforms such as
+GPUs [10, 33, 51, 52, 66, 68, 98, 107] and distributed systems [11,
+72, 73, 87, 109]. Comparing the wall-clock running times reported
+in the papers, it seems that shared-memory algorithms are much
+faster, but we note that different platforms have their own use cases.
+Related Work of Parallel Hash Bag. There exist other variants of
+hash tables designed for parallel algorithms [38, 48, 65]. The parallel
+bag [65] supports similar interfaces as our hash bag, but uses a very
+different design. Parallel bags are organized using pointers, causing
+additional cache misses in practice. Our hash bag uses flat arrays
+and is practical and I/O-friendly. The 𝑘-level hash table designed
+for NVRAMs [48] requires allocating memory when resizing, while
+one of the goals of hash bags is to avoid explicit resizing. Our work
+is also the first to formalize the interface of maintaining frontiers in
+
+hash bags (Sec. 3.3) to maintain the frontiers and the local search
+optimization (Sec. 3.1). Both optimizations are applied to the sparse
+rounds in LDD. In Tab. 3, we compare our algorithm to the same
+algorithm in ConnectIt.
+On social networks with low diameters, our algorithm is slightly
+slower than ConnectIt, but is generally comparable. This is because most of the vertices are visited in the dense mode, which is
+implemented similarly in both algorithms. The slowdown in our
+algorithm on social networks seems to be that VGC brings more
+work to the first several sparse rounds, which reduces the benefit of
+using dense modes. For other graph instances where dense modes
+do not significantly dominate the cost, our algorithm generally performs well. On web graphs, our code is 1.21× faster than ConnectIt
+on average. On the large-diameter graphs, our implementation is
+1.98× faster than ConnectIt on average. Since parallel hash bags and
+VGC only apply to sparse rounds, the speedup of ours compared to
+ConnectIt has a correlation with the diameter of the graph. Note
+that LDD is guaranteed to finish in 𝑂 (log 𝑛) rounds, as opposed to
+𝑂 (𝐷) for diameter 𝐷 in SCC. Therefore, the improvement of our
+implementation over ConnectIt is not as significant as the improvement of our SCC over existing work. However, our implementation
+still outperforms ConnectIt on 16 instances out of 20, and is 1.67×
+faster than ConnectIt on average. We believe that the experiments
+on connectivity provide additional evidence to show that our hash
+bags and VGC are general and practical.
+Experiments on LE-lists. We compare our LE-lists implementation with ParlayLib [14] in Tab. 3. Their implementation is the
+13
+
+parallel reachability search and proposes a practical data structure
+(the hash bag) with theoretical analysis.
+Parallel BFS. There exist other implementations of parallel BFS,
+and some of them also consider reducing synchronization costs [13,
+79, 111]. However, these implementations only consider a single
+source, and we are unaware of how to directly apply to the multireachability search needed in SCC.
+
+8
+
+performed before the number of samples reaches 𝜎. This is equivalent to the number of coins we toss before we see 𝜎 heads (sampled insertions). This can be analyzed using the Chernoff bound—
+assuming the 𝜎 = Θ(log 𝑛) and 𝑘 = Ω(𝜎/𝜖 2 ), the number of tossed
+coins 𝑒 satisfies (1 − 𝜖)𝛼𝑘 ≤ 𝑒 ≤ (1 + 𝜖)𝛼𝑘 for 0 < 𝜖 < 1 whp. If
+we set 𝛼 = 𝜖 = 0.5, the load factor for this chunk when resizing is
+between 1/4 and 3/4 whp.
+Now consider the parallel case, where 𝑃 processors execute insertions asynchronously. In addition, when an insertion sampled, it
+first increments the counter using compare_and_swap, which can
+be delayed by other processors. Based on the assumption given in
+Sec. 3.3, between two consecutive compare_and_swaps, each of the
+other processors can only execute a constant number of instructions,
+so a total of 𝑂 (𝑃) insertions can be done. Since compare_and_swap
+is atomic, one processor has to win and proceed, so an unsuccessful
+compare_and_swap can happen for at most 𝜎 times before resizing.
+As compared to the sequential setting, 𝑂 (𝑃𝜎) more elements can
+be inserted. When 𝑘 = Ω(𝑃𝜎 + 𝜎/𝜖 2 ), each chunk of the hash bag
+will not be overfull whp.
+We now show that for 𝑠 insertions, all elements in the hash bag
+will be in the first 𝑂 (𝑠 + 𝜆) positions in the bag array whp, which
+bounds the work and span for listing and packing. As discussed
+above, the “wasted” space due to parallelism is upper bounded by
+𝑂 (𝑃𝜎), which is asymptotically bounded even for the first chunk
+with 𝜆 = Ω(𝜎 (𝑃 + log 𝑛)). Since the load factor for each chunk is a
+constant when resizing, the total size of all chunks in use is 𝑂 (𝑠 +𝜆).
+Finally, we show the costs for insertions. An insertion to a hash
+table with linear-probing and a constant load factor uses 𝑂 (1)
+expected work and 𝑂 (log 𝑛) span whp. For updating the sample
+count, there can be at most 𝑂 (log 𝑠 log 𝑛) samples whp, which is
+also the longest possible dependence chain in the algorithm. If we
+assume 𝜆 = Ω(𝜎 (𝑃 + log 𝑛)), for each insertion, the probability of it
+to be picked as a first chunk sample is 𝑂 (1/(𝑃 +log 𝑛)) = 𝑂 (1/log 𝑛),
+and in the worst case we need to wait for 𝜎 = Θ(log 𝑛) retries until
+the counter is incremented. Hence, the amortized work is 𝑂 (1).
+Then the sample rate halves for each of the next chunks, so taking
+the sum of a geometric series, the total amortized work to maintain
+counters is 𝑂 (1) for an insertion.
+□
+
+Discussions and Future Work
+
+In this paper, we show that using faster algorithms on reachability
+queries can significantly accelerate the performance of SCC and
+related algorithms, especially for large-diameter graphs. We tested
+our SCC algorithm on large-scale graphs with up to hundreds of
+billions of edges. On average, our SCC algorithm is 6.0× faster than
+the best previous parallel implementation (GBBS), 8.1× faster than
+Multi-step, and 12.9× faster than Tarjan’s sequential algorithms.
+We believe that the two key techniques in this paper, the hash
+bag and vertical granularity control, are general and of independent
+interest. In this paper, we apply them to graph connectivity and
+LE-lists. The experimental results show that they lead to improved
+performance than prior work. We believe that they also apply to
+many other applications.
+Hash bags are used to maintain frontiers (a subset of vertices)
+in graph algorithms. Many state-of-the-art graph libraries (e.g.,
+GBBS [35] and Ligra [94]) use the abstract data type (ADT) called
+VertexSubset to maintain frontiers on many graph algorithms. Hash
+bags can be used to implement this ADT by replacing the current
+data structure (fixed-size array). With careful engineering, we believe hash bags can potentially improve the performance of these
+implementations. We leave this as future work.
+The high-level idea of VGC applies to traversal-based graph algorithms, such as BFS, algorithms for connectivity, biconnectity,
+single source shortest paths (SSSP), and some others in [34, 35, 94].
+VGC can potentially accelerate them on large-diameter graphs. Our
+specific “local-search” idea does not directly apply as is. When
+the traversing order does not matter (e,g., reachability-based algorithms), local search can be applied directly. In a recent paper, we
+apply local search to graph biconnectivity [8], which improved the
+overall performance by up to 4× on a variety of graphs. For some
+distance-based algorithms, we need additional designs on top of
+local-search, such as supporting revisiting certain vertices (e.g., in
+BFS, SSSP, LE-lists) for relaxation, or some wake-up strategies to
+find the next frontier (e.g., in 𝑘-core). We believe that this is an
+interesting research direction, and plan to explore it in the future.
+
+Guided by the theory, we set 𝜆 = 214 and 𝜎 = 50. We note that if
+the frontier size is smaller than 𝜆, this may cause 𝑂 (diam(𝐺) · 𝜆)
+work (which can be more than 𝑚) for a reachability search, since
+the work in each round is Ω(𝜆). To maintain the work bound of
+reachability searches, we want to guarantee the frontier size is
+Ω(𝜆) except for possibly the last frontier. This can be guaranteed
+by setting the local queue size (see Sec. 3.1) to be Ω(𝜆).
+
+Acknowledgement
+
+References
+
+This work is supported by NSF grants CCF-2103483, CCF-2238358,
+IIS-2227669, and UCR Regents Faculty Fellowships. We thank anonymous reviewers for the useful feedbacks.
+
+A
+
+[1] 2010.
+OpenStreetMap © OpenStreetMap contributors.
+https://www.
+openstreetmap.org/.
+[2] Umut A Acar, Vitaly Aksenov, Arthur Charguéraud, and Mike Rainey. 2019.
+Provably and practically efficient granularity control. In ACM Symposium on
+Principles and Practice of Parallel Programming (PPOPP). 214–228.
+[3] Umut A. Acar, Guy E. Blelloch, and Robert D. Blumofe. 2002. The Data Locality
+of Work Stealing. Theoretical Computer Science (TCS) 35, 3 (2002).
+[4] Rakesh Agrawal and HV Jagadish. 1990. Hybrid Transitive Closure Algorithms..
+In Proceedings of the VLDB Endowment (PVLDB). 326–334.
+[5] V Aho Alfred, E Hopcroft John, D Ullman Jeffrey, V Aho Alfred, H Bracht Glenn,
+D Hopkin Kenneth, C Stanley Julian, Brachu Jean-Pierre, Brown A Samler,
+Brown A Peter, et al. 1983. Data structures and algorithms. USA: AddisonWesley.
+
+Proof of Thm. 3.1
+
+Proof. (sketch) We first show the algorithm is correct (i.e., each
+chuck will not be full), and then analyze the cost bounds. We consider the sampling in insertions as a coin-tossing process. Let 𝑘 be
+the chunk size, and the sample rate is 𝜎/𝛼𝑘. We first consider the sequential case (𝑃 = 1). We are interested in the number of insertions
+14
+
+[34] Laxman Dhulipala, Guy E. Blelloch, and Julian Shun. 2017. Julienne: A Framework for Parallel Graph Algorithms using Work-efficient Bucketing. In ACM
+Symposium on Parallelism in Algorithms and Architectures (SPAA).
+[35] Laxman Dhulipala, Guy E Blelloch, and Julian Shun. 2021. Theoretically efficient
+parallel graph algorithms can be fast and scalable. ACM Transactions on Parallel
+Computing (TOPC) 8, 1 (2021), 1–70.
+[36] Laxman Dhulipala, Changwan Hong, and Julian Shun. 2020. ConnectIt: a
+framework for static and incremental parallel graph connectivity algorithms.
+Proceedings of the VLDB Endowment (PVLDB) 14, 4 (2020), 653–667.
+[37] Laxman Dhulipala, Jessica Shi, Tom Tseng, Guy E Blelloch, and Julian Shun.
+2020. The graph based benchmark suite (GBBS). In International Workshop on
+Graph Data Management Experiences & Systems (GRADES). 1–8.
+[38] Xiaojun Dong, Yan Gu, Yihan Sun, and Yunming Zhang. 2021. Efficient Stepping
+Algorithms and Implementations for Parallel Shortest Paths. In ACM Symposium
+on Parallelism in Algorithms and Architectures (SPAA).
+[39] Nan Du, Le Song, Manuel Gomez-Rodriguez, and Hongyuan Zha. 2013. Scalable
+influence estimation in continuous-time diffusion networks. In Advances in
+Neural Information Processing Systems (NIPS). 3147–3155.
+[40] Dheeru Dua and Casey Graf. 2017. UCI Machine Learning Repository. http:
+//archive.ics.uci.edu/ml/.
+[41] Wenfei Fan, Jianzhong Li, Shuai Ma, Hongzhi Wang, and Yinghui Wu. 2010.
+Graph homomorphism revisited for graph matching. Proceedings of the VLDB
+Endowment (PVLDB) 3, 1-2 (2010), 1161–1172.
+[42] Jeremy T. Fineman. 2018. Nearly Work-Efficient Parallel Algorithm for Digraph
+Reachability. In ACM Symposium on Theory of Computing (STOC). 457–470.
+[43] Lisa K Fleischer, Bruce Hendrickson, and Ali Pınar. 2000. On identifying strongly
+connected components in parallel. In IEEE International Parallel and Distributed
+Processing Symposium (IPDPS). Springer, 505–511.
+[44] Jordi Fonollosa, Sadique Sheik, Ramón Huerta, and Santiago Marco. 2015. Reservoir computing compensates slow response of chemosensor arrays exposed to
+fast varying gas concentrations in continuous monitoring. Sensors and Actuators
+B: Chemical 215 (2015), 618–629.
+[45] Pasi Franti, Olli Virmajoki, and Ville Hautamaki. 2006. Fast Agglomerative
+Clustering Using a k-Nearest Neighbor Graph. IEEE Transactions on Pattern
+Analysis and Machine Intelligence 28, 11 (2006), 1875–1881.
+[46] Socorro Gama-Castro, Heladia Salgado, Alberto Santos-Zavaleta, Daniela
+Ledezma-Tejeida, Luis Muñiz-Rascado, Jair Santiago García-Sotelo, Kevin
+Alquicira-Hernández, Irma Martínez-Flores, Lucia Pannier, Jaime Abraham
+Castro-Mondragón, et al. 2016. RegulonDB version 9.0: high-level integration
+of gene regulation, coexpression, motif clustering and beyond. Nucleic acids
+research 44, D1 (2016), D133–D143.
+[47] Yan Gu, Zachary Napier, and Yihan Sun. 2022. Analysis of Work-Stealing and
+Parallel Cache Complexity. In SIAM Symposium on Algorithmic Principles of
+Computer Systems (APOCS). SIAM, 46–60.
+[48] Yan Gu, Yihan Sun, and Guy E. Blelloch. 2018. Algorithmic Building Blocks for
+Asymmetric Memories. In European Symposium on Algorithms (ESA).
+[49] Ville Hautamaki, Ismo Karkkainen, and Pasi Franti. 2004. Outlier detection using
+k-nearest neighbour graph. In International Conference on Pattern Recognition,
+Vol. 3. 430–433.
+[50] Sungpack Hong, Nicole C Rodia, and Kunle Olukotun. 2013. On fast parallel
+detection of strongly connected components (SCC) in small-world graphs. In
+International Conference for High Performance Computing, Networking, Storage,
+and Analysis (SC). 1–11.
+[51] Junteng Hou, Shupeng Wang, Guangjun Wu, Ge Fu, Siyu Jia, Yong Wang, Binbin
+Li, and Lei Zhang. 2019. Parallel strongly connected components detection with
+multi-partition on gpus. In International Conference on Computational Science.
+Springer, 16–30.
+[52] Junteng Hou, Shupeng Wang, Guangjun Wu, Bingnan Ma, and Lei Zhang. 2020.
+Parallel SCC Detection Based on Reusing Warps and Coloring Partitions on
+GPUs. In International Conference on Algorithms and Architectures for Parallel
+Processing. Springer, 31–46.
+[53] Chirag Jain, Patrick Flick, Tony Pan, Oded Green, and Srinivas Aluru. 2017.
+An adaptive parallel algorithm for computing connected components. IEEE
+Transactions on Parallel and Distributed Systems 28, 9 (2017), 2428–2439.
+[54] Joseph JáJá. 1992. Introduction to Parallel Algorithms. Addison-Wesley Professional.
+[55] Arun Jambulapati, Yang P Liu, and Aaron Sidford. 2019. Parallel reachability in
+almost linear work and square root depth. In IEEE Symposium on Foundations of
+Computer Science (FOCS). IEEE, 1664–1686.
+[56] Siddhartha Jayanti, Robert E Tarjan, and Enric Boix-Adserà. 2019. Randomized
+concurrent set union and generalized wake-up. In ACM Symposium on Principles
+of Distributed Computing (PODC). 187–196.
+[57] Yuede Ji, Hang Liu, and H Howie Huang. 2018. ispan: Parallel identification of
+strongly connected components with spanning trees. In International Conference
+for High Performance Computing, Networking, Storage, and Analysis (SC). IEEE,
+731–742.
+[58] George Karypis, Eui-Hong Han, and Vipin Kumar. 1999. Chameleon: Hierarchical clustering using dynamic modeling. Computer 32, 8 (1999), 68–75.
+
+[6] Stefano Allesina, Antonio Bodini, and Cristina Bondavalli. 2005. Ecological
+subsystems via graph theory: the role of strongly connected components. Oikos
+110, 1 (2005), 164–176.
+[7] Alexandr Andoni, Zhao Song, Clifford Stein, Zhengyu Wang, and Peilin Zhong.
+2018. Parallel graph connectivity in log diameter rounds. In IEEE Symposium on
+Foundations of Computer Science (FOCS). IEEE, 674–685.
+[8] Anonymous Authors. 2023. Manuscript on Parallel Biconnectivity (we do not
+provide the information due to double-blind policy).
+[9] Lars Backstrom, Dan Huttenlocher, Jon Kleinberg, and Xiangyang Lan. 2006.
+Group formation in large social networks: membership, growth, and evolution.
+In ACM International Conference on Knowledge Discovery and Data Mining
+(SIGKDD). 44–54.
+[10] Jiří Barnat, Petr Bauch, Luboš Brim, and Milan Ceska. 2011. Computing strongly
+connected components in parallel on CUDA. In IEEE International Parallel and
+Distributed Processing Symposium (IPDPS). 544–555.
+[11] Jiří Barnat, Jakub Chaloupka, and Jaco Van De Pol. 2011. Distributed algorithms
+for SCC decomposition. Journal of Logic and Computation 21, 1 (2011), 23–44.
+[12] Scott Beamer, Krste Asanović, and David Patterson. 2012. Direction-optimizing
+breadth-first search. In International Conference for High Performance Computing,
+Networking, Storage, and Analysis (SC).
+[13] Scott Beamer, Krste Asanović, and David Patterson. 2015. The GAP benchmark
+suite. arXiv preprint arXiv:1508.03619 (2015).
+[14] Guy E. Blelloch, Daniel Anderson, and Laxman Dhulipala. 2020. ParlayLib - a
+toolkit for parallel algorithms on shared-memory multicore machines. In ACM
+Symposium on Parallelism in Algorithms and Architectures (SPAA). 507–509.
+[15] Guy E Blelloch, Laxman Dhulipala, Phillip B Gibbons, Yan Gu, Charles McGuffey,
+and Julian Shun. 2021. The read-only semi-external model. In SIAM Symposium
+on Algorithmic Principles of Computer Systems (APOCS). SIAM, 70–84.
+[16] Guy E. Blelloch, Jeremy T. Fineman, Phillip B. Gibbons, and Julian Shun. 2012.
+Internally deterministic parallel algorithms can be fast. In ACM Symposium on
+Principles and Practice of Parallel Programming (PPOPP).
+[17] Guy E. Blelloch, Jeremy T. Fineman, Yan Gu, and Yihan Sun. 2020. Optimal parallel algorithms in the binary-forking model. In ACM Symposium on Parallelism
+in Algorithms and Architectures (SPAA).
+[18] Guy E. Blelloch, Yan Gu, Julian Shun, and Yihan Sun. 2020. Parallelism in
+Randomized Incremental Algorithms. J. ACM (2020).
+[19] Guy E. Blelloch, Yan Gu, and Yihan Sun. 2017. Efficient Construction of Probabilistic Tree Embeddings. In Intl. Colloq. on Automata, Languages and Programming (ICALP).
+[20] Guy E. Blelloch, Yan Gu, Yihan Sun, and Kanat Tangwongsan. 2016. Parallel
+Shortest Paths Using Radius Stepping. In ACM Symposium on Parallelism in
+Algorithms and Architectures (SPAA).
+[21] Vincent Bloemen. 2015. On-the-fly parallel decomposition of strongly connected
+components. Master’s thesis. University of Twente.
+[22] Vincent Bloemen, Alfons Laarman, and Jaco van de Pol. 2016. Multi-core onthe-fly SCC decomposition. In ACM Symposium on Principles and Practice of
+Parallel Programming (PPOPP). 1–12.
+[23] Nairen Cao, Jeremy T Fineman, and Katina Russell. 2020. Improved work span
+tradeoff for single source reachability and approximate shortest paths. In ACM
+Symposium on Parallelism in Algorithms and Architectures (SPAA). 511–513.
+[24] Edgar Chávez and Eric Sadit Tellez. 2010. Navigating K-Nearest Neighbor
+Graphs to Solve Nearest Neighbor Searches. In Advances in Pattern Recognition.
+270–280.
+[25] Wei Chen, Yajun Wang, and Siyu Yang. 2009. Efficient influence maximization
+in social networks. In ACM International Conference on Knowledge Discovery
+and Data Mining (SIGKDD). 199–208.
+[26] James Cheng, Silu Huang, Huanhuan Wu, and Ada Wai-Chee Fu. 2013. Tf-label:
+a topological-folding labeling scheme for reachability querying in a large graph.
+In ACM SIGMOD International Conference on Management of Data (SIGMOD).
+193–204.
+[27] Edith Cohen. 1997. Size-estimation framework with applications to transitive
+closure and reachability. J. Comput. System Sci. 55, 3 (1997), 441–453.
+[28] Edith Cohen. 1997. Using selective path-doubling for parallel shortest-path
+computations. Journal of Algorithms 22, 1 (1997), 30–56.
+[29] Edith Cohen and Haim Kaplan. 2004. Efficient estimation algorithms for neighborhood variance and other moments. In ACM-SIAM Symposium on Discrete
+Algorithms (SODA). 157–166.
+[30] Don Coppersmith, Lisa Fleischer, Bruce Hendrickson, and Ali Pinar. 2003. A
+divide-and-conquer algorithm for identifying strongly connected components. Technical Report. IBM Research.
+[31] Thomas H. Cormen, Charles E. Leiserson, Ronald L. Rivest, and Clifford Stein.
+2009. Introduction to Algorithms (3rd edition). MIT Press.
+[32] Aurelio WT De Noronha, André A Moreira, André P Vieira, Hans J Herrmann,
+José S Andrade Jr, and Humberto A Carmona. 2018. Percolation on an isotropically directed lattice. Physical Review E 98, 6 (2018), 062116.
+[33] Shrinivas Devshatwar, Madhur Amilkanthwar, and Rupesh Nasre. 2016. GPU
+centric extensions for parallel strongly connected components computation. In
+Workshop on General Purpose Processing using Graphics Processing Unit. 2–11.
+15
+
+[85] Radu Rugina and Martin Rinard. 2000. Symbolic bounds analysis of pointers,
+array indices, and accessed memory regions. ACM Sigplan Notices 35, 5 (2000),
+182–195.
+[86] Dimitris Sacharidis, Stavros Papadopoulos, and Dimitris Papadias. 2009. Topologically sorted skylines for partially ordered domains. In IEEE International
+Conference on Data Engineering (ICDE). IEEE, 1072–1083.
+[87] Semih Salihoglu and Jennifer Widom. 2014. Optimizing Graph Algorithms on
+Pregel-like Systems. Proceedings of the VLDB Endowment (PVLDB) 7, 7 (2014),
+577–588.
+[88] Warren Schudy. 2008. Finding strongly connected components in parallel using
+𝑂 (log2 𝑛) reachability queries. In ACM Symposium on Parallelism in Algorithms
+and Architectures (SPAA). 146–151.
+[89] Thomas B. Sebastian and Benjamin B. Kimia. 2002. Metric-Based Shape Retrieval
+in Large Databases. In International Conference on Pattern Recognition (ICPR).
+[90] Ankush Sharma and Amit Sharma. 2017. KNN-DBSCAN: Using k-nearest
+neighbor information for parameter-free density based clustering. In 2017 International Conference on Intelligent Computing, Instrumentation and Control
+Technologies (ICICICT). IEEE, 787–792.
+[91] Mihir Shekhar, Lini Thomas, and Kamalakar Karlapalem. 2018. High Dimensional Clustering: A Strongly Connected Component Clustering Solution (SCCC). In 2018 IEEE International Conference on Data Mining Workshops
+(ICDMW). IEEE, 1104–1111.
+[92] Hanmao Shi and Thomas H. Spencer. 1999. Time-Work Tradeoffs of the SingleSource Shortest Paths Problem. Journal of Algorithms 30, 1 (1999), 19–32.
+[93] Yossi Shiloach and Uzi Vishkin. 1982. An 𝑂 (log 𝑛) Parallel Connectivity
+Algorithm. J. Algorithms 3, 1 (1982), 57–67. https://doi.org/10.1016/01966774(82)90008-6
+[94] Julian Shun and Guy E. Blelloch. 2013. Ligra: A Lightweight Graph Processing
+Framework for Shared Memory. In ACM Symposium on Principles and Practice
+of Parallel Programming (PPOPP).
+[95] Julian Shun and Guy E Blelloch. 2014. Phase-concurrent hash tables for determinism. In ACM Symposium on Parallelism in Algorithms and Architectures
+(SPAA). 96–107.
+[96] Julian Shun, Laxman Dhulipala, and Guy Blelloch. 2014. A Simple and Practical Linear-work Parallel Algorithm for Connectivity. In ACM Symposium on
+Parallelism in Algorithms and Architectures (SPAA).
+[97] George M Slota, Sivasankaran Rajamanickam, and Kamesh Madduri. 2014. BFS
+and coloring-based parallel algorithms for strongly connected components
+and related problems. In IEEE International Parallel and Distributed Processing
+Symposium (IPDPS). IEEE, 550–559.
+[98] Miroslav Stuhl. 2013. Computing Strongly Connected Components with CUDA.
+Master’s thesis, Masaryk University (2013).
+[99] Michael Sutton, Tal Ben-Nun, and Amnon Barak. 2018. Optimizing parallel
+graph connectivity computation via subgraph sampling. In IEEE International
+Parallel and Distributed Processing Symposium (IPDPS). IEEE, 12–21.
+[100] Robert Tarjan. 1972. Depth-first search and linear graph algorithms. SIAM J. on
+Computing 1, 2 (1972), 146–160.
+[101] Joshua B. Tenenbaum, Vin de Silva, and John C. Langford. 2000. A Global
+Geometric Framework for Nonlinear Dimensionality Reduction. Science 290,
+5500 (2000), 2319–2323.
+[102] Daniel Tomkins, Timmie Smith, Nancy M Amato, and Lawrence Rauchwerger.
+2014. SCCMulti: an improved parallel strongly connected components algorithm.
+ACM Symposium on Principles and Practice of Parallel Programming (PPOPP) 49,
+8 (2014), 393–394.
+[103] Silke Trißl and Ulf Leser. 2007. Fast and practical indexing and querying of very
+large graphs. In ACM SIGMOD International Conference on Management of Data
+(SIGMOD). 845–856.
+[104] Jeffrey D Ullman and Mihalis Yannakakis. 1991. High-probability parallel
+transitive-closure algorithms. SIAM J. Comput. 20, 1 (1991), 100–125.
+[105] Letong Wang, Xiaojun Dong, Yan Gu, and Yihan Sun. 2022. Parallel-StrongConnectivity. https://github.com/ucrparlay/Parallel-Strong-Connectivity.git.
+[106] Yiqiu Wang, Shangdi Yu, Laxman Dhulipala, Yan Gu, and Julian Shun. 2021.
+GeoGraph: A Framework for Graph Processing on Geometric Data. ACM SIGOPS
+Operating Systems Review 55, 1 (2021), 38–46.
+[107] Anton Wijs, Joost-Pieter Katoen, and Dragan Bošnački. 2014. GPU-based graph
+decomposition into strongly connected and maximal end components. In International Conference on Computer Aided Verification. Springer, 310–326.
+[108] Taihua Xu and Guoyin Wang. 2018. Finding strongly connected components
+of simple digraphs based on generalized rough sets theory. Knowledge-Based
+Systems 149 (2018), 88–98.
+[109] Da Yan, James Cheng, Kai Xing, Yi Lu, Wilfred Ng, and Yingyi Bu. 2014. Pregel
+algorithms for graph connectivity problems with performance guarantees. Proceedings of the VLDB Endowment (PVLDB) 7, 14 (2014), 1821–1832.
+[110] Jaewon Yang and Jure Leskovec. 2015. Defining and evaluating network communities based on ground-truth. Knowledge and Information Systems 42, 1 (2015),
+181–213.
+
+[59] Maleq Khan, Fabian Kuhn, Dahlia Malkhi, Gopal Pandurangan, and Kunal
+Talwar. 2012. Efficient distributed approximation algorithms via probabilistic
+tree embeddings. Distributed Computing 25, 3 (2012), 189–205.
+[60] Valerie King and Garry Sagert. 2002. A fully dynamic algorithm for maintaining
+the transitive closure. J. Computer and System Sciences 65, 1 (2002), 150–167.
+[61] Philip N Klein and Sairam Subramanian. 1997. A randomized parallel algorithm
+for single-source shortest paths. Journal of Algorithms 25, 2 (1997), 205–220.
+[62] Haewoon Kwak, Changhyun Lee, Hosung Park, and Sue Moon. 2010. What is
+Twitter, a social network or a news media?. In International World Wide Web
+Conference (WWW). 591–600.
+[63] YongChul Kwon, Dylan Nunley, Jeffrey P Gardner, Magdalena Balazinska, Bill
+Howe, and Sarah Loebman. 2010. Scalable clustering algorithm for N-body
+simulations in a shared-nothing cluster. In International Conference on Scientific
+and Statistical Database Management. Springer, 132–150.
+[64] Charles E. Leiserson. 2010. The Cilk++ concurrency platform. The Journal of
+Supercomputing 51, 3 (2010).
+[65] Charles E. Leiserson and Tao B. Schardl. 2010. A work-efficient parallel breadthfirst search algorithm (or how to cope with the nondeterminism of reducers). In
+ACM Symposium on Parallelism in Algorithms and Architectures (SPAA).
+[66] Guohui Li, Zhe Zhu, Zhang Cong, and Fumin Yang. 2014. Efficient decomposition
+of strongly connected components on GPUs. Journal of Systems Architecture 60,
+1 (2014), 1–10.
+[67] Lin Li, Xiang Chen, and Chengyun Song. 2022. A robust clustering method with
+noise identification based on directed K-nearest neighbor graph. Neurocomputing 508 (2022), 19–35.
+[68] Pingfan Li, Xuhao Chen, Jie Shen, Jianbin Fang, Tao Tang, and Canqun Yang.
+2017. High performance detection of strongly connected components in sparse
+graphs on GPUs. In Proceedings of the 8th International Workshop on Programming Models and Applications for Multicores and Manycores. 48–57.
+[69] Gavin Lowe. 2016. Concurrent depth-first search algorithms based on Tarjan’s
+algorithm. International Journal on Software Tools for Technology Transfer 18, 2
+(2016), 129–147.
+[70] Małgorzata Lucińska and Sławomir T. Wierzchoń. 2012. Spectral Clustering
+Based on k-Nearest Neighbor Graph. In Computer Information Systems and
+Industrial Management. 254–265.
+[71] Markus Maier, Matthias Hein, and Ulrike Von Luxburg. 2009. Optimal construction of k-nearest-neighbor graphs for identifying noisy clusters. Theoretical
+Computer Science 410, 19 (2009), 1749–1764.
+[72] Grzegorz Malewicz, Matthew H Austern, Aart JC Bik, James C Dehnert, Ilan
+Horn, Naty Leiser, and Grzegorz Czajkowski. 2010. Pregel: a system for largescale graph processing. In Proceedings of the 2010 ACM SIGMOD International
+Conference on Management of data. 135–146.
+[73] William Mclendon Iii, Bruce Hendrickson, Steven J Plimpton, and Lawrence
+Rauchwerger. 2005. Finding strongly connected components in distributed
+graphs. J. Parallel Distrib. Comput. 65, 8 (2005), 901–910.
+[74] Robert Meusel, Oliver Lehmberg, Christian Bizer, and Sebastiano Vigna.
+2014. Web Data Commons - Hyperlink Graphs. http://webdatacommons.org/
+hyperlinkgraph.
+[75] Gary L Miller, Richard Peng, and Shen Chen Xu. 2013. Parallel graph decompositions using random shifts. In ACM Symposium on Parallelism in Algorithms
+and Architectures (SPAA).
+[76] Alan Mislove, Massimiliano Marcon, Krishna P Gummadi, Peter Druschel, and
+Bobby Bhattacharjee. 2007. Measurement and analysis of online social networks.
+In ACM SIGCOMM conference on Internet measurement. 29–42.
+[77] Flaviano Morone, Ian Leifer, and Hernán A Makse. 2020. Fibration symmetries
+uncover the building blocks of biological networks. Proceedings of the National
+Academy of Sciences 117, 15 (2020), 8306–8314.
+[78] Matthieu Nadini, Laura Alessandretti, Flavio Di Giacinto, Mauro Martino,
+Luca Maria Aiello, and Andrea Baronchelli. 2021. Mapping the NFT revolution: market trends, trade networks, and visual features. Scientific reports 11,
+1 (2021), 1–11.
+[79] Donald Nguyen, Andrew Lenharth, and Keshav Pingali. 2013. A lightweight
+infrastructure for graph analytics. In Proceedings of the Twenty-Fourth ACM
+Symposium on Operating Systems Principles. 456–471.
+[80] Naoto Ohsaka, Takuya Akiba, Yuichi Yoshida, and Ken-ichi Kawarabayashi.
+2014. Fast and accurate influence maximization on large networks with pruned
+monte-carlo simulations. In AAAI Conference on Artificial Intelligence, Vol. 28.
+[81] Rodrigo Paredes and Edgar Chávez. 2005. Using the k-Nearest Neighbor Graph
+for Proximity Searching in Metric Spaces. In String Processing and Information
+Retrieval. 127–138.
+[82] Keith H Randall, Raymie Stata, Rajiv G Wickremesinghe, and Janet L Wiener.
+2002. The link database: Fast access to graphs of the web. In IEEE Data Compression Conference (DCC). IEEE, 122–131.
+[83] John H Reif. 1985. Depth-first search is inherently sequential. Inform. Process.
+Lett. 20, 5 (1985), 229–234.
+[84] Liam Roditty and Uri Zwick. 2008. Improved dynamic reachability algorithms
+for directed graphs. SIAM J. on Computing 37, 5 (2008), 1455–1471.
+16
+
+[111] Yunming Zhang, Mengjiao Yang, Riyadh Baghdadi, Shoaib Kamil, Julian Shun,
+and Saman Amarasinghe. 2018. Graphit: A high-performance graph dsl. Proceedings of the ACM on Programming Languages 2, OOPSLA (2018), 1–30.
+[112] Yu Zheng, Like Liu, Longhao Wang, and Xing Xie. 2008. Learning transportation
+mode from raw gps data for geographic applications on the web. In International
+World Wide Web Conference (WWW). 247–256.
+
+17
+
+

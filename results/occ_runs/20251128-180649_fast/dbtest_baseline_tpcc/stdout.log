@@ -1,0 +1,205 @@
+# Command: ./build/dbtest
+# Working dir: /home/azureuser/mako-eocc
+allocator::Initialize()
+  hugepgsize: 2097152
+  use MADV_WILLNEED: 1
+  mmap() region [0x7cb57be00000, 0x7cb5bc000000)
+cpu0 owns [0x7cb57be00000, 0x7cb5bbe00000)
+Database Benchmark:
+  pid: 71753
+settings:
+  num-cpus    : 2
+  num-threads : 1
+  shardIndex  : 0
+  paxos_proc_name  : 
+  nshards     : 1
+  is_micro    : 0
+  is_replicated : 0
+  var-encode  : yes
+  allocator   : jemalloc
+system properties:
+  tuple_prefetch          : no
+  btree_node_prefetch     : yes
+20251028-18:06.50-647261(us) 71753 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/1, noops_cnt:0, replay_batch:0, wait_time:1s
+
+20251028-18:06.51-647408(us) 71753 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/1, noops_cnt:0, replay_batch:0, wait_time:2s
+
+20251028-18:06.52-647566(us) 71753 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/1, noops_cnt:0, replay_batch:0, wait_time:3s
+
+20251028-18:06.53-647771(us) 71753 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/1, noops_cnt:0, replay_batch:0, wait_time:4s
+
+20251028-18:06.54-647927(us) 71753 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/1, noops_cnt:0, replay_batch:0, wait_time:5s
+
+20251028-18:06.55-648055(us) 71753 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/1, noops_cnt:0, replay_batch:0, wait_time:6s
+
+20251028-18:06.56-648196(us) 71753 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/1, noops_cnt:0, replay_batch:0, wait_time:7s
+
+20251028-18:06.57-648370(us) 71753 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/1, noops_cnt:0, replay_batch:0, wait_time:8s
+
+20251028-18:06.58-648506(us) 71753 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/1, noops_cnt:0, replay_batch:0, wait_time:9s
+
+20251028-18:06.59-648668(us) 71753 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/1, noops_cnt:0, replay_batch:0, wait_time:10s
+
+20251028-18:07.00-648787(us) 71753 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/1, noops_cnt:0, replay_batch:0, wait_time:11s
+
+20251028-18:07.01-648897(us) 71753 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/1, noops_cnt:0, replay_batch:0, wait_time:12s
+
+20251028-18:07.02-649023(us) 71753 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/1, noops_cnt:0, replay_batch:0, wait_time:13s
+
+20251028-18:07.03-649146(us) 71753 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/1, noops_cnt:0, replay_batch:0, wait_time:14s
+
+20251028-18:07.04-649270(us) 71753 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/1, noops_cnt:0, replay_batch:0, wait_time:15s
+
+20251028-18:07.05-649392(us) 71753 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/1, noops_cnt:0, replay_batch:0, wait_time:16s
+
+20251028-18:07.06-649514(us) 71753 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/1, noops_cnt:0, replay_batch:0, wait_time:17s
+
+20251028-18:07.07-649644(us) 71753 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/1, noops_cnt:0, replay_batch:0, wait_time:18s
+
+20251028-18:07.08-649770(us) 71753 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/1, noops_cnt:0, replay_batch:0, wait_time:19s
+
+20251028-18:07.09-649896(us) 71753 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/1, noops_cnt:0, replay_batch:0, wait_time:20s
+
+20251028-18:07.10-650011(us) 71753 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/1, noops_cnt:0, replay_batch:0, wait_time:21s
+
+20251028-18:07.11-650142(us) 71753 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/1, noops_cnt:0, replay_batch:0, wait_time:22s
+
+20251028-18:07.12-650270(us) 71753 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/1, noops_cnt:0, replay_batch:0, wait_time:23s
+
+20251028-18:07.13-650390(us) 71753 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/1, noops_cnt:0, replay_batch:0, wait_time:24s
+
+20251028-18:07.14-650569(us) 71753 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/1, noops_cnt:0, replay_batch:0, wait_time:25s
+
+20251028-18:07.15-650706(us) 71753 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/1, noops_cnt:0, replay_batch:0, wait_time:26s
+
+20251028-18:07.16-650861(us) 71753 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/1, noops_cnt:0, replay_batch:0, wait_time:27s
+
+20251028-18:07.17-651030(us) 71753 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/1, noops_cnt:0, replay_batch:0, wait_time:28s
+
+20251028-18:07.18-651154(us) 71753 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/1, noops_cnt:0, replay_batch:0, wait_time:29s
+
+20251028-18:07.19-651270(us) 71753 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/1, noops_cnt:0, replay_batch:0, wait_time:30s
+
+20251028-18:07.20-651407(us) 71753 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/1, noops_cnt:0, replay_batch:0, wait_time:31s
+
+20251028-18:07.21-651546(us) 71753 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/1, noops_cnt:0, replay_batch:0, wait_time:32s
+
+20251028-18:07.22-653636(us) 71753 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/1, noops_cnt:0, replay_batch:0, wait_time:33s
+
+20251028-18:07.23-653751(us) 71753 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/1, noops_cnt:0, replay_batch:0, wait_time:34s
+
+20251028-18:07.24-653871(us) 71753 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/1, noops_cnt:0, replay_batch:0, wait_time:35s
+
+20251028-18:07.25-653989(us) 71753 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/1, noops_cnt:0, replay_batch:0, wait_time:36s
+
+20251028-18:07.26-654098(us) 71753 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/1, noops_cnt:0, replay_batch:0, wait_time:37s
+
+20251028-18:07.27-654226(us) 71753 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/1, noops_cnt:0, replay_batch:0, wait_time:38s
+
+20251028-18:07.28-654349(us) 71753 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/1, noops_cnt:0, replay_batch:0, wait_time:39s
+
+20251028-18:07.29-654474(us) 71753 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/1, noops_cnt:0, replay_batch:0, wait_time:40s
+
+20251028-18:07.30-654598(us) 71753 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/1, noops_cnt:0, replay_batch:0, wait_time:41s
+
+20251028-18:07.31-654723(us) 71753 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/1, noops_cnt:0, replay_batch:0, wait_time:42s
+
+20251028-18:07.32-654959(us) 71753 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/1, noops_cnt:0, replay_batch:0, wait_time:43s
+
+20251028-18:07.33-655075(us) 71753 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/1, noops_cnt:0, replay_batch:0, wait_time:44s
+
+20251028-18:07.34-655185(us) 71753 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/1, noops_cnt:0, replay_batch:0, wait_time:45s
+
+20251028-18:07.35-655303(us) 71753 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/1, noops_cnt:0, replay_batch:0, wait_time:46s
+
+20251028-18:07.36-655415(us) 71753 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/1, noops_cnt:0, replay_batch:0, wait_time:47s
+
+20251028-18:07.37-655528(us) 71753 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/1, noops_cnt:0, replay_batch:0, wait_time:48s
+
+20251028-18:07.38-655647(us) 71753 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/1, noops_cnt:0, replay_batch:0, wait_time:49s
+
+20251028-18:07.39-655762(us) 71753 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/1, noops_cnt:0, replay_batch:0, wait_time:50s
+
+20251028-18:07.40-655875(us) 71753 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/1, noops_cnt:0, replay_batch:0, wait_time:51s
+
+20251028-18:07.41-655991(us) 71753 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/1, noops_cnt:0, replay_batch:0, wait_time:52s
+
+20251028-18:07.42-656105(us) 71753 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/1, noops_cnt:0, replay_batch:0, wait_time:53s
+
+20251028-18:07.43-656232(us) 71753 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/1, noops_cnt:0, replay_batch:0, wait_time:54s
+
+20251028-18:07.44-656360(us) 71753 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/1, noops_cnt:0, replay_batch:0, wait_time:55s
+
+20251028-18:07.45-656477(us) 71753 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/1, noops_cnt:0, replay_batch:0, wait_time:56s
+
+20251028-18:07.46-656589(us) 71753 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/1, noops_cnt:0, replay_batch:0, wait_time:57s
+
+20251028-18:07.47-656705(us) 71753 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/1, noops_cnt:0, replay_batch:0, wait_time:58s
+
+20251028-18:07.48-656824(us) 71753 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/1, noops_cnt:0, replay_batch:0, wait_time:59s
+
+20251028-18:07.49-656948(us) 71753 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/1, noops_cnt:0, replay_batch:0, wait_time:60s
+
+20251028-18:07.50-657070(us) 71753 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/1, noops_cnt:0, replay_batch:0, wait_time:61s
+
+20251028-18:07.51-657197(us) 71753 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/1, noops_cnt:0, replay_batch:0, wait_time:62s
+
+20251028-18:07.52-657312(us) 71753 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/1, noops_cnt:0, replay_batch:0, wait_time:63s
+
+20251028-18:07.53-657440(us) 71753 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/1, noops_cnt:0, replay_batch:0, wait_time:64s
+
+20251028-18:07.54-657598(us) 71753 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/1, noops_cnt:0, replay_batch:0, wait_time:65s
+
+20251028-18:07.55-657738(us) 71753 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/1, noops_cnt:0, replay_batch:0, wait_time:66s
+
+20251028-18:07.56-657867(us) 71753 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/1, noops_cnt:0, replay_batch:0, wait_time:67s
+
+20251028-18:07.57-657997(us) 71753 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/1, noops_cnt:0, replay_batch:0, wait_time:68s
+
+20251028-18:07.58-658127(us) 71753 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/1, noops_cnt:0, replay_batch:0, wait_time:69s
+
+20251028-18:07.59-658236(us) 71753 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/1, noops_cnt:0, replay_batch:0, wait_time:70s
+
+20251028-18:08.00-658359(us) 71753 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/1, noops_cnt:0, replay_batch:0, wait_time:71s
+
+20251028-18:08.01-658630(us) 71753 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/1, noops_cnt:0, replay_batch:0, wait_time:72s
+
+20251028-18:08.02-658737(us) 71753 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/1, noops_cnt:0, replay_batch:0, wait_time:73s
+
+20251028-18:08.03-658860(us) 71753 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/1, noops_cnt:0, replay_batch:0, wait_time:74s
+
+20251028-18:08.04-658977(us) 71753 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/1, noops_cnt:0, replay_batch:0, wait_time:75s
+
+20251028-18:08.05-659100(us) 71753 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/1, noops_cnt:0, replay_batch:0, wait_time:76s
+
+20251028-18:08.06-659373(us) 71753 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/1, noops_cnt:0, replay_batch:0, wait_time:77s
+
+20251028-18:08.07-659510(us) 71753 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/1, noops_cnt:0, replay_batch:0, wait_time:78s
+
+20251028-18:08.08-659638(us) 71753 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/1, noops_cnt:0, replay_batch:0, wait_time:79s
+
+20251028-18:08.09-659768(us) 71753 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/1, noops_cnt:0, replay_batch:0, wait_time:80s
+
+20251028-18:08.10-659895(us) 71753 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/1, noops_cnt:0, replay_batch:0, wait_time:81s
+
+20251028-18:08.11-660025(us) 71753 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/1, noops_cnt:0, replay_batch:0, wait_time:82s
+
+20251028-18:08.12-660168(us) 71753 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/1, noops_cnt:0, replay_batch:0, wait_time:83s
+
+20251028-18:08.13-660291(us) 71753 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/1, noops_cnt:0, replay_batch:0, wait_time:84s
+
+20251028-18:08.14-660417(us) 71753 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/1, noops_cnt:0, replay_batch:0, wait_time:85s
+
+20251028-18:08.15-660565(us) 71753 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/1, noops_cnt:0, replay_batch:0, wait_time:86s
+
+20251028-18:08.16-660695(us) 71753 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/1, noops_cnt:0, replay_batch:0, wait_time:87s
+
+20251028-18:08.17-660838(us) 71753 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/1, noops_cnt:0, replay_batch:0, wait_time:88s
+
+20251028-18:08.18-660969(us) 71753 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/1, noops_cnt:0, replay_batch:0, wait_time:89s
+
+20251028-18:08.19-661149(us) 71753 * wait_for_termination (mako.hh:538):      follower is waiting for being ended: 0/1, noops_cnt:0, replay_batch:0, wait_time:90s
+
+20251028-18:08.19-661199(us) 71753 ! wait_for_termination (mako.hh:544):      Follower timed out waiting for end signal after 90 seconds - exiting gracefully
+
+# Exit code: 0

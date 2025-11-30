@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <semaphore.h>
+#include <atomic>
 #include <unistd.h>
 #include <sys/time.h>
 #include <signal.h>
@@ -34,14 +35,14 @@ ThreadPool* thrpool;
 
 Counter req_counter;
 
-bool should_stop = false;
+std::atomic<bool> should_stop{false};
 
 pthread_mutex_t g_stop_mutex;
 pthread_cond_t g_stop_cond;
 
 static void signal_handler(int sig) {
     Log_info("caught signal %d, stopping server now", sig);
-    should_stop = true;
+    should_stop.store(true, std::memory_order_relaxed);
     Pthread_mutex_lock(&g_stop_mutex);
     Pthread_cond_signal(&g_stop_cond);
     Pthread_mutex_unlock(&g_stop_mutex);
@@ -61,7 +62,7 @@ static void* stat_proc(void*) {
         last_cnt = cnt;
         sleep(1);
     }
-    should_stop = true;
+    should_stop.store(true, std::memory_order_relaxed);
     int sum = 0;
     for (size_t i=0; i<summary.size(); i++) {
         sum += summary[i];
@@ -85,7 +86,7 @@ static void* client_proc(void*) {
         rpc_id = BenchmarkService::NOP;
     }
     auto do_work = [cl, &fu_attr, rpc_id] {
-        if (!should_stop) {
+        if (!should_stop.load(std::memory_order_relaxed)) {
             auto fu_result = cl->begin_request(rpc_id, fu_attr);
             if (fu_result.is_err()) {
                 return;
@@ -112,7 +113,7 @@ static void* client_proc(void*) {
     for (int i = 0; i < outgoing_requests; i++) {
         do_work();
     }
-    while (!should_stop) {
+    while (!should_stop.load(std::memory_order_relaxed)) {
         sleep(1);
     }
 
@@ -221,7 +222,7 @@ int main(int argc, char **argv) {
         signal(SIGTERM, signal_handler);
 
         Pthread_mutex_lock(&g_stop_mutex);
-        while (should_stop == false) {
+        while (!should_stop.load(std::memory_order_relaxed)) {
             Pthread_cond_wait(&g_stop_cond, &g_stop_mutex);
         }
         Pthread_mutex_unlock(&g_stop_mutex);

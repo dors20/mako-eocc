@@ -1,0 +1,5 @@
+# Command: ./build/dbtest -b tpcc -t 2 -d 10 -P LOCALHOST_CENTER
+# Working dir: /home/azureuser/mako-eocc
+./build/dbtest: invalid option -- 'b'
+
+# Exit code: 1

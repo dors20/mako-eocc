@@ -1,0 +1,54 @@
+# Command: ./build/test_batch_validation_stress 2 500
+# Working dir: /home/azureuser/mako-eocc
+==========================================
+Batch Validation Stress Test
+==========================================
+Threads: 2
+Transactions per thread: 500
+Total transactions: 1000
+
+✗ Batch validation: DISABLED
+
+20251029-16:52.23-8130(us) 476793 * ParseOldFormat  (configuration.cc:66): Using old configuration format
+20251029-16:52.23-8732(us) 476793 * ParseOldFormat  (configuration.cc:66): Using old configuration format
+20251029-16:52.23-9064(us) 476793 * ParseOldFormat  (configuration.cc:66): Using old configuration format
+[TRANSPORT] Using default: rrr
+20251029-16:52.23-9286(us) 476793 * Initialize      (rrr_rpc_backend.cc:58): RrrRpcBackend::Initialize: poll_thread_worker_ created, is_some=1
+20251029-16:52.23-9383(us) 476793 * Initialize      (rrr_rpc_backend.cc:88): RrrRpcBackend initialized on 127.0.0.1:31000 (listening on 0.0.0.0:31000)
+20251029-16:52.23-9396(us) 476793 * FastTransport   (fasttransport.cc:116): FastTransport initialized with rrr/rpc backend on 127.0.0.1:31000
+20251029-16:52.23-9763(us) 476793 * ParseOldFormat  (configuration.cc:66): Using old configuration format
+new table is createded with name: stress_table_0, table-id: 1, on shard-server id:0
+20251029-16:52.23-10865(us) 476793 * ParseOldFormat  (configuration.cc:66): Using old configuration format
+20251029-16:52.23-11217(us) 476793 * ParseOldFormat  (configuration.cc:66): Using old configuration format
+[TRANSPORT] Using default: rrr
+20251029-16:52.23-11394(us) 476793 * Initialize      (rrr_rpc_backend.cc:58): RrrRpcBackend::Initialize: poll_thread_worker_ created, is_some=1
+20251029-16:52.23-11446(us) 476793 * Initialize      (rrr_rpc_backend.cc:88): RrrRpcBackend initialized on 127.0.0.1:31001 (listening on 0.0.0.0:31001)
+20251029-16:52.23-11477(us) 476793 * FastTransport   (fasttransport.cc:116): FastTransport initialized with rrr/rpc backend on 127.0.0.1:31001
+20251029-16:52.23-11844(us) 476793 * ParseOldFormat  (configuration.cc:66): Using old configuration format
+new table is createded with name: stress_table_1, table-id: 2, on shard-server id:0
+20251029-16:52.23-14449(us) 476793 * ParseOldFormat  (configuration.cc:66): Using old configuration format
+20251029-16:52.23-14691(us) 476793 * ParseOldFormat  (configuration.cc:66): Using old configuration format
+20251029-16:52.23-14957(us) 476793 * ParseOldFormat  (configuration.cc:66): Using old configuration format
+[TRANSPORT] Using default: rrr
+20251029-16:52.23-15123(us) 476793 * Initialize      (rrr_rpc_backend.cc:58): RrrRpcBackend::Initialize: poll_thread_worker_ created, is_some=1
+20251029-16:52.23-15147(us) 476793 * ParseOldFormat  (configuration.cc:66): Using old configuration format
+20251029-16:52.23-15169(us) 476793 * Initialize      (rrr_rpc_backend.cc:88): RrrRpcBackend initialized on 127.0.0.1:31003 (listening on 0.0.0.0:31003)
+20251029-16:52.23-15181(us) 476793 * FastTransport   (fasttransport.cc:116): FastTransport initialized with rrr/rpc backend on 127.0.0.1:31003
+[TRANSPORT] Using default: rrr
+20251029-16:52.23-15298(us) 476793 * Initialize      (rrr_rpc_backend.cc:58): RrrRpcBackend::Initialize: poll_thread_worker_ created, is_some=1
+20251029-16:52.23-15331(us) 476793 * Initialize      (rrr_rpc_backend.cc:88): RrrRpcBackend initialized on 127.0.0.1:31002 (listening on 0.0.0.0:31002)
+20251029-16:52.23-15343(us) 476793 * FastTransport   (fasttransport.cc:116): FastTransport initialized with rrr/rpc backend on 127.0.0.1:31002
+20251029-16:52.23-15570(us) 476793 * ParseOldFormat  (configuration.cc:66): Using old configuration format
+20251029-16:52.23-15754(us) 476793 * ParseOldFormat  (configuration.cc:66): Using old configuration format
+==========================================
+Results
+==========================================
+Duration: 7 ms (0.007 s)
+Committed: 932
+Aborted: 68
+Total: 1000
+Abort Rate: 6.8%
+Throughput: 133143 txns/sec
+
+
+# Exit code: 0

@@ -1,8 +1,11 @@
 #ifndef _BENCHMARK_MBTA_WRAPPER_H_
 #define _BENCHMARK_MBTA_WRAPPER_H_
 #pragma once
+#include <algorithm>
 #include <atomic>
+#include <cstdio>
 #include <cstdlib>
+#include <chrono>
 #include "abstract_db.h"
 #include "abstract_ordered_index.h"
 #include "sto/Transaction.hh"
@@ -19,11 +22,20 @@
 #include "lib/common.h"
 #include "benchmarks/rpc_setup.h"
 #include "mbta_sharded_ordered_index.hh"
+#include "sto_reorder/sto_batch_validator.h"
+#include "sto_reorder/sto_storage_reorderer.h"
+#include "sto_reorder/txn_timing_util.h"
+#include "occ_reorder/batch_validation_counters.h"
 
 // We have to do it on the coordinator instead of transaction.cc, because it only has a local copy of the readSet;
 #define GET_NODE_POINTER(val,len) reinterpret_cast<mako::Node *>((char*)(val+len-mako::BITS_OF_NODE));
 #define GET_NODE_EXTRA_POINTER(val,len) reinterpret_cast<uint32_t *>((char*)(val+len-mako::EXTRA_BITS_FOR_VALUE));
 #define MAX(a,b) ((a)>(b)?(a):(b))
+
+using TxnClock = mako::sto::TxnClock;
+using mako::sto::RecordClientExec;
+using mako::sto::RecordTxnCompletion;
+using mako::sto::ResetTxnTiming;
 
 #if defined(FAIL_NEW_VERSION)
 // control_mode==4, If a value is in the old epoch while this transaction is from the new epoch,  if not stable, we put it in the queue.
@@ -955,6 +967,8 @@ public:
     for (int i=0; i<benchConfig.getNshards(); i++) {
       availableTable_id[i] = i * mako::NUM_TABLES_PER_SHARD + 1 ;
     }
+
+    configure_batch_validation();
   }
 
   ssize_t txn_max_batch_size() const OVERRIDE { return 100; }
@@ -1065,6 +1079,10 @@ public:
                 TxnProfileHint hint = HINT_DEFAULT) {
     Sto::start_transaction();
     thr_arena = &arena;
+    if (TThread::txn) {
+      ResetTxnTiming(TThread::txn);
+      TThread::txn->timing().client_start = TxnClock::now();
+    }
     return NULL;
   }
 
@@ -1072,9 +1090,24 @@ public:
     if (!Sto::in_progress()) {
       throw abstract_db::abstract_abort_exception();
     }
+    RecordClientExec(TThread::txn);
+    bool should_abort = false;
+    if (storage_reorder_enabled_) {
+      auto decision = mako::sto::StoStorageReorderer::Instance().Process(TThread::txn);
+      should_abort = (decision == mako::sto::StoBatchValidator::Decision::kAborted);
+    } else if (batch_validation_enabled_) {
+      auto decision = mako::sto::StoBatchValidator::Instance().Process(TThread::txn);
+      should_abort = (decision == mako::sto::StoBatchValidator::Decision::kAborted);
+    }
+    if (should_abort) {
+      RecordTxnCompletion(TThread::txn, false);
+      Sto::silent_abort();
+      return false;
+    }
     if (!Sto::try_commit()) {
       throw abstract_db::abstract_abort_exception();
     }
+    RecordTxnCompletion(TThread::txn, true);
     return true;
   }
 
@@ -1082,19 +1115,36 @@ public:
     if (!Sto::in_progress()) {
       throw abstract_db::abstract_abort_exception();
     }
+    RecordClientExec(TThread::txn);
+    bool should_abort = false;
+    if (storage_reorder_enabled_) {
+      auto decision = mako::sto::StoStorageReorderer::Instance().Process(TThread::txn);
+      should_abort = (decision == mako::sto::StoBatchValidator::Decision::kAborted);
+    } else if (batch_validation_enabled_) {
+      auto decision = mako::sto::StoBatchValidator::Instance().Process(TThread::txn);
+      should_abort = (decision == mako::sto::StoBatchValidator::Decision::kAborted);
+    }
+    if (should_abort) {
+      RecordTxnCompletion(TThread::txn, false);
+      Sto::silent_abort();
+      return false;
+    }
     if (!Sto::try_commit_no_paxos()) {
       throw abstract_db::abstract_abort_exception();
     }
+    RecordTxnCompletion(TThread::txn, true);
     return true;
   }
 
   void abort_txn(void *txn) {
+    RecordTxnCompletion(TThread::txn, false);
     Sto::silent_abort();
     if (TThread::writeset_shard_bits>0||TThread::readset_shard_bits>0)
       TThread::sclient->remoteAbort();
   }
 
   void abort_txn_local(void *txn) {
+    RecordTxnCompletion(TThread::txn, false);
     Sto::silent_abort();
   }
 
@@ -1229,6 +1279,63 @@ public:
    delete idx;
  }
 
+private:
+  void configure_batch_validation() {
+    const char* env = std::getenv("MAKO_ENABLE_BATCH_VALIDATION");
+    const bool enabled =
+        env && (std::string(env) == "1" || std::string(env) == "true" || std::string(env) == "TRUE");
+    batch_validation_enabled_ = enabled;
+    if (!batch_validation_enabled_) {
+      mako::sto::StoBatchValidator::Instance().Shutdown();
+      storage_reorder_enabled_ = false;
+      mako::sto::StoStorageReorderer::Instance().Shutdown();
+      return;
+    }
+    size_t requested_batch = 32;
+    size_t max_wait_us = 50;  // keep wait short to avoid tanking throughput
+    if (const char* batch_env = std::getenv("MAKO_BATCH_VALIDATION_SIZE")) {
+      requested_batch = std::strtoul(batch_env, nullptr, 10);
+    }
+    if (const char* wait_env = std::getenv("MAKO_BATCH_VALIDATION_MAX_WAIT_US")) {
+      max_wait_us = std::strtoul(wait_env, nullptr, 10);
+    }
+    const size_t thread_budget = std::max<size_t>(
+        1, static_cast<size_t>(BenchmarkConfig::getInstance().getNthreads()));
+    const size_t effective_batch =
+        std::max<size_t>(1, std::min(requested_batch, thread_budget));
+    if (const char* trace_env = std::getenv("MAKO_BATCH_VALIDATION_TRACE")) {
+      std::fprintf(stderr,
+                   "[batch_validation] trace env detected=\"%s\" requested_batch=%zu "
+                   "effective_batch=%zu max_wait_us=%zu thread_budget=%zu\n",
+                   trace_env,
+                   requested_batch,
+                   effective_batch,
+                   max_wait_us,
+                   thread_budget);
+    }
+    mako::sto::StoBatchValidator::Instance().Configure(effective_batch, max_wait_us);
+
+    storage_reorder_enabled_ = false;
+    const char* storage_env = std::getenv("MAKO_ENABLE_STORAGE_REORDER");
+    if (storage_env && (std::string(storage_env) == "1" || std::string(storage_env) == "true" ||
+                        std::string(storage_env) == "TRUE")) {
+      size_t reorder_batch = effective_batch;
+      size_t reorder_wait_us = max_wait_us;
+      if (const char* reorder_batch_env = std::getenv("MAKO_STORAGE_REORDER_SIZE")) {
+        reorder_batch = std::strtoul(reorder_batch_env, nullptr, 10);
+      }
+      if (const char* reorder_wait_env = std::getenv("MAKO_STORAGE_REORDER_MAX_WAIT_US")) {
+        reorder_wait_us = std::strtoul(reorder_wait_env, nullptr, 10);
+      }
+      mako::sto::StoStorageReorderer::Instance().Configure(reorder_batch, reorder_wait_us);
+      storage_reorder_enabled_ = true;
+    } else {
+      mako::sto::StoStorageReorderer::Instance().Shutdown();
+    }
+  }
+
+  bool batch_validation_enabled_{false};
+  bool storage_reorder_enabled_{false};
 };
 
 __thread str_arena* mbta_wrapper::thr_arena;

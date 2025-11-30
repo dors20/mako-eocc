@@ -1,0 +1,49 @@
+{
+  "name": "batch_validation_stress_storage",
+  "description": "Batch validation + storage-stage reordering on stress harness.",
+  "mode": "fast",
+  "command_template": "./build/test_batch_validation_stress {threads} {txns_per_thread}",
+  "command": [
+    "./build/test_batch_validation_stress",
+    "2",
+    "500"
+  ],
+  "placeholders": {
+    "threads": 2,
+    "txns_per_thread": 500,
+    "batch_size": 16,
+    "batch_wait_us": 1000,
+    "storage_batch": 16,
+    "storage_wait_us": 500
+  },
+  "env": {
+    "MAKO_ENABLE_BATCH_VALIDATION": "1",
+    "MAKO_BATCH_VALIDATION_SIZE": "16",
+    "MAKO_BATCH_VALIDATION_MAX_WAIT_US": "1000",
+    "MAKO_ENABLE_STORAGE_REORDER": "1",
+    "MAKO_STORAGE_REORDER_SIZE": "16",
+    "MAKO_STORAGE_REORDER_MAX_WAIT_US": "500"
+  },
+  "workdir": "/home/azureuser/mako-eocc",
+  "timestamp": "20251130-072741",
+  "dry_run": false,
+  "metrics": {
+    "duration_seconds": 0.304,
+    "committed": 932.0,
+    "aborted": 68.0,
+    "abort_rate": 6.8,
+    "throughput_tps": 3066.0
+  },
+  "event_counters": {
+    "batch_validations": 932,
+    "batch_validated_txns": 932,
+    "avg_batch_size": 932,
+    "storage_reorder_batches": 466,
+    "storage_reorder_attempts": 466,
+    "storage_reorder_applied": 0,
+    "storage_reorder_removed_txns": 0,
+    "storage_reorder_cycles_detected": 0,
+    "storage_reorder_aborted_txns": 0,
+    "storage_reorder_avg_batch_size": 466
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "name": "baseline_tpcc",
+  "description": "Baseline OCC with sequential validation.",
+  "mode": "fast",
+  "command_template": "./build/dbtest --bench tpcc --config config/occ.yml --num-threads {threads} --runtime {runtime}",
+  "command": [
+    "./build/dbtest",
+    "--bench",
+    "tpcc",
+    "--config",
+    "config/occ.yml",
+    "--num-threads",
+    "2",
+    "--runtime",
+    "15"
+  ],
+  "placeholders": {
+    "threads": 2,
+    "runtime": 15
+  },
+  "env": {
+    "MAKO_ENABLE_BATCH_VALIDATION": "0"
+  },
+  "workdir": "/home/azureuser/mako-eocc",
+  "timestamp": "20251128-175101",
+  "dry_run": false
+}

@@ -1,0 +1,16 @@
+{
+  "name": "baseline_simple",
+  "description": "Baseline OCC with sequential validation using simpleTransaction.",
+  "mode": "fast",
+  "command_template": "./build/simpleTransaction",
+  "command": [
+    "./build/simpleTransaction"
+  ],
+  "placeholders": {},
+  "env": {
+    "MAKO_ENABLE_BATCH_VALIDATION": "0"
+  },
+  "workdir": "/home/azureuser/mako-eocc",
+  "timestamp": "20251130-025644",
+  "dry_run": false
+}

@@ -40,6 +40,13 @@
 template <template <typename> class Transaction, typename P>
   class base_txn_btree;
 
+namespace mako {
+namespace occ {
+template <template <typename> class Protocol, typename Traits>
+class TxnBatchBuilder;
+}
+}
+
 // Forward declaration for batch validator
 namespace mako {
   template <template <typename> class Protocol, typename Traits>
@@ -416,6 +423,7 @@ class transaction : public transaction_base {
   friend Protocol<Traits>;
   // Friend for batch validation (parallel validation access to protected members)
   friend class mako::BatchValidator<Protocol, Traits>;
+  friend class mako::occ::TxnBatchBuilder<Protocol, Traits>;
 
 public:
 

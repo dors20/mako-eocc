@@ -348,6 +348,12 @@ transaction<Protocol, Traits>::commit(bool doThrow)
       static bool batch_validation_enabled = []() {
         const char* env = std::getenv("MAKO_ENABLE_BATCH_VALIDATION");
         bool enabled = env && (std::string(env) == "1" || std::string(env) == "true");
+        if (mako::BatchValidationTraceEnabled()) {
+          std::fprintf(stderr,
+                       "[batch_validation] MAKO_ENABLE_BATCH_VALIDATION=%s -> %s\n",
+                       env ? env : "<null>",
+                       enabled ? "enabled" : "disabled");
+        }
         if (enabled) {
           // Initialize batch validator on first use
           auto& validator = GetBatchValidator<Protocol, Traits>();
@@ -363,6 +369,13 @@ transaction<Protocol, Traits>::commit(bool doThrow)
             const char* max_wait_env = std::getenv("MAKO_BATCH_VALIDATION_MAX_WAIT_US");
             if (max_wait_env) {
               max_wait_us = std::stoul(max_wait_env);
+            }
+            if (mako::BatchValidationTraceEnabled()) {
+              std::fprintf(stderr,
+                           "[batch_validation] initializing BatchValidator batch_size=%zu "
+                           "max_wait_us=%zu\n",
+                           batch_size,
+                           max_wait_us);
             }
             validator.Init(batch_size, max_wait_us);
           }

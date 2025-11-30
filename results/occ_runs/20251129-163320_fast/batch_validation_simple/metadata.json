@@ -1,0 +1,21 @@
+{
+  "name": "batch_validation_simple",
+  "description": "OCC with batch validation enabled using simpleTransaction.",
+  "mode": "fast",
+  "command_template": "./build/simpleTransaction",
+  "command": [
+    "./build/simpleTransaction"
+  ],
+  "placeholders": {
+    "batch_size": 16,
+    "batch_wait_us": 1000
+  },
+  "env": {
+    "MAKO_ENABLE_BATCH_VALIDATION": "1",
+    "MAKO_BATCH_VALIDATION_SIZE": "16",
+    "MAKO_BATCH_VALIDATION_MAX_WAIT_US": "1000"
+  },
+  "workdir": "/home/azureuser/mako-eocc",
+  "timestamp": "20251129-163320",
+  "dry_run": false
+}

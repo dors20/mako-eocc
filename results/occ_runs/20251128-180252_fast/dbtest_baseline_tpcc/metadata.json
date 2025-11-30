@@ -1,0 +1,27 @@
+{
+  "name": "dbtest_baseline_tpcc",
+  "description": "Baseline dbtest TPCC run with sequential validation.",
+  "mode": "fast",
+  "command_template": "./build/dbtest -b tpcc -t {threads} -d {duration} -P LOCALHOST_CENTER",
+  "command": [
+    "./build/dbtest",
+    "-b",
+    "tpcc",
+    "-t",
+    "2",
+    "-d",
+    "10",
+    "-P",
+    "LOCALHOST_CENTER"
+  ],
+  "placeholders": {
+    "threads": 2,
+    "duration": 10
+  },
+  "env": {
+    "MAKO_ENABLE_BATCH_VALIDATION": "0"
+  },
+  "workdir": "/home/azureuser/mako-eocc",
+  "timestamp": "20251128-180252",
+  "dry_run": false
+}
