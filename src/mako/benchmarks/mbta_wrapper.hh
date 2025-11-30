@@ -32,10 +32,10 @@
 #define GET_NODE_EXTRA_POINTER(val,len) reinterpret_cast<uint32_t *>((char*)(val+len-mako::EXTRA_BITS_FOR_VALUE));
 #define MAX(a,b) ((a)>(b)?(a):(b))
 
-using TxnClock = mako::sto::TxnClock;
 using mako::sto::RecordClientExec;
 using mako::sto::RecordTxnCompletion;
 using mako::sto::ResetTxnTiming;
+using mako::sto::MarkClientStart;
 
 #if defined(FAIL_NEW_VERSION)
 // control_mode==4, If a value is in the old epoch while this transaction is from the new epoch,  if not stable, we put it in the queue.
@@ -1081,7 +1081,7 @@ public:
     thr_arena = &arena;
     if (TThread::txn) {
       ResetTxnTiming(TThread::txn);
-      TThread::txn->timing().client_start = TxnClock::now();
+      MarkClientStart(TThread::txn);
     }
     return NULL;
   }

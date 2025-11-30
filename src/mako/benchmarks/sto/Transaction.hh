@@ -16,7 +16,6 @@
 #include <x86intrin.h>
 #include <vector>
 #include <cstring> // for memcpy
-#include <chrono>
 #include "deptran/s_main.h"
 #include "benchmarks/sto/Interface.hh"
 #include "benchmarks/sto/sync_util.hh"
@@ -350,24 +349,6 @@ struct __attribute__((aligned(128))) threadinfo_t {
 class Transaction {
 public:
     static constexpr unsigned tset_initial_capacity = 512;
-
-    struct TimingInfo {
-        using clock = std::chrono::steady_clock;
-        clock::time_point client_start{};
-        clock::time_point client_exec_done{};
-        clock::time_point storage_enqueue{};
-        clock::time_point storage_dequeue{};
-        clock::time_point validator_enqueue{};
-        clock::time_point validator_dequeue{};
-    };
-
-    TimingInfo& timing() {
-        return timing_info_;
-    }
-
-    const TimingInfo& timing() const {
-        return timing_info_;
-    }
 
     static constexpr unsigned hash_size = 1024;
     static constexpr unsigned hash_step = 5;
@@ -873,7 +854,6 @@ private:
     bool any_nonopaque_;
     bool may_duplicate_items_;
     bool is_test_;
-    TimingInfo timing_info_{};
     TransItem* tset_next_;
     unsigned tset_size_;
     mutable tid_type start_tid_;
