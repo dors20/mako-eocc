@@ -1,0 +1,76 @@
+{
+  "name": "batch_validation_storage_simple",
+  "description": "Batch validation with storage-stage reordering on simpleTransaction.",
+  "mode": "fast",
+  "command_template": "./build/simpleTransaction",
+  "command": [
+    "./build/simpleTransaction"
+  ],
+  "placeholders": {
+    "batch_size": 8,
+    "batch_wait_us": 250,
+    "storage_batch": 8,
+    "storage_wait_us": 50
+  },
+  "env": {
+    "MAKO_ENABLE_BATCH_VALIDATION": "1",
+    "MAKO_BATCH_VALIDATION_SIZE": "8",
+    "MAKO_BATCH_VALIDATION_MAX_WAIT_US": "250",
+    "MAKO_ENABLE_STORAGE_REORDER": "1",
+    "MAKO_STORAGE_REORDER_SIZE": "8",
+    "MAKO_STORAGE_REORDER_MAX_WAIT_US": "50"
+  },
+  "workdir": "/home/azureuser/mako-eocc",
+  "timestamp": "20251203-130834",
+  "dry_run": false,
+  "event_counters": {
+    "batch_validations": 15,
+    "batch_validated_txns": 15,
+    "batch_finalize_phase_us": {
+      "count": 15,
+      "max": 158.0,
+      "avg": 22.67
+    },
+    "avg_batch_size": {
+      "count": 15,
+      "max": 1.0,
+      "avg": 1.0
+    },
+    "avg_batch_validation_time_us": {
+      "count": 15,
+      "max": 703.0,
+      "avg": 60.73
+    },
+    "sto_batch_phase_build_us": {
+      "count": 15,
+      "max": 569.0,
+      "avg": 37.93
+    },
+    "sto_batch_phase_finalize_us": {
+      "count": 15,
+      "max": 158.0,
+      "avg": 22.67
+    },
+    "storage_reorder_batches": 0,
+    "storage_reorder_attempts": 0,
+    "storage_reorder_applied": 0,
+    "storage_reorder_removed_txns": 0,
+    "storage_reorder_cycles_detected": 0,
+    "storage_reorder_aborted_txns": 0,
+    "storage_reorder_avg_batch_size": {
+      "count": 0,
+      "max": 0.0,
+      "avg": 0.0
+    },
+    "storage_reorder_phase_build_us": {
+      "count": 15,
+      "max": 1651.0,
+      "avg": 110.13
+    },
+    "storage_reorder_phase_finalize_us": {
+      "count": 15,
+      "max": 3080.0,
+      "avg": 257.8
+    }
+  }
+}

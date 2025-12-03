@@ -1,0 +1,65 @@
+# Command: ./build/test_batch_validation_stress 2 1000
+# Working dir: /home/azureuser/mako-eocc
+==========================================
+Batch Validation Stress Test
+==========================================
+Threads: 2
+Transactions per thread: 1000
+Total transactions: 2000
+
+✓ Batch validation: ENABLED
+  Batch size: 8
+
+20251103-13:08.38-70570(us) 1579271 * ParseOldFormat  (configuration.cc:66): Using old configuration format
+20251103-13:08.38-71201(us) 1579271 * ParseOldFormat  (configuration.cc:66): Using old configuration format
+20251103-13:08.38-71553(us) 1579271 * ParseOldFormat  (configuration.cc:66): Using old configuration format
+[TRANSPORT] Using default: rrr
+20251103-13:08.38-71788(us) 1579271 * Initialize      (rrr_rpc_backend.cc:58): RrrRpcBackend::Initialize: poll_thread_worker_ created, is_some=1
+20251103-13:08.38-71888(us) 1579271 * Initialize      (rrr_rpc_backend.cc:88): RrrRpcBackend initialized on 127.0.0.1:31000 (listening on 0.0.0.0:31000)
+20251103-13:08.38-71905(us) 1579271 * FastTransport   (fasttransport.cc:116): FastTransport initialized with rrr/rpc backend on 127.0.0.1:31000
+20251103-13:08.38-72743(us) 1579271 * ParseOldFormat  (configuration.cc:66): Using old configuration format
+new table is createded with name: stress_table_0, table-id: 1, on shard-server id:0
+20251103-13:08.38-73904(us) 1579271 * ParseOldFormat  (configuration.cc:66): Using old configuration format
+20251103-13:08.38-74286(us) 1579271 * ParseOldFormat  (configuration.cc:66): Using old configuration format
+[TRANSPORT] Using default: rrr
+20251103-13:08.38-74476(us) 1579271 * Initialize      (rrr_rpc_backend.cc:58): RrrRpcBackend::Initialize: poll_thread_worker_ created, is_some=1
+20251103-13:08.38-74529(us) 1579271 * Initialize      (rrr_rpc_backend.cc:88): RrrRpcBackend initialized on 127.0.0.1:31001 (listening on 0.0.0.0:31001)
+20251103-13:08.38-74542(us) 1579271 * FastTransport   (fasttransport.cc:116): FastTransport initialized with rrr/rpc backend on 127.0.0.1:31001
+20251103-13:08.38-74924(us) 1579271 * ParseOldFormat  (configuration.cc:66): Using old configuration format
+new table is createded with name: stress_table_1, table-id: 2, on shard-server id:0
+20251103-13:08.38-77114(us) 1579271 * ParseOldFormat  (configuration.cc:66): Using old configuration format
+20251103-13:08.38-77706(us) 1579271 * ParseOldFormat  (configuration.cc:66): Using old configuration format
+20251103-13:08.38-77872(us) 1579271 * ParseOldFormat  (configuration.cc:66): Using old configuration format
+[TRANSPORT] Using default: rrr
+20251103-13:08.38-78046(us) 1579271 * Initialize      (rrr_rpc_backend.cc:58): RrrRpcBackend::Initialize: poll_thread_worker_ created, is_some=1
+20251103-13:08.38-78093(us) 1579271 * Initialize      (rrr_rpc_backend.cc:88): RrrRpcBackend initialized on 127.0.0.1:31002 (listening on 0.0.0.0:31002)
+20251103-13:08.38-78105(us) 1579271 * FastTransport   (fasttransport.cc:116): FastTransport initialized with rrr/rpc backend on 127.0.0.1:31002
+20251103-13:08.38-78151(us) 1579271 * ParseOldFormat  (configuration.cc:66): Using old configuration format
+[TRANSPORT] Using default: rrr
+20251103-13:08.38-78299(us) 1579271 * Initialize      (rrr_rpc_backend.cc:58): RrrRpcBackend::Initialize: poll_thread_worker_ created, is_some=1
+20251103-13:08.38-78332(us) 1579271 * Initialize      (rrr_rpc_backend.cc:88): RrrRpcBackend initialized on 127.0.0.1:31003 (listening on 0.0.0.0:31003)
+20251103-13:08.38-78344(us) 1579271 * FastTransport   (fasttransport.cc:116): FastTransport initialized with rrr/rpc backend on 127.0.0.1:31003
+20251103-13:08.38-78498(us) 1579271 * ParseOldFormat  (configuration.cc:66): Using old configuration format
+20251103-13:08.38-78748(us) 1579271 * ParseOldFormat  (configuration.cc:66): Using old configuration format
+==========================================
+Results
+==========================================
+Duration: 32 ms (0.032 s)
+Committed: 1932
+Aborted: 68
+Total: 2000
+Abort Rate: 3.4%
+Throughput: 60375 txns/sec
+
+--- batch_validation_counters ---
+batch_validations: count=1052
+batch_validated_txns: count=1932
+batch_finalize_phase_us: count=1052, max=257, avg=3.12
+avg_batch_size: count=1052, max=2, avg=1.84
+avg_batch_validation_time_us: count=1052, max=469, avg=3.40
+sto_batch_phase_build_us: count=1052, max=211, avg=0.22
+sto_batch_phase_finalize_us: count=1052, max=257, avg=3.12
+--- txn_reorder_counters ---
+--- storage_reorder_counters ---
+
+# Exit code: 0
