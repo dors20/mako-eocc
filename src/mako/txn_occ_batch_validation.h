@@ -175,7 +175,36 @@ public:
             size_t num_threads = DEFAULT_NUM_VALIDATION_THREADS) {
     batch_size_ = batch_size;
     max_wait_us_ = max_wait_us;
-    num_validation_threads_ = num_threads;
+
+    // Derive validation thread count:
+    // 1) MAKO_BATCH_VALIDATION_THREADS (explicit override)
+    // 2) OMP_NUM_THREADS if OpenMP is enabled
+    // 3) Fallback to num_threads argument (usually DEFAULT_NUM_VALIDATION_THREADS)
+    size_t threads = num_threads;
+    if (const char* env = std::getenv("MAKO_BATCH_VALIDATION_THREADS")) {
+      char* end = nullptr;
+      unsigned long v = std::strtoul(env, &end, 10);
+      if (end != env && v > 0) {
+        threads = static_cast<size_t>(v);
+      }
+    }
+#ifdef _OPENMP
+    if (threads == 0) {
+      if (const char* omp_env = std::getenv("OMP_NUM_THREADS")) {
+        char* end = nullptr;
+        unsigned long v = std::strtoul(omp_env, &end, 10);
+        if (end != omp_env && v > 0) {
+          threads = static_cast<size_t>(v);
+        }
+      }
+    }
+#endif
+    if (threads == 0) {
+      threads = DEFAULT_NUM_VALIDATION_THREADS;
+    }
+    // Avoid spawning more validation threads than there are txns in a batch
+    threads = std::max<size_t>(1, std::min(threads, batch_size_));
+    num_validation_threads_ = threads;
     enabled_ = true;
     EnsureCounterReporterRegistered();
     const char* reorder_env = std::getenv("MAKO_ENABLE_TXN_REORDER");

@@ -5,6 +5,7 @@
 #include <unordered_map>
 #include <utility>
 #include <vector>
+#include <cstdlib>
 
 #include "occ_reorder/graph_backend.h"
 #include "occ_reorder/dependency_graph.h"
@@ -25,10 +26,21 @@ class ParallelGraphBackend {
       return SerialGraphBackend<descriptor_type, Options>::Compute(descriptors, options);
     }
 
-    size_t concurrency = std::thread::hardware_concurrency();
-    if (concurrency == 0) {
-      concurrency = 4;
+    size_t concurrency = 0;
+    if (const char* env = std::getenv("MAKO_TXN_REORDER_THREADS")) {
+      char* end = nullptr;
+      unsigned long v = std::strtoul(env, &end, 10);
+      if (end != env && v > 0) {
+        concurrency = static_cast<size_t>(v);
+      }
     }
+    if (concurrency == 0) {
+      concurrency = std::thread::hardware_concurrency();
+      if (concurrency == 0) {
+        concurrency = 4;
+      }
+    }
+    // Clamp to a reasonable range: at least 2 threads, at most one per descriptor.
     concurrency = std::max<size_t>(2, std::min(concurrency, descriptors.size()));
 
     DependencyGraph graph;

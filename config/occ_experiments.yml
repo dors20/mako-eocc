@@ -14,11 +14,11 @@ scenarios:
     command: "./build/simpleTransaction"
     placeholders:
       batch_size:
-        fast: 16
-        full: 64
+        fast: 8
+        full: 16
       batch_wait_us:
-        fast: 1000
-        full: 5000
+        fast: 250
+        full: 500
     env:
       MAKO_ENABLE_BATCH_VALIDATION: "1"
       MAKO_BATCH_VALIDATION_SIZE: "{batch_size}"
@@ -29,17 +29,17 @@ scenarios:
     command: "./build/simpleTransaction"
     placeholders:
       batch_size:
-        fast: 16
-        full: 64
+        fast: 8
+        full: 16
       batch_wait_us:
-        fast: 1000
-        full: 5000
+        fast: 250
+        full: 500
       storage_batch:
-        fast: 16
-        full: 64
+        fast: 8
+        full: 16
       storage_wait_us:
-        fast: 500
-        full: 2000
+        fast: 50
+        full: 100
     env:
       MAKO_ENABLE_BATCH_VALIDATION: "1"
       MAKO_BATCH_VALIDATION_SIZE: "{batch_size}"
@@ -72,11 +72,11 @@ scenarios:
         fast: 500
         full: 5000
       batch_size:
-        fast: 16
-        full: 64
+        fast: 8
+        full: 16
       batch_wait_us:
-        fast: 1000
-        full: 5000
+        fast: 250
+        full: 500
     env:
       MAKO_ENABLE_BATCH_VALIDATION: "1"
       MAKO_BATCH_VALIDATION_SIZE: "{batch_size}"
@@ -93,11 +93,11 @@ scenarios:
         fast: 500
         full: 5000
       batch_size:
-        fast: 16
-        full: 64
+        fast: 8
+        full: 16
       batch_wait_us:
-        fast: 1000
-        full: 5000
+        fast: 250
+        full: 500
     env:
       MAKO_ENABLE_BATCH_VALIDATION: "1"
       MAKO_ENABLE_TXN_REORDER: "1"
@@ -117,11 +117,11 @@ scenarios:
         fast: 500
         full: 5000
       batch_size:
-        fast: 16
-        full: 64
+        fast: 8
+        full: 16
       batch_wait_us:
-        fast: 1000
-        full: 5000
+        fast: 250
+        full: 500
     env:
       MAKO_ENABLE_BATCH_VALIDATION: "1"
       MAKO_ENABLE_TXN_REORDER: "1"
@@ -141,17 +141,17 @@ scenarios:
         fast: 500
         full: 5000
       batch_size:
-        fast: 16
-        full: 64
+        fast: 8
+        full: 16
       batch_wait_us:
-        fast: 1000
-        full: 5000
+        fast: 250
+        full: 500
       storage_batch:
-        fast: 16
-        full: 64
+        fast: 8
+        full: 16
       storage_wait_us:
-        fast: 500
-        full: 2000
+        fast: 50
+        full: 100
     env:
       MAKO_ENABLE_BATCH_VALIDATION: "1"
       MAKO_BATCH_VALIDATION_SIZE: "{batch_size}"
@@ -192,14 +192,16 @@ scenarios:
         fast: 500
         full: 5000
       batch_size:
-        fast: 16
-        full: 64
+        fast: 8
+        full: 16
+        fast: 8
+        full: 16
       batch_wait_us:
-        fast: 500
-        full: 2000
+        fast: 250
+        full: 500
       storage_batch:
-        fast: 16
-        full: 64
+        fast: 8
+        full: 16
       storage_wait_us:
         fast: 200
         full: 1000
@@ -222,15 +224,38 @@ scenarios:
         fast: 1000
         full: 5000
       batch_size:
-        fast: 64
-        full: 128
+        fast: 16
+        full: 32
       batch_wait_us:
-        fast: 5000
-        full: 10000
+        fast: 250
+        full: 500
     env:
       MAKO_ENABLE_BATCH_VALIDATION: "1"
       MAKO_BATCH_VALIDATION_SIZE: "{batch_size}"
       MAKO_BATCH_VALIDATION_MAX_WAIT_US: "{batch_wait_us}"
+
+  - name: batch_validation_stress_parallel_validation
+    description: OCC stress harness with OpenMP parallel batch validation using all validation threads.
+    command: "./build/test_batch_validation_stress {threads} {txns_per_thread}"
+    placeholders:
+      threads:
+        fast: 4
+        full: 16
+      txns_per_thread:
+        fast: 1000
+        full: 10000
+      batch_size:
+        fast: 8
+        full: 16
+      batch_wait_us:
+        fast: 250
+        full: 500
+    env:
+      MAKO_ENABLE_BATCH_VALIDATION: "1"
+      MAKO_BATCH_VALIDATION_SIZE: "{batch_size}"
+      MAKO_BATCH_VALIDATION_MAX_WAIT_US: "{batch_wait_us}"
+      MAKO_BATCH_VALIDATION_THREADS: "{threads}"
+      OMP_NUM_THREADS: "{threads}"
 
   - name: dbtest_baseline_tpcc
     description: Baseline dbtest TPCC run (sequential validation) using default config.
@@ -253,11 +278,11 @@ scenarios:
         fast: 2
         full: 24
       batch_size:
-        fast: 16
-        full: 64
+        fast: 8
+        full: 16
       batch_wait_us:
-        fast: 1000
-        full: 5000
+        fast: 250
+        full: 500
     env:
       MAKO_ENABLE_BATCH_VALIDATION: "1"
       MAKO_BATCH_VALIDATION_SIZE: "{batch_size}"
@@ -274,11 +299,11 @@ scenarios:
         fast: 2
         full: 24
       batch_size:
-        fast: 16
-        full: 64
+        fast: 8
+        full: 16
       batch_wait_us:
-        fast: 1000
-        full: 5000
+        fast: 250
+        full: 500
     env:
       MAKO_ENABLE_BATCH_VALIDATION: "1"
       MAKO_ENABLE_TXN_REORDER: "1"
@@ -298,11 +323,11 @@ scenarios:
         fast: 2
         full: 24
       batch_size:
-        fast: 16
-        full: 64
+        fast: 8
+        full: 16
       batch_wait_us:
-        fast: 1000
-        full: 5000
+        fast: 250
+        full: 500
     env:
       MAKO_ENABLE_BATCH_VALIDATION: "1"
       MAKO_ENABLE_TXN_REORDER: "1"
@@ -322,21 +347,79 @@ scenarios:
         fast: 2
         full: 24
       batch_size:
-        fast: 16
-        full: 64
+        fast: 8
+        full: 16
       batch_wait_us:
-        fast: 1000
-        full: 5000
+        fast: 250
+        full: 500
       storage_batch:
-        fast: 16
-        full: 64
+        fast: 8
+        full: 16
       storage_wait_us:
-        fast: 500
-        full: 2000
+        fast: 50
+        full: 100
     env:
       MAKO_ENABLE_BATCH_VALIDATION: "1"
       MAKO_BATCH_VALIDATION_SIZE: "{batch_size}"
       MAKO_BATCH_VALIDATION_MAX_WAIT_US: "{batch_wait_us}"
+      MAKO_ENABLE_STORAGE_REORDER: "1"
+      MAKO_STORAGE_REORDER_SIZE: "{storage_batch}"
+      MAKO_STORAGE_REORDER_MAX_WAIT_US: "{storage_wait_us}"
+      DBTEST_EXIT_AFTER_SECS:
+        fast: 5
+        full: 60
+
+  # dbtest TPCC with batch validation and OpenMP-style parallel validation in OCC path (for future OCC+TPCC integration)
+  - name: dbtest_parallel_validation_tpcc
+    description: dbtest TPCC with batch validation knobs set for OCC-style parallel validation (uses all configured OpenMP threads if OCC path is enabled).
+    command: "./build/dbtest -q config/mako_single_node.yml -N local_s0 -t {threads}"
+    placeholders:
+      threads:
+        fast: 2
+        full: 24
+      batch_size:
+        fast: 8
+        full: 16
+      batch_wait_us:
+        fast: 250
+        full: 500
+    env:
+      MAKO_ENABLE_BATCH_VALIDATION: "1"
+      MAKO_BATCH_VALIDATION_SIZE: "{batch_size}"
+      MAKO_BATCH_VALIDATION_MAX_WAIT_US: "{batch_wait_us}"
+      MAKO_BATCH_VALIDATION_THREADS: "{threads}"
+      OMP_NUM_THREADS: "{threads}"
+      DBTEST_EXIT_AFTER_SECS:
+        fast: 5
+        full: 60
+
+  # dbtest TPCC with all OCC optimizations enabled (batch + reorder + storage)
+  - name: dbtest_batch_validation_all_optimizations
+    description: dbtest TPCC with batch validation, txn reordering (prod FVS), and storage-stage reordering enabled.
+    command: "./build/dbtest -q config/mako_single_node.yml -N local_s0 -t {threads}"
+    placeholders:
+      threads:
+        fast: 2
+        full: 24
+      batch_size:
+        fast: 8
+        full: 16
+      batch_wait_us:
+        fast: 250
+        full: 500
+      storage_batch:
+        fast: 8
+        full: 16
+      storage_wait_us:
+        fast: 50
+        full: 100
+    env:
+      MAKO_ENABLE_BATCH_VALIDATION: "1"
+      MAKO_BATCH_VALIDATION_SIZE: "{batch_size}"
+      MAKO_BATCH_VALIDATION_MAX_WAIT_US: "{batch_wait_us}"
+      MAKO_ENABLE_TXN_REORDER: "1"
+      MAKO_TXN_REORDER_FVS: "prod"
+      MAKO_TXN_REORDER_ALGO: "sort"
       MAKO_ENABLE_STORAGE_REORDER: "1"
       MAKO_STORAGE_REORDER_SIZE: "{storage_batch}"
       MAKO_STORAGE_REORDER_MAX_WAIT_US: "{storage_wait_us}"
@@ -356,8 +439,8 @@ scenarios:
       MAKO_ENABLE_TXN_REORDER: "1"
       MAKO_TXN_REORDER_FVS: "prod"
       MAKO_TXN_REORDER_ALGO: "sort"
-      MAKO_BATCH_VALIDATION_SIZE: "64"
-      MAKO_BATCH_VALIDATION_MAX_WAIT_US: "5000"
+      MAKO_BATCH_VALIDATION_SIZE: "8"
+      MAKO_BATCH_VALIDATION_MAX_WAIT_US: "250"
 
   - name: stress_reorder_prod_2c
     description: OCC stress harness with txn reordering (prod FVS), 2 threads, high load.
@@ -370,8 +453,8 @@ scenarios:
       MAKO_ENABLE_TXN_REORDER: "1"
       MAKO_TXN_REORDER_FVS: "prod"
       MAKO_TXN_REORDER_ALGO: "sort"
-      MAKO_BATCH_VALIDATION_SIZE: "64"
-      MAKO_BATCH_VALIDATION_MAX_WAIT_US: "5000"
+      MAKO_BATCH_VALIDATION_SIZE: "8"
+      MAKO_BATCH_VALIDATION_MAX_WAIT_US: "250"
 
   - name: stress_reorder_prod_4c
     description: OCC stress harness with txn reordering (prod FVS), 4 threads, high load.
@@ -384,8 +467,8 @@ scenarios:
       MAKO_ENABLE_TXN_REORDER: "1"
       MAKO_TXN_REORDER_FVS: "prod"
       MAKO_TXN_REORDER_ALGO: "sort"
-      MAKO_BATCH_VALIDATION_SIZE: "64"
-      MAKO_BATCH_VALIDATION_MAX_WAIT_US: "5000"
+      MAKO_BATCH_VALIDATION_SIZE: "8"
+      MAKO_BATCH_VALIDATION_MAX_WAIT_US: "250"
 
   - name: stress_reorder_prod_8c
     description: OCC stress harness with txn reordering (prod FVS), 8 threads, high load.
@@ -398,8 +481,8 @@ scenarios:
       MAKO_ENABLE_TXN_REORDER: "1"
       MAKO_TXN_REORDER_FVS: "prod"
       MAKO_TXN_REORDER_ALGO: "sort"
-      MAKO_BATCH_VALIDATION_SIZE: "64"
-      MAKO_BATCH_VALIDATION_MAX_WAIT_US: "5000"
+      MAKO_BATCH_VALIDATION_SIZE: "8"
+      MAKO_BATCH_VALIDATION_MAX_WAIT_US: "250"
 
   - name: stress_reorder_prod_16c
     description: OCC stress harness with txn reordering (prod FVS), 16 threads, high load.
@@ -412,6 +495,71 @@ scenarios:
       MAKO_ENABLE_TXN_REORDER: "1"
       MAKO_TXN_REORDER_FVS: "prod"
       MAKO_TXN_REORDER_ALGO: "sort"
-      MAKO_BATCH_VALIDATION_SIZE: "64"
-      MAKO_BATCH_VALIDATION_MAX_WAIT_US: "5000"
+      MAKO_BATCH_VALIDATION_SIZE: "8"
+      MAKO_BATCH_VALIDATION_MAX_WAIT_US: "250"
+
+  # OCC stress harness with explicit parallel reordering threads (ParallelGraphBackend)
+  - name: stress_reorder_parallel_threads_4c
+    description: OCC stress harness with txn reordering using 4 parallel graph threads.
+    command: "./build/test_batch_validation_stress {threads} {txns_per_thread}"
+    placeholders:
+      threads: 8
+      txns_per_thread: 10000
+    env:
+      MAKO_ENABLE_BATCH_VALIDATION: "1"
+      MAKO_ENABLE_TXN_REORDER: "1"
+      MAKO_TXN_REORDER_FVS: "prod"
+      MAKO_TXN_REORDER_ALGO: "sort"
+      MAKO_BATCH_VALIDATION_SIZE: "8"
+      MAKO_BATCH_VALIDATION_MAX_WAIT_US: "250"
+      MAKO_TXN_REORDER_THREADS: "4"
+
+  - name: stress_reorder_parallel_threads_8c
+    description: OCC stress harness with txn reordering using 8 parallel graph threads.
+    command: "./build/test_batch_validation_stress {threads} {txns_per_thread}"
+    placeholders:
+      threads: 16
+      txns_per_thread: 10000
+    env:
+      MAKO_ENABLE_BATCH_VALIDATION: "1"
+      MAKO_ENABLE_TXN_REORDER: "1"
+      MAKO_TXN_REORDER_FVS: "prod"
+      MAKO_TXN_REORDER_ALGO: "sort"
+      MAKO_BATCH_VALIDATION_SIZE: "8"
+      MAKO_BATCH_VALIDATION_MAX_WAIT_US: "250"
+      MAKO_TXN_REORDER_THREADS: "8"
+
+  # All OCC optimizations combined on stress harness (batch + reorder + storage)
+  - name: batch_validation_stress_all_optimizations
+    description: Stress harness with batch validation, txn reordering (prod FVS), and storage-stage reordering enabled.
+    command: "./build/test_batch_validation_stress {threads} {txns_per_thread}"
+    placeholders:
+      threads:
+        fast: 4
+        full: 8
+      txns_per_thread:
+        fast: 1000
+        full: 10000
+      batch_size:
+        fast: 8
+        full: 16
+      batch_wait_us:
+        fast: 250
+        full: 500
+      storage_batch:
+        fast: 8
+        full: 16
+      storage_wait_us:
+        fast: 50
+        full: 100
+    env:
+      MAKO_ENABLE_BATCH_VALIDATION: "1"
+      MAKO_BATCH_VALIDATION_SIZE: "{batch_size}"
+      MAKO_BATCH_VALIDATION_MAX_WAIT_US: "{batch_wait_us}"
+      MAKO_ENABLE_TXN_REORDER: "1"
+      MAKO_TXN_REORDER_FVS: "prod"
+      MAKO_TXN_REORDER_ALGO: "sort"
+      MAKO_ENABLE_STORAGE_REORDER: "1"
+      MAKO_STORAGE_REORDER_SIZE: "{storage_batch}"
+      MAKO_STORAGE_REORDER_MAX_WAIT_US: "{storage_wait_us}"
 
