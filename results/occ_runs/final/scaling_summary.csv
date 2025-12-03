@@ -1,0 +1,26 @@
+scenario,label,cores,throughput_txn_per_s,avg_latency_ms,abort_per_1000_txn
+dbtest_baseline_tpcc,Baseline (sequential),1,98456.0,0.00961528,n/a
+dbtest_baseline_tpcc,Baseline (sequential),2,173067.0,0.0109811,0.15910023285779495
+dbtest_baseline_tpcc,Baseline (sequential),4,358909.0,0.0105653,0.14505738223337947
+dbtest_baseline_tpcc,Baseline (sequential),8,666201.0,0.0114193,0.1482723682492221
+dbtest_baseline_tpcc,Baseline (sequential),16,74705.19059339524,0.013207,2.3838771922729682
+dbtest_batch_validation_tpcc,Batch validation,1,31518.0,0.0311605,n/a
+dbtest_batch_validation_tpcc,Batch validation,2,49168.5,0.0400869,0.11793424651962131
+dbtest_batch_validation_tpcc,Batch validation,4,91842.3,0.0429603,0.13060430760118158
+dbtest_batch_validation_tpcc,Batch validation,8,155491.0,0.0508445,0.1431902811095176
+dbtest_batch_validation_tpcc,Batch validation,16,151698.0,0.10481,0.14240860129995123
+dbtest_batch_validation_reorder_minid,Batch + reorder (min-id),1,31586.2,0.0310918,n/a
+dbtest_batch_validation_reorder_minid,Batch + reorder (min-id),2,45063.8,0.0437916,0.11691823592329097
+dbtest_batch_validation_reorder_minid,Batch + reorder (min-id),4,73994.5,0.053452,0.14822858455696034
+dbtest_batch_validation_reorder_minid,Batch + reorder (min-id),8,107247.0,0.0739654,0.1461299616772497
+dbtest_batch_validation_reorder_minid,Batch + reorder (min-id),16,108073.0,0.14728,0.5993615426609792
+dbtest_batch_validation_reorder_prod,Batch + reorder (prod),1,31535.8,0.0311404,n/a
+dbtest_batch_validation_reorder_prod,Batch + reorder (prod),2,45081.4,0.0437752,0.11687480867941102
+dbtest_batch_validation_reorder_prod,Batch + reorder (prod),4,73880.6,0.0535189,0.5207131506782564
+dbtest_batch_validation_reorder_prod,Batch + reorder (prod),8,106584.0,0.0744269,0.14483505967124521
+dbtest_batch_validation_reorder_prod,Batch + reorder (prod),16,107697.0,0.147783,0.5893813198139225
+dbtest_batch_validation_storage,Batch + storage reorder,1,9274.98,0.10719,n/a
+dbtest_batch_validation_storage,Batch + storage reorder,2,21589.8,0.0920082,0.10130061417891782
+dbtest_batch_validation_storage,Batch + storage reorder,4,21538.3,0.185005,0.12615851761745356
+dbtest_batch_validation_storage,Batch + storage reorder,8,1309.72,6.10272,0.15181031060073907
+dbtest_batch_validation_storage,Batch + storage reorder,16,2207.48,7.23884,0.6003406599380289

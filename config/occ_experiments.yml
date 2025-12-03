@@ -1,6 +1,6 @@
 defaults:
-  workdir: /home/ubuntu/md/mako-eocc
-  results_root: /home/ubuntu/md/mako-eocc/results/occ_runs
+  workdir: /home/azureuser/mako-eocc
+  results_root: /home/azureuser/mako-eocc/results/occ_runs
 
 scenarios:
   - name: baseline_simple
