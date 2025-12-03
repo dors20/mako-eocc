@@ -21,6 +21,7 @@
 #include "txn.h"
 #include "occ_reorder/batch_validation_counters.h"
 #include "occ_reorder/batch_validation_trace.h"
+#include "occ_reorder/storage_reorder_counters.h"
 #include "macros.h"
 #include "thread.h"
 #include "core.h"
@@ -101,6 +102,7 @@ private:
   size_t num_validation_threads_;
   bool enabled_;
   bool txn_reorder_enabled_{false};
+  bool storage_reorder_enabled_{false};
 
   // Batch management
   std::mutex batch_mutex_;
@@ -160,6 +162,18 @@ public:
     (void) get_txn_reorder_applied_counter();
     (void) get_txn_reorder_removed_counter();
     (void) get_txn_reorder_cycles_counter();
+    // Ensure storage-reorder counters exist for OCC path as well.
+    (void) occ::storage_reorder_batches_counter();
+    (void) occ::storage_reorder_attempts_counter();
+    (void) occ::storage_reorder_applied_counter();
+    (void) occ::storage_reorder_removed_counter();
+    (void) occ::storage_reorder_cycles_counter();
+    (void) occ::storage_reorder_aborted_counter();
+    (void) occ::storage_reorder_avg_batch_size_counter();
+    (void) occ::storage_reorder_queue_wait_us_counter();
+    (void) occ::storage_reorder_phase_build_us_counter();
+    (void) occ::storage_reorder_phase_reorder_us_counter();
+    (void) occ::storage_reorder_phase_finalize_us_counter();
   }
 
   ~BatchValidator() {
@@ -211,6 +225,12 @@ public:
     if (reorder_env) {
       std::string flag(reorder_env);
       txn_reorder_enabled_ = (flag == "1" || flag == "true" || flag == "TRUE");
+    }
+    const char* storage_env = std::getenv("MAKO_ENABLE_STORAGE_REORDER");
+    if (storage_env) {
+      std::string flag(storage_env);
+      storage_reorder_enabled_ =
+          (flag == "1" || flag == "true" || flag == "TRUE");
     }
     
     // Initialize pending batch
@@ -368,30 +388,53 @@ private:
     batch.validated_count.store(0);
     if (BatchValidationTraceEnabled()) {
       std::fprintf(stderr,
-                   "[batch_validation] validating batch size=%zu reorder=%s\n",
+                   "[batch_validation] validating batch size=%zu reorder_txn=%s reorder_storage=%s\n",
                    batch.txns.size(),
-                   txn_reorder_enabled_ ? "on" : "off");
+                   txn_reorder_enabled_ ? "on" : "off",
+                   storage_reorder_enabled_ ? "on" : "off");
     }
 
-    if (txn_reorder_enabled_) {
-      get_txn_reorder_attempts_counter().inc();
+    const bool do_reorder = txn_reorder_enabled_ || storage_reorder_enabled_;
+    if (do_reorder) {
+      const bool as_storage = storage_reorder_enabled_ && !txn_reorder_enabled_;
+      if (as_storage) {
+        occ::storage_reorder_attempts_counter().inc();
+        occ::storage_reorder_batches_counter().inc();
+        occ::storage_reorder_avg_batch_size_counter().offer(batch.txns.size());
+      } else {
+        get_txn_reorder_attempts_counter().inc();
+      }
+
       auto plan = occ::TxnReorderController<Protocol, Traits>::Plan(batch.txns);
       if (plan.cycle_components > 0) {
-        get_txn_reorder_cycles_counter().inc(plan.cycle_components);
+        if (as_storage) {
+          occ::storage_reorder_cycles_counter().inc(plan.cycle_components);
+        } else {
+          get_txn_reorder_cycles_counter().inc(plan.cycle_components);
+        }
       }
       if (plan.removed_nodes > 0) {
-        get_txn_reorder_removed_counter().inc(plan.removed_nodes);
+        if (as_storage) {
+          occ::storage_reorder_removed_counter().inc(plan.removed_nodes);
+        } else {
+          get_txn_reorder_removed_counter().inc(plan.removed_nodes);
+        }
       }
       if (plan.applied) {
-        get_txn_reorder_applied_counter().inc();
+        if (as_storage) {
+          occ::storage_reorder_applied_counter().inc();
+        } else {
+          get_txn_reorder_applied_counter().inc();
+        }
         if (BatchValidationTraceEnabled()) {
           std::fprintf(stderr,
                        "[txn_reorder] plan graph_nodes=%zu edges=%zu removed=%zu "
-                       "cycle_components=%zu applied=1\n",
+                       "cycle_components=%zu applied=1 (mode=%s)\n",
                        plan.graph_nodes,
                        plan.graph_edges,
                        plan.removed_nodes,
-                       plan.cycle_components);
+                       plan.cycle_components,
+                       as_storage ? "storage" : "txn");
         }
         std::unordered_map<uint64_t, size_t> index_map;
         index_map.reserve(batch.txns.size());
@@ -417,6 +460,9 @@ private:
           txn->state = transaction_base::TXN_ABRT;
           txn->reason = transaction_base::ABORT_REASON_USER;
           get_batch_aborted_txns_counter().inc();
+          if (as_storage) {
+            occ::storage_reorder_aborted_counter().inc();
+          }
         }
 
         for (auto* txn : plan.ordered) {
@@ -438,16 +484,21 @@ private:
             end_time - start_time)
                                .count();
         get_avg_batch_validation_time_counter().offer(duration_us);
+        if (as_storage) {
+          occ::storage_reorder_phase_finalize_us_counter().offer(
+              static_cast<double>(duration_us));
+        }
         return;
       }
       if (BatchValidationTraceEnabled()) {
         std::fprintf(stderr,
                      "[txn_reorder] plan graph_nodes=%zu edges=%zu removed=%zu "
-                     "cycle_components=%zu applied=0\n",
+                     "cycle_components=%zu applied=0 (mode=%s)\n",
                      plan.graph_nodes,
                      plan.graph_edges,
                      plan.removed_nodes,
-                     plan.cycle_components);
+                     plan.cycle_components,
+                     as_storage ? "storage" : "txn");
       }
     }
 
