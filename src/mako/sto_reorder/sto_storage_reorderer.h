@@ -34,15 +34,9 @@ class StoStorageReorderer {
     max_wait_us_ = max_wait_us;
     idle_wait_us_ = ParseIdleWaitEnv();
     low_watermark_ = ParseLowWatermarkEnv();
-    inline_flush_enabled_ = ParseInlineFlushEnv();
-    inline_flush_threshold_ = ParseInlineThresholdEnv();
     reorder_min_size_ = ParseMinReorderSizeEnv();
-    pass_inline_batches_ = ParsePassInlineEnv();
     if (reorder_min_size_ < size_t{1}) {
       reorder_min_size_ = 1;
-    }
-    if (inline_flush_threshold_ < size_t{1}) {
-      inline_flush_threshold_ = 1;
     }
     if (low_watermark_ > batch_size_) {
       low_watermark_ = batch_size_;
@@ -95,8 +89,6 @@ class StoStorageReorderer {
     Entry entry;
     entry.txn = txn;
 
-    bool inline_flush = false;
-    std::vector<Entry*> inline_entries;
     {
       std::lock_guard<std::mutex> lock(mutex_);
       if (shutdown_) {
@@ -107,23 +99,6 @@ class StoStorageReorderer {
       }
       pending_.push_back(&entry);
       RecordStorageEnqueue(txn);
-      const bool do_inline = inline_flush_enabled_ &&
-                             pass_inline_batches_ &&
-                             pending_.size() <= inline_flush_threshold_;
-      if (do_inline) {
-        inline_entries.swap(pending_);
-        first_enqueue_time_ = std::chrono::steady_clock::now();
-        inline_flush = true;
-      } else {
-        cv_.notify_one();
-      }
-    }
-
-    if (inline_flush && pass_inline_batches_) {
-      Flush(inline_entries);
-    } else if (inline_flush) {
-      std::lock_guard<std::mutex> lock(mutex_);
-      pending_ = std::move(inline_entries);
       cv_.notify_one();
     }
 
@@ -368,32 +343,6 @@ class StoStorageReorderer {
     return static_cast<size_t>(value);
   }
 
-  bool ParseInlineFlushEnv() const {
-    const char* env = std::getenv("MAKO_STORAGE_REORDER_INLINE_FLUSH");
-    if (!env) {
-      return true;
-    }
-    std::string flag(env);
-    std::transform(flag.begin(),
-                   flag.end(),
-                   flag.begin(),
-                   [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
-    return flag == "1" || flag == "true" || flag == "on";
-  }
-
-  size_t ParseInlineThresholdEnv() const {
-    const char* env = std::getenv("MAKO_STORAGE_REORDER_INLINE_THRESHOLD");
-    if (!env) {
-      return 1;
-    }
-    char* end = nullptr;
-    unsigned long long value = std::strtoull(env, &end, 10);
-    if (end == env) {
-      return 1;
-    }
-    return static_cast<size_t>(value);
-  }
-
   size_t ParseMinReorderSizeEnv() const {
     const char* env = std::getenv("MAKO_STORAGE_REORDER_MIN_SIZE");
     if (!env) {
@@ -408,19 +357,6 @@ class StoStorageReorderer {
       value = 1;
     }
     return static_cast<size_t>(value);
-  }
-
-  bool ParsePassInlineEnv() const {
-    const char* env = std::getenv("MAKO_STORAGE_REORDER_PASS_INLINE");
-    if (!env) {
-      return true;
-    }
-    std::string flag(env);
-    std::transform(flag.begin(),
-                   flag.end(),
-                   flag.begin(),
-                   [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
-    return flag == "1" || flag == "true" || flag == "on";
   }
 
   size_t DetermineWaitUs(size_t queue_depth) const {
@@ -443,10 +379,7 @@ class StoStorageReorderer {
   size_t max_wait_us_{1000};
   size_t idle_wait_us_{50};
   size_t low_watermark_{4};
-  bool inline_flush_enabled_{true};
-  size_t inline_flush_threshold_{1};
   size_t reorder_min_size_{2};
-  bool pass_inline_batches_{true};
   bool enabled_{false};
   bool shutdown_{false};
   bool worker_running_{false};

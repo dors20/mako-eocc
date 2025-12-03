@@ -37,15 +37,9 @@ class StoBatchValidator {
     max_wait_us_ = max_wait_us;
     idle_wait_us_ = ParseIdleWaitEnv();
     adaptive_low_watermark_ = ParseLowWatermarkEnv();
-    inline_flush_enabled_ = ParseInlineFlushEnv();
-    inline_flush_threshold_ = ParseInlineThresholdEnv();
     reorder_min_size_ = ParseMinReorderSizeEnv();
-    pass_inline_batches_ = ParsePassInlineEnv();
     if (reorder_min_size_ < size_t{1}) {
       reorder_min_size_ = 1;
-    }
-    if (inline_flush_threshold_ < size_t{1}) {
-      inline_flush_threshold_ = 1;
     }
     if (adaptive_low_watermark_ > batch_size_) {
       adaptive_low_watermark_ = batch_size_;
@@ -175,10 +169,7 @@ class StoBatchValidator {
   occ::FvsAlgorithm ParseAlgoEnv() const;
   size_t ParseIdleWaitEnv() const;
   size_t ParseLowWatermarkEnv() const;
-  bool ParseInlineFlushEnv() const;
-  size_t ParseInlineThresholdEnv() const;
   size_t ParseMinReorderSizeEnv() const;
-  bool ParsePassInlineEnv() const;
   void EnsureReporterRegistered();
   static void PrintCounter(const char* name);
   void ValidateBatch(ValidationBatch& batch);
@@ -194,10 +185,7 @@ class StoBatchValidator {
   size_t max_wait_us_{1000};
   size_t idle_wait_us_{50};
   size_t adaptive_low_watermark_{4};
-  bool inline_flush_enabled_{true};
-  size_t inline_flush_threshold_{1};
   size_t reorder_min_size_{2};
-  bool pass_inline_batches_{true};
   bool enabled_{false};
   bool shutdown_{false};
   bool worker_running_{false};
@@ -287,32 +275,6 @@ inline size_t StoBatchValidator::ParseLowWatermarkEnv() const {
   return static_cast<size_t>(value);
 }
 
-inline bool StoBatchValidator::ParseInlineFlushEnv() const {
-  const char* env = std::getenv("MAKO_BATCH_VALIDATION_INLINE_FLUSH");
-  if (!env) {
-    return true;
-  }
-  std::string flag(env);
-  std::transform(flag.begin(),
-                 flag.end(),
-                 flag.begin(),
-                 [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
-  return flag == "1" || flag == "true" || flag == "on";
-}
-
-inline size_t StoBatchValidator::ParseInlineThresholdEnv() const {
-  const char* env = std::getenv("MAKO_BATCH_VALIDATION_INLINE_THRESHOLD");
-  if (!env) {
-    return 1;
-  }
-  char* end = nullptr;
-  unsigned long long value = std::strtoull(env, &end, 10);
-  if (end == env) {
-    return 1;
-  }
-  return static_cast<size_t>(value);
-}
-
 inline size_t StoBatchValidator::ParseMinReorderSizeEnv() const {
   const char* env = std::getenv("MAKO_BATCH_VALIDATION_MIN_REORDER_SIZE");
   if (!env) {
@@ -327,19 +289,6 @@ inline size_t StoBatchValidator::ParseMinReorderSizeEnv() const {
     value = 1;
   }
   return static_cast<size_t>(value);
-}
-
-inline bool StoBatchValidator::ParsePassInlineEnv() const {
-  const char* env = std::getenv("MAKO_BATCH_VALIDATION_PASS_INLINE");
-  if (!env) {
-    return true;
-  }
-  std::string flag(env);
-  std::transform(flag.begin(),
-                 flag.end(),
-                 flag.begin(),
-                 [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
-  return flag == "1" || flag == "true" || flag == "on";
 }
 
 inline void StoBatchValidator::EnsureReporterRegistered() {
@@ -404,7 +353,6 @@ inline void StoBatchValidator::ProcessBatch(const std::vector<Transaction*>& txn
     auto entry = std::make_unique<ValidationEntry>();
     entry->txn = txn;
     bool enqueued = false;
-    std::unique_ptr<ValidationBatch> inline_batch;
     {
       std::lock_guard<std::mutex> lock(batch_mutex_);
       if (!shutdown_) {
@@ -413,16 +361,7 @@ inline void StoBatchValidator::ProcessBatch(const std::vector<Transaction*>& txn
         }
         pending_batch_->add_entry(entry.get());
         RecordValidatorEnqueue(txn);
-        const bool do_inline = inline_flush_enabled_ &&
-                               pass_inline_batches_ &&
-                               pending_batch_->entries.size() <=
-                                   inline_flush_threshold_;
-        if (do_inline) {
-          inline_batch = std::move(pending_batch_);
-          pending_batch_ = std::make_unique<ValidationBatch>(batch_size_);
-        } else {
-          batch_cv_.notify_one();
-        }
+        batch_cv_.notify_one();
         enqueued = true;
       }
     }
@@ -430,12 +369,8 @@ inline void StoBatchValidator::ProcessBatch(const std::vector<Transaction*>& txn
       continue;
     }
 
-    if (inline_batch) {
-      ValidateBatch(*inline_batch);
-    } else {
-      pending_entries.push_back(Pending{entry.get(), i});
-      storage.push_back(std::move(entry));
-    }
+    pending_entries.push_back(Pending{entry.get(), i});
+    storage.push_back(std::move(entry));
   }
 
   for (auto& pending : pending_entries) {

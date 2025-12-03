@@ -22,6 +22,8 @@ except ImportError as exc:  # pragma: no cover
     print("Missing dependency: PyYAML is required to run this script.", file=sys.stderr)
     raise
 
+from plot_occ_results import generate_plots
+
 
 def resolve_value(raw_value, mode):
     """Resolve per-mode dictionaries to a concrete value."""
@@ -100,7 +102,12 @@ DBTEST_PATTERNS = {
     "avg_latency_ms": re.compile(r"avg_latency:\s+([\d\.]+)\s+ms"),
 }
 
-COUNTER_PATTERN = re.compile(r"^([A-Za-z0-9_]+):\s+count=([0-9]+)", re.MULTILINE)
+COUNTER_PATTERN = re.compile(
+    r"^([A-Za-z0-9_]+):\s+count=([0-9]+)"
+    r"(?:,\s+max=([0-9Ee+.\-]+))?"
+    r"(?:,\s+avg=([0-9Ee+.\-]+))?",
+    re.MULTILINE,
+)
 
 
 def extract_metrics(log_path):
@@ -122,11 +129,28 @@ def extract_metrics(log_path):
                 metrics[key] = value
     for match in COUNTER_PATTERN.finditer(text):
         name = match.group(1)
-        value = match.group(2)
+        count_str = match.group(2)
+        max_str = match.group(3)
+        avg_str = match.group(4)
         try:
-            counters[name] = int(value)
+            count_val = int(count_str)
         except ValueError:
             continue
+        if max_str is None and avg_str is None:
+            counters[name] = count_val
+            continue
+        entry = {"count": count_val}
+        if max_str is not None:
+            try:
+                entry["max"] = float(max_str)
+            except ValueError:
+                pass
+        if avg_str is not None:
+            try:
+                entry["avg"] = float(avg_str)
+            except ValueError:
+                pass
+        counters[name] = entry
     return metrics, counters
 
 
@@ -182,6 +206,7 @@ def main():
         parser.error("No scenarios defined in YAML file.")
 
     selected = set(args.only) if args.only else None
+    ran_any = False
 
     for scenario in scenarios:
         name = scenario.get("name")
@@ -255,6 +280,15 @@ def main():
             metadata.setdefault("event_counters", counters)
             with open(metadata_path, "w", encoding="utf-8") as meta_file:
                 json.dump(metadata, meta_file, indent=2)
+        ran_any = True
+
+    if not args.dry_run and ran_any:
+        try:
+            print(f"\nGenerating plots for {session_dir} ...")
+            generate_plots(session_dir)
+            print("Plots saved to", session_dir)
+        except Exception as exc:  # pragma: no cover
+            print(f"Failed to generate plots for {session_dir}: {exc}", file=sys.stderr)
 
 
 if __name__ == "__main__":
