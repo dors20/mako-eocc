@@ -102,6 +102,7 @@ scenarios:
       MAKO_ENABLE_BATCH_VALIDATION: "1"
       MAKO_ENABLE_TXN_REORDER: "1"
       MAKO_TXN_REORDER_FVS: "min"
+      MAKO_TXN_REORDER_ALGO: "sort"
       MAKO_BATCH_VALIDATION_SIZE: "{batch_size}"
       MAKO_BATCH_VALIDATION_MAX_WAIT_US: "{batch_wait_us}"
 
@@ -125,6 +126,7 @@ scenarios:
       MAKO_ENABLE_BATCH_VALIDATION: "1"
       MAKO_ENABLE_TXN_REORDER: "1"
       MAKO_TXN_REORDER_FVS: "prod"
+      MAKO_TXN_REORDER_ALGO: "sort"
       MAKO_BATCH_VALIDATION_SIZE: "{batch_size}"
       MAKO_BATCH_VALIDATION_MAX_WAIT_US: "{batch_wait_us}"
 
@@ -281,6 +283,7 @@ scenarios:
       MAKO_ENABLE_BATCH_VALIDATION: "1"
       MAKO_ENABLE_TXN_REORDER: "1"
       MAKO_TXN_REORDER_FVS: "min"
+      MAKO_TXN_REORDER_ALGO: "sort"
       MAKO_BATCH_VALIDATION_SIZE: "{batch_size}"
       MAKO_BATCH_VALIDATION_MAX_WAIT_US: "{batch_wait_us}"
       DBTEST_EXIT_AFTER_SECS:
@@ -304,6 +307,7 @@ scenarios:
       MAKO_ENABLE_BATCH_VALIDATION: "1"
       MAKO_ENABLE_TXN_REORDER: "1"
       MAKO_TXN_REORDER_FVS: "prod"
+      MAKO_TXN_REORDER_ALGO: "sort"
       MAKO_BATCH_VALIDATION_SIZE: "{batch_size}"
       MAKO_BATCH_VALIDATION_MAX_WAIT_US: "{batch_wait_us}"
       DBTEST_EXIT_AFTER_SECS:

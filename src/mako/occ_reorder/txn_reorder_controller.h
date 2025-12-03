@@ -9,6 +9,7 @@
 #include <vector>
 
 #include "occ_reorder/graph_backend.h"
+#include "occ_reorder/fvs_policies.h"
 template <template <typename> class Protocol, typename Traits>
 class transaction;
 
@@ -41,6 +42,10 @@ class GenericTxnReorderController {
 
   struct Options {
     FvsPolicy fvs_policy{FvsPolicy::MIN_ID};
+    // Default to sort-based greedy as it offers the best trade-off in Ding et al.
+    FvsAlgorithm fvs_algorithm{FvsAlgorithm::SORT_GREEDY};
+    size_t fvs_sort_k{2};
+    size_t fvs_hybrid_threshold{5};
     bool require_cycle{true};
   };
 
@@ -120,6 +125,33 @@ class GenericTxnReorderController {
         opts.fvs_policy = FvsPolicy::PROD_DEGREE;
       } else {
         opts.fvs_policy = FvsPolicy::MIN_ID;
+      }
+    }
+    if (const char* env = std::getenv("MAKO_TXN_REORDER_ALGO")) {
+      std::string algo(env);
+      for (auto& c : algo) {
+        c = static_cast<char>(std::tolower(c));
+      }
+      if (algo == "sort" || algo == "sort_greedy") {
+        opts.fvs_algorithm = FvsAlgorithm::SORT_GREEDY;
+      } else if (algo == "hybrid") {
+        opts.fvs_algorithm = FvsAlgorithm::HYBRID;
+      } else {
+        opts.fvs_algorithm = FvsAlgorithm::BASIC_SCC;
+      }
+    }
+    if (const char* env = std::getenv("MAKO_TXN_REORDER_SORT_K")) {
+      char* end = nullptr;
+      unsigned long v = std::strtoul(env, &end, 10);
+      if (end != env && v > 0) {
+        opts.fvs_sort_k = static_cast<size_t>(v);
+      }
+    }
+    if (const char* env = std::getenv("MAKO_TXN_REORDER_HYBRID_THRESHOLD")) {
+      char* end = nullptr;
+      unsigned long v = std::strtoul(env, &end, 10);
+      if (end != env && v > 0) {
+        opts.fvs_hybrid_threshold = static_cast<size_t>(v);
       }
     }
     if (const char* env = std::getenv("MAKO_TXN_REORDER_REQUIRE_CYCLE")) {

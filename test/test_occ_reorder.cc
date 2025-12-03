@@ -146,3 +146,25 @@ TEST(FvsSolverTest, DegreePolicyTargetsHighDegreeNodes) {
   EXPECT_EQ(result.cyclic_components, 1u);
 }
 
+TEST(FvsSolverTest, SortGreedyUsesMultiFactorAndPolicy) {
+  mako::occ::DependencyGraph graph;
+  graph.add_node(201, 0.0);
+  graph.add_node(202, 0.0);
+  graph.add_node(203, 0.0);
+
+  // 201 <-> 202 and 202 -> 203, so 202 has highest degree product.
+  graph.add_edge(201, 202);
+  graph.add_edge(202, 201);
+  graph.add_edge(202, 203);
+
+  mako::occ::FvsConfig cfg;
+  cfg.policy = mako::occ::FvsPolicy::PROD_DEGREE;
+  cfg.algorithm = mako::occ::FvsAlgorithm::SORT_GREEDY;
+  cfg.sort_k = 2;
+  mako::occ::FvsSolver<mako::occ::DependencyGraph> solver(cfg);
+  auto result = solver.Compute(graph);
+  ASSERT_FALSE(result.remove.empty());
+  EXPECT_TRUE(result.remove.count(202));
+  EXPECT_EQ(result.cyclic_components, 1u);
+}
+

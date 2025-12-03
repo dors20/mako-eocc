@@ -42,7 +42,12 @@ class SerialGraphBackend {
     plan.graph_nodes = graph.node_count();
     plan.graph_edges = graph.edge_count();
 
-    FvsSolver<DependencyGraph> solver(options.fvs_policy);
+    FvsConfig fcfg;
+    fcfg.policy = options.fvs_policy;
+    fcfg.algorithm = options.fvs_algorithm;
+    fcfg.sort_k = options.fvs_sort_k;
+    fcfg.hybrid_threshold = options.fvs_hybrid_threshold;
+    FvsSolver<DependencyGraph> solver(fcfg);
     auto fvs = solver.Compute(graph);
     plan.abort_ids = std::move(fvs.remove);
     plan.removed_nodes = plan.abort_ids.size();

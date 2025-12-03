@@ -57,6 +57,22 @@ class StoBatchValidator {
     reorder_enabled_ = ParseReorderEnv();
     reorder_options_ = {};
     reorder_options_.fvs_policy = ParsePolicyEnv();
+    reorder_options_.fvs_algorithm = ParseAlgoEnv();
+    // Reuse global env knobs for sort_k / hybrid_threshold if set.
+    if (const char* env = std::getenv("MAKO_TXN_REORDER_SORT_K")) {
+      char* end = nullptr;
+      unsigned long v = std::strtoul(env, &end, 10);
+      if (end != env && v > 0) {
+        reorder_options_.fvs_sort_k = static_cast<size_t>(v);
+      }
+    }
+    if (const char* env = std::getenv("MAKO_TXN_REORDER_HYBRID_THRESHOLD")) {
+      char* end = nullptr;
+      unsigned long v = std::strtoul(env, &end, 10);
+      if (end != env && v > 0) {
+        reorder_options_.fvs_hybrid_threshold = static_cast<size_t>(v);
+      }
+    }
     if (BatchValidationTraceEnabled()) {
       std::fprintf(stderr,
                    "[batch_validation] sto configure batch_size=%zu max_wait_us=%zu\n",
@@ -156,6 +172,7 @@ class StoBatchValidator {
 
   bool ParseReorderEnv() const;
   occ::FvsPolicy ParsePolicyEnv() const;
+  occ::FvsAlgorithm ParseAlgoEnv() const;
   size_t ParseIdleWaitEnv() const;
   size_t ParseLowWatermarkEnv() const;
   bool ParseInlineFlushEnv() const;
@@ -220,6 +237,28 @@ inline occ::FvsPolicy StoBatchValidator::ParsePolicyEnv() const {
     return occ::FvsPolicy::PROD_DEGREE;
   }
   return occ::FvsPolicy::MIN_ID;
+}
+
+inline occ::FvsAlgorithm StoBatchValidator::ParseAlgoEnv() const {
+  const char* env = std::getenv("MAKO_TXN_REORDER_ALGO");
+  if (!env) {
+    // Default to sort-based greedy to match Ding et al.'s best-performing algo.
+    return occ::FvsAlgorithm::SORT_GREEDY;
+  }
+  std::string algo(env);
+  std::transform(algo.begin(),
+                 algo.end(),
+                 algo.begin(),
+                 [](unsigned char c) {
+                   return static_cast<char>(std::tolower(c));
+                 });
+  if (algo == "sort" || algo == "sort_greedy") {
+    return occ::FvsAlgorithm::SORT_GREEDY;
+  }
+  if (algo == "hybrid") {
+    return occ::FvsAlgorithm::HYBRID;
+  }
+  return occ::FvsAlgorithm::BASIC_SCC;
 }
 
 inline size_t StoBatchValidator::ParseIdleWaitEnv() const {
