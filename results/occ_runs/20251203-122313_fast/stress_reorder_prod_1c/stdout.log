@@ -1,0 +1,50 @@
+# Command: ./build/test_batch_validation_stress 1 10000
+# Working dir: /home/azureuser/mako-eocc
+==========================================
+Batch Validation Stress Test
+==========================================
+Threads: 1
+Transactions per thread: 10000
+Total transactions: 10000
+
+✓ Batch validation: ENABLED
+  Batch size: 8
+
+20251103-12:27.56-850785(us) 1551843 * ParseOldFormat  (configuration.cc:66): Using old configuration format
+20251103-12:27.56-851379(us) 1551843 * ParseOldFormat  (configuration.cc:66): Using old configuration format
+20251103-12:27.56-851727(us) 1551843 * ParseOldFormat  (configuration.cc:66): Using old configuration format
+[TRANSPORT] Using default: rrr
+20251103-12:27.56-851951(us) 1551843 * Initialize      (rrr_rpc_backend.cc:58): RrrRpcBackend::Initialize: poll_thread_worker_ created, is_some=1
+20251103-12:27.56-852052(us) 1551843 * Initialize      (rrr_rpc_backend.cc:88): RrrRpcBackend initialized on 127.0.0.1:31000 (listening on 0.0.0.0:31000)
+20251103-12:27.56-852065(us) 1551843 * FastTransport   (fasttransport.cc:116): FastTransport initialized with rrr/rpc backend on 127.0.0.1:31000
+20251103-12:27.56-852413(us) 1551843 * ParseOldFormat  (configuration.cc:66): Using old configuration format
+new table is createded with name: stress_table_0, table-id: 1, on shard-server id:0
+20251103-12:27.56-854613(us) 1551843 * ParseOldFormat  (configuration.cc:66): Using old configuration format
+20251103-12:27.56-854988(us) 1551843 * ParseOldFormat  (configuration.cc:66): Using old configuration format
+[TRANSPORT] Using default: rrr
+20251103-12:27.56-855168(us) 1551843 * Initialize      (rrr_rpc_backend.cc:58): RrrRpcBackend::Initialize: poll_thread_worker_ created, is_some=1
+20251103-12:27.56-855225(us) 1551843 * Initialize      (rrr_rpc_backend.cc:88): RrrRpcBackend initialized on 127.0.0.1:31001 (listening on 0.0.0.0:31001)
+20251103-12:27.56-855241(us) 1551843 * FastTransport   (fasttransport.cc:116): FastTransport initialized with rrr/rpc backend on 127.0.0.1:31001
+20251103-12:27.56-855602(us) 1551843 * ParseOldFormat  (configuration.cc:66): Using old configuration format
+==========================================
+Results
+==========================================
+Duration: 264 ms (0.264 s)
+Committed: 9966
+Aborted: 34
+Total: 10000
+Abort Rate: 0.34%
+Throughput: 37750 txns/sec
+
+--- batch_validation_counters ---
+batch_validations: count=9966
+batch_validated_txns: count=9966
+batch_finalize_phase_us: count=9966, max=129, avg=3.12
+avg_batch_size: count=9966, max=1, avg=1.00
+avg_batch_validation_time_us: count=9966, max=307, avg=3.22
+sto_batch_phase_build_us: count=9966, max=177, avg=0.02
+sto_batch_phase_finalize_us: count=9966, max=129, avg=3.12
+--- txn_reorder_counters ---
+--- storage_reorder_counters ---
+
+# Exit code: 0

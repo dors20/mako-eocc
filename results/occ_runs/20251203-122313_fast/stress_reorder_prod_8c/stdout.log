@@ -1,0 +1,161 @@
+# Command: ./build/test_batch_validation_stress 8 10000
+# Working dir: /home/azureuser/mako-eocc
+==========================================
+Batch Validation Stress Test
+==========================================
+Threads: 8
+Transactions per thread: 10000
+Total transactions: 80000
+
+✓ Batch validation: ENABLED
+  Batch size: 8
+
+20251103-12:27.57-797720(us) 1551877 * ParseOldFormat  (configuration.cc:66): Using old configuration format
+20251103-12:27.57-798324(us) 1551877 * ParseOldFormat  (configuration.cc:66): Using old configuration format
+20251103-12:27.57-798676(us) 1551877 * ParseOldFormat  (configuration.cc:66): Using old configuration format
+[TRANSPORT] Using default: rrr
+20251103-12:27.57-798904(us) 1551877 * Initialize      (rrr_rpc_backend.cc:58): RrrRpcBackend::Initialize: poll_thread_worker_ created, is_some=1
+20251103-12:27.57-799009(us) 1551877 * Initialize      (rrr_rpc_backend.cc:88): RrrRpcBackend initialized on 127.0.0.1:31000 (listening on 0.0.0.0:31000)
+20251103-12:27.57-799022(us) 1551877 * FastTransport   (fasttransport.cc:116): FastTransport initialized with rrr/rpc backend on 127.0.0.1:31000
+20251103-12:27.57-799375(us) 1551877 * ParseOldFormat  (configuration.cc:66): Using old configuration format
+new table is createded with name: stress_table_0, table-id: 1, on shard-server id:0
+20251103-12:27.57-800516(us) 1551877 * ParseOldFormat  (configuration.cc:66): Using old configuration format
+20251103-12:27.57-800860(us) 1551877 * ParseOldFormat  (configuration.cc:66): Using old configuration format
+[TRANSPORT] Using default: rrr
+20251103-12:27.57-801036(us) 1551877 * Initialize      (rrr_rpc_backend.cc:58): RrrRpcBackend::Initialize: poll_thread_worker_ created, is_some=1
+20251103-12:27.57-801091(us) 1551877 * Initialize      (rrr_rpc_backend.cc:88): RrrRpcBackend initialized on 127.0.0.1:31001 (listening on 0.0.0.0:31001)
+20251103-12:27.57-801108(us) 1551877 * FastTransport   (fasttransport.cc:116): FastTransport initialized with rrr/rpc backend on 127.0.0.1:31001
+20251103-12:27.57-801479(us) 1551877 * ParseOldFormat  (configuration.cc:66): Using old configuration format
+new table is createded with name: stress_table_1, table-id: 2, on shard-server id:0
+20251103-12:27.57-802791(us) 1551877 * ParseOldFormat  (configuration.cc:66): Using old configuration format
+20251103-12:27.57-803129(us) 1551877 * ParseOldFormat  (configuration.cc:66): Using old configuration format
+[TRANSPORT] Using default: rrr
+20251103-12:27.57-803290(us) 1551877 * Initialize      (rrr_rpc_backend.cc:58): RrrRpcBackend::Initialize: poll_thread_worker_ created, is_some=1
+20251103-12:27.57-803336(us) 1551877 * Initialize      (rrr_rpc_backend.cc:88): RrrRpcBackend initialized on 127.0.0.1:31002 (listening on 0.0.0.0:31002)
+20251103-12:27.57-803399(us) 1551877 * FastTransport   (fasttransport.cc:116): FastTransport initialized with rrr/rpc backend on 127.0.0.1:31002
+20251103-12:27.57-803823(us) 1551877 * ParseOldFormat  (configuration.cc:66): Using old configuration format
+new table is createded with name: stress_table_2, table-id: 3, on shard-server id:0
+20251103-12:27.57-804480(us) 1551877 * ParseOldFormat  (configuration.cc:66): Using old configuration format
+20251103-12:27.57-804926(us) 1551877 * ParseOldFormat  (configuration.cc:66): Using old configuration format
+[TRANSPORT] Using default: rrr
+20251103-12:27.57-805100(us) 1551877 * Initialize      (rrr_rpc_backend.cc:58): RrrRpcBackend::Initialize: poll_thread_worker_ created, is_some=1
+20251103-12:27.57-805142(us) 1551877 * Initialize      (rrr_rpc_backend.cc:88): RrrRpcBackend initialized on 127.0.0.1:31003 (listening on 0.0.0.0:31003)
+20251103-12:27.57-805158(us) 1551877 * FastTransport   (fasttransport.cc:116): FastTransport initialized with rrr/rpc backend on 127.0.0.1:31003
+20251103-12:27.57-805502(us) 1551877 * ParseOldFormat  (configuration.cc:66): Using old configuration format
+new table is createded with name: stress_table_3, table-id: 4, on shard-server id:0
+20251103-12:27.57-806055(us) 1551877 * ParseOldFormat  (configuration.cc:66): Using old configuration format
+20251103-12:27.57-806479(us) 1551877 * ParseOldFormat  (configuration.cc:66): Using old configuration format
+[TRANSPORT] Using default: rrr
+20251103-12:27.57-806760(us) 1551877 * Initialize      (rrr_rpc_backend.cc:58): RrrRpcBackend::Initialize: poll_thread_worker_ created, is_some=1
+20251103-12:27.57-807800(us) 1551877 * Initialize      (rrr_rpc_backend.cc:88): RrrRpcBackend initialized on 127.0.0.1:31004 (listening on 0.0.0.0:31004)
+20251103-12:27.57-807882(us) 1551877 * FastTransport   (fasttransport.cc:116): FastTransport initialized with rrr/rpc backend on 127.0.0.1:31004
+20251103-12:27.57-808249(us) 1551877 * ParseOldFormat  (configuration.cc:66): Using old configuration format
+existing table is createded with name: stress_table_0, table-id: 1, on shard-server id:0
+20251103-12:27.57-808771(us) 1551877 * ParseOldFormat  (configuration.cc:66): Using old configuration format
+20251103-12:27.57-809166(us) 1551877 * ParseOldFormat  (configuration.cc:66): Using old configuration format
+[TRANSPORT] Using default: rrr
+20251103-12:27.57-809343(us) 1551877 * Initialize      (rrr_rpc_backend.cc:58): RrrRpcBackend::Initialize: poll_thread_worker_ created, is_some=1
+20251103-12:27.57-809385(us) 1551877 * Initialize      (rrr_rpc_backend.cc:88): RrrRpcBackend initialized on 127.0.0.1:31005 (listening on 0.0.0.0:31005)
+20251103-12:27.57-809402(us) 1551877 * FastTransport   (fasttransport.cc:116): FastTransport initialized with rrr/rpc backend on 127.0.0.1:31005
+20251103-12:27.57-809786(us) 1551877 * ParseOldFormat  (configuration.cc:66): Using old configuration format
+existing table is createded with name: stress_table_1, table-id: 2, on shard-server id:0
+20251103-12:27.57-810307(us) 1551877 * ParseOldFormat  (configuration.cc:66): Using old configuration format
+20251103-12:27.57-810844(us) 1551877 * ParseOldFormat  (configuration.cc:66): Using old configuration format
+[TRANSPORT] Using default: rrr
+20251103-12:27.57-811085(us) 1551877 * Initialize      (rrr_rpc_backend.cc:58): RrrRpcBackend::Initialize: poll_thread_worker_ created, is_some=1
+20251103-12:27.57-811832(us) 1551877 * Initialize      (rrr_rpc_backend.cc:88): RrrRpcBackend initialized on 127.0.0.1:31006 (listening on 0.0.0.0:31006)
+20251103-12:27.57-811858(us) 1551877 * FastTransport   (fasttransport.cc:116): FastTransport initialized with rrr/rpc backend on 127.0.0.1:31006
+20251103-12:27.57-812646(us) 1551877 * ParseOldFormat  (configuration.cc:66): Using old configuration format
+existing table is createded with name: stress_table_2, table-id: 3, on shard-server id:0
+20251103-12:27.57-813206(us) 1551877 * ParseOldFormat  (configuration.cc:66): Using old configuration format
+20251103-12:27.57-813565(us) 1551877 * ParseOldFormat  (configuration.cc:66): Using old configuration format
+[TRANSPORT] Using default: rrr
+20251103-12:27.57-813747(us) 1551877 * Initialize      (rrr_rpc_backend.cc:58): RrrRpcBackend::Initialize: poll_thread_worker_ created, is_some=1
+20251103-12:27.57-813788(us) 1551877 * Initialize      (rrr_rpc_backend.cc:88): RrrRpcBackend initialized on 127.0.0.1:31007 (listening on 0.0.0.0:31007)
+20251103-12:27.57-813800(us) 1551877 * FastTransport   (fasttransport.cc:116): FastTransport initialized with rrr/rpc backend on 127.0.0.1:31007
+20251103-12:27.57-814141(us) 1551877 * ParseOldFormat  (configuration.cc:66): Using old configuration format
+existing table is createded with name: stress_table_3, table-id: 4, on shard-server id:0
+20251103-12:27.57-814871(us) 1551877 * ParseOldFormat  (configuration.cc:66): Using old configuration format
+20251103-12:27.57-815242(us) 1551877 * ParseOldFormat  (configuration.cc:66): Using old configuration format
+20251103-12:27.57-815358(us) 1551877 * ParseOldFormat  (configuration.cc:66): Using old configuration format
+[TRANSPORT] Using default: rrr
+20251103-12:27.57-815529(us) 1551877 * Initialize      (rrr_rpc_backend.cc:58): RrrRpcBackend::Initialize: poll_thread_worker_ created, is_some=1
+20251103-12:27.57-815567(us) 1551877 * Initialize      (rrr_rpc_backend.cc:88): RrrRpcBackend initialized on 127.0.0.1:31008 (listening on 0.0.0.0:31008)
+20251103-12:27.57-815579(us) 1551877 * FastTransport   (fasttransport.cc:116): FastTransport initialized with rrr/rpc backend on 127.0.0.1:31008
+20251103-12:27.57-815698(us) 1551877 * ParseOldFormat  (configuration.cc:66): Using old configuration format
+[TRANSPORT] Using default: rrr
+20251103-12:27.57-815861(us) 1551877 * Initialize      (rrr_rpc_backend.cc:58): RrrRpcBackend::Initialize: poll_thread_worker_ created, is_some=1
+20251103-12:27.57-815896(us) 1551877 * Initialize      (rrr_rpc_backend.cc:88): RrrRpcBackend initialized on 127.0.0.1:31009 (listening on 0.0.0.0:31009)
+20251103-12:27.57-815908(us) 1551877 * FastTransport   (fasttransport.cc:116): FastTransport initialized with rrr/rpc backend on 127.0.0.1:31009
+20251103-12:27.57-816303(us) 1551877 * ParseOldFormat  (configuration.cc:66): Using old configuration format
+20251103-12:27.57-816337(us) 1551877 * ParseOldFormat  (configuration.cc:66): Using old configuration format
+20251103-12:27.57-816784(us) 1551877 * ParseOldFormat  (configuration.cc:66): Using old configuration format
+20251103-12:27.57-817088(us) 1551877 * ParseOldFormat  (configuration.cc:66): Using old configuration format
+20251103-12:27.57-817121(us) 1551877 * ParseOldFormat  (configuration.cc:66): Using old configuration format
+20251103-12:27.57-817571(us) 1551877 * ParseOldFormat  (configuration.cc:66): Using old configuration format
+20251103-12:27.57-817704(us) 1551877 * ParseOldFormat  (configuration.cc:66): Using old configuration format
+20251103-12:27.57-818253(us) 1551877 * ParseOldFormat  (configuration.cc:66): Using old configuration format
+20251103-12:27.57-818739(us) 1551877 * ParseOldFormat  (configuration.cc:66): Using old configuration format
+20251103-12:27.57-818754(us) 1551877 * ParseOldFormat  (configuration.cc:66): Using old configuration format
+20251103-12:27.57-819022(us) 1551877 * ParseOldFormat  (configuration.cc:66): Using old configuration format
+20251103-12:27.57-819879(us) 1551877 * ParseOldFormat  (configuration.cc:66): Using old configuration format
+20251103-12:27.57-822118(us) 1551877 [TRANSPORT] Using default: rrr
+* ParseOldFormat  (configuration.cc:66): Using old configuration format
+[TRANSPORT] Using default: rrr
+20251103-12:27.57-823312(us) 1551877 * ParseOldFormat  (configuration.cc:66): Using old configuration format
+20251103-12:27.57-823425(us) 1551877 * Initialize      (rrr_rpc_backend.cc:58): RrrRpcBackend::Initialize: poll_thread_worker_ created, is_some=1
+20251103-12:27.57-823481(us) 1551877 * Initialize      (rrr_rpc_backend.cc:88): RrrRpcBackend initialized on 127.0.0.1:31010 (listening on 0.0.0.0:31010)
+20251103-12:27.57-823493(us) 1551877 * FastTransport   (fasttransport.cc:116): FastTransport initialized with rrr/rpc backend on 127.0.0.1:31010
+20251103-12:27.57-823568(us) 1551877 * Initialize      (rrr_rpc_backend.cc:58): RrrRpcBackend::Initialize: poll_thread_worker_ created, is_some=1
+20251103-12:27.57-823604(us) 1551877 * Initialize      (rrr_rpc_backend.cc:88): RrrRpcBackend initialized on 127.0.0.1:31011 (listening on 0.0.0.0:31011)
+20251103-12:27.57-823628(us) 1551877 * FastTransport   (fasttransport.cc:116): FastTransport initialized with rrr/rpc backend on 127.0.0.1:31011
+20251103-12:27.57-824031(us) 1551877 [TRANSPORT] Using default: rrr
+* ParseOldFormat  (configuration.cc:66): Using old configuration format
+[TRANSPORT] Using default: rrr
+[TRANSPORT] Using default: rrr
+20251103-12:27.57-824565(us) 1551877 * Initialize      (rrr_rpc_backend.cc:58): RrrRpcBackend::Initialize: poll_thread_worker_ created, is_some=1
+20251103-12:27.57-824585(us) 1551877 * Initialize      (rrr_rpc_backend.cc:58): RrrRpcBackend::Initialize: poll_thread_worker_ created, is_some=1
+20251103-12:27.57-824607(us) 1551877 * Initialize      (rrr_rpc_backend.cc:88): RrrRpcBackend initialized on 127.0.0.1:31013 (listening on 0.0.0.0:31013)
+20251103-12:27.57-824637(us) 1551877 * FastTransport   (fasttransport.cc:116): FastTransport initialized with rrr/rpc backend on 127.0.0.1:31013
+[TRANSPORT] Using default: rrr
+20251103-12:27.57-824970(us) 1551877 * Initialize      (rrr_rpc_backend.cc:58): RrrRpcBackend::Initialize: poll_thread_worker_ created, is_some=1
+20251103-12:27.57-825012(us) 1551877 * Initialize      (rrr_rpc_backend.cc:88): RrrRpcBackend initialized on 127.0.0.1:31012 (listening on 0.0.0.0:31012)
+20251103-12:27.57-825030(us) 1551877 * FastTransport   (fasttransport.cc:116): FastTransport initialized with rrr/rpc backend on 127.0.0.1:31012
+20251103-12:27.57-825099(us) 1551877 * Initialize      (rrr_rpc_backend.cc:88): RrrRpcBackend initialized on 127.0.0.1:31014 (listening on 0.0.0.0:31014)
+20251103-12:27.57-825115(us) 1551877 * FastTransport   (fasttransport.cc:116): FastTransport initialized with rrr/rpc backend on 127.0.0.1:31014
+20251103-12:27.57-825449(us) 1551877 * ParseOldFormat  (configuration.cc:66): Using old configuration format
+20251103-12:27.57-825670(us) 1551877 * Initialize      (rrr_rpc_backend.cc:58): RrrRpcBackend::Initialize: poll_thread_worker_ created, is_some=1
+20251103-12:27.57-825715(us) 1551877 * Initialize      (rrr_rpc_backend.cc:88): RrrRpcBackend initialized on 127.0.0.1:31015 (listening on 0.0.0.0:31015)
+20251103-12:27.57-825732(us) 1551877 * FastTransport   (fasttransport.cc:116): FastTransport initialized with rrr/rpc backend on 127.0.0.1:31015
+20251103-12:27.57-825907(us) 1551877 * ParseOldFormat  (configuration.cc:66): Using old configuration format
+20251103-12:27.57-826121(us) 1551877 * ParseOldFormat  (configuration.cc:66): Using old configuration format
+20251103-12:27.57-826174(us) 1551877 * ParseOldFormat  (configuration.cc:66): Using old configuration format
+20251103-12:27.57-826539(us) 1551877 * ParseOldFormat  (configuration.cc:66): Using old configuration format
+==========================================
+Results
+==========================================
+Duration: 514 ms (0.514 s)
+Committed: 79299
+Aborted: 701
+Total: 80000
+Abort Rate: 0.87625%
+Throughput: 154278 txns/sec
+
+--- batch_validation_counters ---
+batch_validations: count=29145
+batch_validated_txns: count=79594
+batch_aborted_txns: count=130
+batch_finalize_phase_us: count=29145, max=419, avg=10.55
+avg_batch_size: count=29145, max=8, avg=2.74
+avg_batch_validation_time_us: count=29145, max=645, avg=12.97
+sto_batch_phase_build_us: count=29145, max=216, avg=0.02
+sto_batch_phase_reorder_us: count=17371, max=282, avg=3.37
+sto_batch_phase_finalize_us: count=29145, max=419, avg=10.55
+--- txn_reorder_counters ---
+txn_reorder_attempts: count=17371
+txn_reorder_applied: count=130
+txn_reorder_removed_txns: count=130
+txn_reorder_cycles_detected: count=130
+--- storage_reorder_counters ---
+
+# Exit code: 0

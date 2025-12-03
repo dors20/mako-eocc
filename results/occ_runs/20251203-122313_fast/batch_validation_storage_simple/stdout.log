@@ -1,0 +1,45 @@
+# Command: ./build/simpleTransaction
+# Working dir: /home/azureuser/mako-eocc
+20251103-12:23.15-903511(us) 1548324 * ParseOldFormat  (configuration.cc:66): Using old configuration format
+20251103-12:23.15-904146(us) 1548324 * ParseOldFormat  (configuration.cc:66): Using old configuration format
+20251103-12:23.15-904491(us) 1548324 * ParseOldFormat  (configuration.cc:66): Using old configuration format
+=== Mako Transaction Tests  ===
+[TRANSPORT] Using default: rrr
+20251103-12:23.15-904736(us) 1548324 * Initialize      (rrr_rpc_backend.cc:58): RrrRpcBackend::Initialize: poll_thread_worker_ created, is_some=1
+20251103-12:23.15-904834(us) 1548324 * Initialize      (rrr_rpc_backend.cc:88): RrrRpcBackend initialized on 127.0.0.1:31000 (listening on 0.0.0.0:31000)
+20251103-12:23.15-904846(us) 1548324 * FastTransport   (fasttransport.cc:116): FastTransport initialized with rrr/rpc backend on 127.0.0.1:31000
+20251103-12:23.15-905205(us) 1548324 * ParseOldFormat  (configuration.cc:66): Using old configuration format
+
+--- Testing Basic Transactions ---
+new table is createded with name: customer_0, table-id: 1, on shard-server id:0
+existing table is createded with name: customer_0, table-id: 1, on shard-server id:0
+[[32mPASS[0m] Write 5 records
+[[32mPASS[0m] Read and verify 5 records
+[[32mPASS[0m] Table scan verification
+
+--- Testing OverwrittenOperations ---
+new table is createded with name: overwritten_table, table-id: 2, on shard-server id:0
+--- batch_validation_counters ---
+batch_validations: count=15
+batch_validated_txns: count=15
+batch_finalize_phase_us: count=15, max=158, avg=14.47
+avg_batch_size: count=15, max=1, avg=1.00
+avg_batch_validation_time_us: count=15, max=322, avg=25.47
+sto_batch_phase_build_us: count=15, max=164, avg=10.93
+sto_batch_phase_finalize_us: count=15, max=158, avg=14.47
+--- txn_reorder_counters ---
+--- storage_reorder_counters ---
+storage_reorder_batches: count=0
+storage_reorder_attempts: count=0
+storage_reorder_applied: count=0
+storage_reorder_removed_txns: count=0
+storage_reorder_cycles_detected: count=0
+storage_reorder_aborted_txns: count=0
+storage_reorder_avg_batch_size: count=0, max=0, avg=0.00
+storage_reorder_phase_build_us: count=15, max=945, avg=63.00
+storage_reorder_phase_finalize_us: count=15, max=1454, avg=133.53
+[[32mPASS[0m] value check
+
+[32mAll tests completed successfully![0m
+
+# Exit code: 0

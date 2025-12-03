@@ -1,0 +1,50 @@
+{
+  "name": "batch_validation_simple",
+  "description": "OCC with batch validation enabled using simpleTransaction.",
+  "mode": "fast",
+  "command_template": "./build/simpleTransaction",
+  "command": [
+    "./build/simpleTransaction"
+  ],
+  "placeholders": {
+    "batch_size": 8,
+    "batch_wait_us": 250
+  },
+  "env": {
+    "MAKO_ENABLE_BATCH_VALIDATION": "1",
+    "MAKO_BATCH_VALIDATION_SIZE": "8",
+    "MAKO_BATCH_VALIDATION_MAX_WAIT_US": "250"
+  },
+  "workdir": "/home/azureuser/mako-eocc",
+  "timestamp": "20251203-122313",
+  "dry_run": false,
+  "event_counters": {
+    "batch_validations": 15,
+    "batch_validated_txns": 15,
+    "batch_finalize_phase_us": {
+      "count": 15,
+      "max": 117.0,
+      "avg": 11.0
+    },
+    "avg_batch_size": {
+      "count": 15,
+      "max": 1.0,
+      "avg": 1.0
+    },
+    "avg_batch_validation_time_us": {
+      "count": 15,
+      "max": 238.0,
+      "avg": 19.07
+    },
+    "sto_batch_phase_build_us": {
+      "count": 15,
+      "max": 121.0,
+      "avg": 8.07
+    },
+    "sto_batch_phase_finalize_us": {
+      "count": 15,
+      "max": 117.0,
+      "avg": 11.0
+    }
+  }
+}

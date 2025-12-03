@@ -1,0 +1,92 @@
+{
+  "name": "batch_validation_stress_storage",
+  "description": "Batch validation + storage-stage reordering on stress harness.",
+  "mode": "fast",
+  "command_template": "./build/test_batch_validation_stress {threads} {txns_per_thread}",
+  "command": [
+    "./build/test_batch_validation_stress",
+    "2",
+    "500"
+  ],
+  "placeholders": {
+    "threads": 2,
+    "txns_per_thread": 500,
+    "batch_size": 8,
+    "batch_wait_us": 250,
+    "storage_batch": 8,
+    "storage_wait_us": 50
+  },
+  "env": {
+    "MAKO_ENABLE_BATCH_VALIDATION": "1",
+    "MAKO_BATCH_VALIDATION_SIZE": "8",
+    "MAKO_BATCH_VALIDATION_MAX_WAIT_US": "250",
+    "MAKO_ENABLE_STORAGE_REORDER": "1",
+    "MAKO_STORAGE_REORDER_SIZE": "8",
+    "MAKO_STORAGE_REORDER_MAX_WAIT_US": "50"
+  },
+  "workdir": "/home/azureuser/mako-eocc",
+  "timestamp": "20251203-122313",
+  "dry_run": false,
+  "metrics": {
+    "duration_seconds": 0.049,
+    "committed": 932.0,
+    "aborted": 68.0,
+    "abort_rate": 6.8,
+    "throughput_tps": 19020.0
+  },
+  "event_counters": {
+    "batch_validations": 472,
+    "batch_validated_txns": 932,
+    "batch_finalize_phase_us": {
+      "count": 472,
+      "max": 239.0,
+      "avg": 3.32
+    },
+    "avg_batch_size": {
+      "count": 472,
+      "max": 2.0,
+      "avg": 1.97
+    },
+    "avg_batch_validation_time_us": {
+      "count": 472,
+      "max": 564.0,
+      "avg": 4.08
+    },
+    "sto_batch_phase_build_us": {
+      "count": 472,
+      "max": 325.0,
+      "avg": 0.7
+    },
+    "sto_batch_phase_finalize_us": {
+      "count": 472,
+      "max": 239.0,
+      "avg": 3.32
+    },
+    "storage_reorder_batches": 463,
+    "storage_reorder_attempts": 463,
+    "storage_reorder_applied": 0,
+    "storage_reorder_removed_txns": 0,
+    "storage_reorder_cycles_detected": 0,
+    "storage_reorder_aborted_txns": 0,
+    "storage_reorder_avg_batch_size": {
+      "count": 463,
+      "max": 2.0,
+      "avg": 2.0
+    },
+    "storage_reorder_phase_build_us": {
+      "count": 469,
+      "max": 1787.0,
+      "avg": 3.86
+    },
+    "storage_reorder_phase_reorder_us": {
+      "count": 463,
+      "max": 19.0,
+      "avg": 1.39
+    },
+    "storage_reorder_phase_finalize_us": {
+      "count": 469,
+      "max": 786.0,
+      "avg": 29.28
+    }
+  }
+}
