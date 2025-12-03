@@ -1,0 +1,25 @@
+{
+  "name": "dbtest_baseline_tpcc",
+  "description": "Baseline dbtest TPCC run (sequential validation) using default config.",
+  "mode": "full",
+  "command_template": "./build/dbtest -q config/mako_single_node.yml -N local_s0 -t {threads}",
+  "command": [
+    "./build/dbtest",
+    "-q",
+    "config/mako_single_node.yml",
+    "-N",
+    "local_s0",
+    "-t",
+    "24"
+  ],
+  "placeholders": {
+    "threads": 24
+  },
+  "env": {
+    "MAKO_ENABLE_BATCH_VALIDATION": "0",
+    "DBTEST_EXIT_AFTER_SECS": "60"
+  },
+  "workdir": "/home/ubuntu/md/mako-eocc",
+  "timestamp": "20251203-052826",
+  "dry_run": false
+}

@@ -1,6 +1,6 @@
 defaults:
-  workdir: /home/azureuser/mako-eocc
-  results_root: /home/azureuser/mako-eocc/results/occ_runs
+  workdir: /home/ubuntu/md/mako-eocc
+  results_root: /home/ubuntu/md/mako-eocc/results/occ_runs
 
 scenarios:
   - name: baseline_simple
@@ -343,4 +343,75 @@ scenarios:
       DBTEST_EXIT_AFTER_SECS:
         fast: 5
         full: 60
+
+  # Core-scaling OCC stress scenarios (high concurrent clients)
+  - name: stress_reorder_prod_1c
+    description: OCC stress harness with txn reordering (prod FVS), 1 thread, high load.
+    command: "./build/test_batch_validation_stress {threads} {txns_per_thread}"
+    placeholders:
+      threads: 1
+      txns_per_thread: 10000
+    env:
+      MAKO_ENABLE_BATCH_VALIDATION: "1"
+      MAKO_ENABLE_TXN_REORDER: "1"
+      MAKO_TXN_REORDER_FVS: "prod"
+      MAKO_TXN_REORDER_ALGO: "sort"
+      MAKO_BATCH_VALIDATION_SIZE: "64"
+      MAKO_BATCH_VALIDATION_MAX_WAIT_US: "5000"
+
+  - name: stress_reorder_prod_2c
+    description: OCC stress harness with txn reordering (prod FVS), 2 threads, high load.
+    command: "./build/test_batch_validation_stress {threads} {txns_per_thread}"
+    placeholders:
+      threads: 2
+      txns_per_thread: 10000
+    env:
+      MAKO_ENABLE_BATCH_VALIDATION: "1"
+      MAKO_ENABLE_TXN_REORDER: "1"
+      MAKO_TXN_REORDER_FVS: "prod"
+      MAKO_TXN_REORDER_ALGO: "sort"
+      MAKO_BATCH_VALIDATION_SIZE: "64"
+      MAKO_BATCH_VALIDATION_MAX_WAIT_US: "5000"
+
+  - name: stress_reorder_prod_4c
+    description: OCC stress harness with txn reordering (prod FVS), 4 threads, high load.
+    command: "./build/test_batch_validation_stress {threads} {txns_per_thread}"
+    placeholders:
+      threads: 4
+      txns_per_thread: 10000
+    env:
+      MAKO_ENABLE_BATCH_VALIDATION: "1"
+      MAKO_ENABLE_TXN_REORDER: "1"
+      MAKO_TXN_REORDER_FVS: "prod"
+      MAKO_TXN_REORDER_ALGO: "sort"
+      MAKO_BATCH_VALIDATION_SIZE: "64"
+      MAKO_BATCH_VALIDATION_MAX_WAIT_US: "5000"
+
+  - name: stress_reorder_prod_8c
+    description: OCC stress harness with txn reordering (prod FVS), 8 threads, high load.
+    command: "./build/test_batch_validation_stress {threads} {txns_per_thread}"
+    placeholders:
+      threads: 8
+      txns_per_thread: 10000
+    env:
+      MAKO_ENABLE_BATCH_VALIDATION: "1"
+      MAKO_ENABLE_TXN_REORDER: "1"
+      MAKO_TXN_REORDER_FVS: "prod"
+      MAKO_TXN_REORDER_ALGO: "sort"
+      MAKO_BATCH_VALIDATION_SIZE: "64"
+      MAKO_BATCH_VALIDATION_MAX_WAIT_US: "5000"
+
+  - name: stress_reorder_prod_16c
+    description: OCC stress harness with txn reordering (prod FVS), 16 threads, high load.
+    command: "./build/test_batch_validation_stress {threads} {txns_per_thread}"
+    placeholders:
+      threads: 16
+      txns_per_thread: 10000
+    env:
+      MAKO_ENABLE_BATCH_VALIDATION: "1"
+      MAKO_ENABLE_TXN_REORDER: "1"
+      MAKO_TXN_REORDER_FVS: "prod"
+      MAKO_TXN_REORDER_ALGO: "sort"
+      MAKO_BATCH_VALIDATION_SIZE: "64"
+      MAKO_BATCH_VALIDATION_MAX_WAIT_US: "5000"
 

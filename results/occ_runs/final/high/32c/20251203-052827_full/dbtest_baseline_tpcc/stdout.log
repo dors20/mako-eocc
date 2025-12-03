@@ -1,0 +1,470 @@
+# Command: ./build/dbtest -q config/mako_single_node.yml -N local_s0 -t 32
+# Working dir: /home/ubuntu/md/mako-eocc
+20251103-05:28.27-381837(us) 105138 * ParseNewFormat  (configuration.cc:99): Using new configuration format
+20251103-05:28.27-381894(us) 105138 * ParseNewFormat  (configuration.cc:159): Loaded 1 sites in 1 shards
+20251103-05:28.27-381908(us) 105138 * handle_new_config_format (dbtest.cc:131):    Site local_s0: shard=0, replica_idx=0, is_leader=1, cluster=localhost
+allocator::Initialize()
+  hugepgsize: 2097152
+  use MADV_WILLNEED: 1
+  mmap() region [0x70696be00000, 0x7069ac000000)
+cpu0 owns [0x70696be00000, 0x70696de00000)
+cpu1 owns [0x70696de00000, 0x70696fe00000)
+cpu2 owns [0x70696fe00000, 0x706971e00000)
+cpu3 owns [0x706971e00000, 0x706973e00000)
+cpu4 owns [0x706973e00000, 0x706975e00000)
+cpu5 owns [0x706975e00000, 0x706977e00000)
+cpu6 owns [0x706977e00000, 0x706979e00000)
+cpu7 owns [0x706979e00000, 0x70697be00000)
+cpu8 owns [0x70697be00000, 0x70697de00000)
+cpu9 owns [0x70697de00000, 0x70697fe00000)
+cpu10 owns [0x70697fe00000, 0x706981e00000)
+cpu11 owns [0x706981e00000, 0x706983e00000)
+cpu12 owns [0x706983e00000, 0x706985e00000)
+cpu13 owns [0x706985e00000, 0x706987e00000)
+cpu14 owns [0x706987e00000, 0x706989e00000)
+cpu15 owns [0x706989e00000, 0x70698be00000)
+cpu16 owns [0x70698be00000, 0x70698de00000)
+cpu17 owns [0x70698de00000, 0x70698fe00000)
+cpu18 owns [0x70698fe00000, 0x706991e00000)
+cpu19 owns [0x706991e00000, 0x706993e00000)
+cpu20 owns [0x706993e00000, 0x706995e00000)
+cpu21 owns [0x706995e00000, 0x706997e00000)
+cpu22 owns [0x706997e00000, 0x706999e00000)
+cpu23 owns [0x706999e00000, 0x70699be00000)
+cpu24 owns [0x70699be00000, 0x70699de00000)
+cpu25 owns [0x70699de00000, 0x70699fe00000)
+cpu26 owns [0x70699fe00000, 0x7069a1e00000)
+cpu27 owns [0x7069a1e00000, 0x7069a3e00000)
+cpu28 owns [0x7069a3e00000, 0x7069a5e00000)
+cpu29 owns [0x7069a5e00000, 0x7069a7e00000)
+cpu30 owns [0x7069a7e00000, 0x7069a9e00000)
+cpu31 owns [0x7069a9e00000, 0x7069abe00000)
+Database Benchmark:
+  pid: 105138
+settings:
+  num-cpus    : 32
+  num-threads : 32
+  shardIndex  : 0
+  paxos_proc_name  : localhost
+  nshards     : 1
+  is_micro    : 0
+  is_replicated : 0
+  var-encode  : yes
+  allocator   : jemalloc
+system properties:
+  tuple_prefetch          : no
+  btree_node_prefetch     : yes
+tpcc settings:
+  cross_partition_transactions : 1
+  read_only_snapshots          : 1
+  partition_locks              : 0
+  separate_tree_per_partition  : 1
+  new_order_remote_item_pct    : 1
+  new_order_fast_id_gen        : 1
+  uniform_item_dist            : 0
+  order_status_scan_hack       : 0
+  workload_mix                 : [45, 43, 4, 4, 4]
+new table is createded with name: customer_0, table-id: 1, on shard-server id:0
+new table is createded with name: customer_1, table-id: 2, on shard-server id:0
+new table is createded with name: customer_2, table-id: 3, on shard-server id:0
+new table is createded with name: customer_3, table-id: 4, on shard-server id:0
+new table is createded with name: customer_4, table-id: 5, on shard-server id:0
+new table is createded with name: customer_5, table-id: 6, on shard-server id:0
+new table is createded with name: customer_6, table-id: 7, on shard-server id:0
+new table is createded with name: customer_7, table-id: 8, on shard-server id:0
+new table is createded with name: customer_8, table-id: 9, on shard-server id:0
+new table is createded with name: customer_9, table-id: 10, on shard-server id:0
+new table is createded with name: customer_10, table-id: 11, on shard-server id:0
+new table is createded with name: customer_11, table-id: 12, on shard-server id:0
+new table is createded with name: customer_12, table-id: 13, on shard-server id:0
+new table is createded with name: customer_13, table-id: 14, on shard-server id:0
+new table is createded with name: customer_14, table-id: 15, on shard-server id:0
+new table is createded with name: customer_15, table-id: 16, on shard-server id:0
+new table is createded with name: customer_16, table-id: 17, on shard-server id:0
+new table is createded with name: customer_17, table-id: 18, on shard-server id:0
+new table is createded with name: customer_18, table-id: 19, on shard-server id:0
+new table is createded with name: customer_19, table-id: 20, on shard-server id:0
+new table is createded with name: customer_20, table-id: 21, on shard-server id:0
+new table is createded with name: customer_21, table-id: 22, on shard-server id:0
+new table is createded with name: customer_22, table-id: 23, on shard-server id:0
+new table is createded with name: customer_23, table-id: 24, on shard-server id:0
+new table is createded with name: customer_24, table-id: 25, on shard-server id:0
+new table is createded with name: customer_25, table-id: 26, on shard-server id:0
+new table is createded with name: customer_26, table-id: 27, on shard-server id:0
+new table is createded with name: customer_27, table-id: 28, on shard-server id:0
+new table is createded with name: customer_28, table-id: 29, on shard-server id:0
+new table is createded with name: customer_29, table-id: 30, on shard-server id:0
+new table is createded with name: customer_30, table-id: 31, on shard-server id:0
+new table is createded with name: customer_31, table-id: 32, on shard-server id:0
+new table is createded with name: customer_name_idx_0, table-id: 33, on shard-server id:0
+new table is createded with name: customer_name_idx_1, table-id: 34, on shard-server id:0
+new table is createded with name: customer_name_idx_2, table-id: 35, on shard-server id:0
+new table is createded with name: customer_name_idx_3, table-id: 36, on shard-server id:0
+new table is createded with name: customer_name_idx_4, table-id: 37, on shard-server id:0
+new table is createded with name: customer_name_idx_5, table-id: 38, on shard-server id:0
+new table is createded with name: customer_name_idx_6, table-id: 39, on shard-server id:0
+new table is createded with name: customer_name_idx_7, table-id: 40, on shard-server id:0
+new table is createded with name: customer_name_idx_8, table-id: 41, on shard-server id:0
+new table is createded with name: customer_name_idx_9, table-id: 42, on shard-server id:0
+new table is createded with name: customer_name_idx_10, table-id: 43, on shard-server id:0
+new table is createded with name: customer_name_idx_11, table-id: 44, on shard-server id:0
+new table is createded with name: customer_name_idx_12, table-id: 45, on shard-server id:0
+new table is createded with name: customer_name_idx_13, table-id: 46, on shard-server id:0
+new table is createded with name: customer_name_idx_14, table-id: 47, on shard-server id:0
+new table is createded with name: customer_name_idx_15, table-id: 48, on shard-server id:0
+new table is createded with name: customer_name_idx_16, table-id: 49, on shard-server id:0
+new table is createded with name: customer_name_idx_17, table-id: 50, on shard-server id:0
+new table is createded with name: customer_name_idx_18, table-id: 51, on shard-server id:0
+new table is createded with name: customer_name_idx_19, table-id: 52, on shard-server id:0
+new table is createded with name: customer_name_idx_20, table-id: 53, on shard-server id:0
+new table is createded with name: customer_name_idx_21, table-id: 54, on shard-server id:0
+new table is createded with name: customer_name_idx_22, table-id: 55, on shard-server id:0
+new table is createded with name: customer_name_idx_23, table-id: 56, on shard-server id:0
+new table is createded with name: customer_name_idx_24, table-id: 57, on shard-server id:0
+new table is createded with name: customer_name_idx_25, table-id: 58, on shard-server id:0
+new table is createded with name: customer_name_idx_26, table-id: 59, on shard-server id:0
+new table is createded with name: customer_name_idx_27, table-id: 60, on shard-server id:0
+new table is createded with name: customer_name_idx_28, table-id: 61, on shard-server id:0
+new table is createded with name: customer_name_idx_29, table-id: 62, on shard-server id:0
+new table is createded with name: customer_name_idx_30, table-id: 63, on shard-server id:0
+new table is createded with name: customer_name_idx_31, table-id: 64, on shard-server id:0
+new table is createded with name: district_0, table-id: 65, on shard-server id:0
+new table is createded with name: district_1, table-id: 66, on shard-server id:0
+new table is createded with name: district_2, table-id: 67, on shard-server id:0
+new table is createded with name: district_3, table-id: 68, on shard-server id:0
+new table is createded with name: district_4, table-id: 69, on shard-server id:0
+new table is createded with name: district_5, table-id: 70, on shard-server id:0
+new table is createded with name: district_6, table-id: 71, on shard-server id:0
+new table is createded with name: district_7, table-id: 72, on shard-server id:0
+new table is createded with name: district_8, table-id: 73, on shard-server id:0
+new table is createded with name: district_9, table-id: 74, on shard-server id:0
+new table is createded with name: district_10, table-id: 75, on shard-server id:0
+new table is createded with name: district_11, table-id: 76, on shard-server id:0
+new table is createded with name: district_12, table-id: 77, on shard-server id:0
+new table is createded with name: district_13, table-id: 78, on shard-server id:0
+new table is createded with name: district_14, table-id: 79, on shard-server id:0
+new table is createded with name: district_15, table-id: 80, on shard-server id:0
+new table is createded with name: district_16, table-id: 81, on shard-server id:0
+new table is createded with name: district_17, table-id: 82, on shard-server id:0
+new table is createded with name: district_18, table-id: 83, on shard-server id:0
+new table is createded with name: district_19, table-id: 84, on shard-server id:0
+new table is createded with name: district_20, table-id: 85, on shard-server id:0
+new table is createded with name: district_21, table-id: 86, on shard-server id:0
+new table is createded with name: district_22, table-id: 87, on shard-server id:0
+new table is createded with name: district_23, table-id: 88, on shard-server id:0
+new table is createded with name: district_24, table-id: 89, on shard-server id:0
+new table is createded with name: district_25, table-id: 90, on shard-server id:0
+new table is createded with name: district_26, table-id: 91, on shard-server id:0
+new table is createded with name: district_27, table-id: 92, on shard-server id:0
+new table is createded with name: district_28, table-id: 93, on shard-server id:0
+new table is createded with name: district_29, table-id: 94, on shard-server id:0
+new table is createded with name: district_30, table-id: 95, on shard-server id:0
+new table is createded with name: district_31, table-id: 96, on shard-server id:0
+new table is createded with name: history_0, table-id: 97, on shard-server id:0
+new table is createded with name: history_1, table-id: 98, on shard-server id:0
+new table is createded with name: history_2, table-id: 99, on shard-server id:0
+new table is createded with name: history_3, table-id: 100, on shard-server id:0
+new table is createded with name: history_4, table-id: 101, on shard-server id:0
+new table is createded with name: history_5, table-id: 102, on shard-server id:0
+new table is createded with name: history_6, table-id: 103, on shard-server id:0
+new table is createded with name: history_7, table-id: 104, on shard-server id:0
+new table is createded with name: history_8, table-id: 105, on shard-server id:0
+new table is createded with name: history_9, table-id: 106, on shard-server id:0
+new table is createded with name: history_10, table-id: 107, on shard-server id:0
+new table is createded with name: history_11, table-id: 108, on shard-server id:0
+new table is createded with name: history_12, table-id: 109, on shard-server id:0
+new table is createded with name: history_13, table-id: 110, on shard-server id:0
+new table is createded with name: history_14, table-id: 111, on shard-server id:0
+new table is createded with name: history_15, table-id: 112, on shard-server id:0
+new table is createded with name: history_16, table-id: 113, on shard-server id:0
+new table is createded with name: history_17, table-id: 114, on shard-server id:0
+new table is createded with name: history_18, table-id: 115, on shard-server id:0
+new table is createded with name: history_19, table-id: 116, on shard-server id:0
+new table is createded with name: history_20, table-id: 117, on shard-server id:0
+new table is createded with name: history_21, table-id: 118, on shard-server id:0
+new table is createded with name: history_22, table-id: 119, on shard-server id:0
+new table is createded with name: history_23, table-id: 120, on shard-server id:0
+new table is createded with name: history_24, table-id: 121, on shard-server id:0
+new table is createded with name: history_25, table-id: 122, on shard-server id:0
+new table is createded with name: history_26, table-id: 123, on shard-server id:0
+new table is createded with name: history_27, table-id: 124, on shard-server id:0
+new table is createded with name: history_28, table-id: 125, on shard-server id:0
+new table is createded with name: history_29, table-id: 126, on shard-server id:0
+new table is createded with name: history_30, table-id: 127, on shard-server id:0
+new table is createded with name: history_31, table-id: 128, on shard-server id:0
+new table is createded with name: new_order_0, table-id: 129, on shard-server id:0
+new table is createded with name: new_order_1, table-id: 130, on shard-server id:0
+new table is createded with name: new_order_2, table-id: 131, on shard-server id:0
+new table is createded with name: new_order_3, table-id: 132, on shard-server id:0
+new table is createded with name: new_order_4, table-id: 133, on shard-server id:0
+new table is createded with name: new_order_5, table-id: 134, on shard-server id:0
+new table is createded with name: new_order_6, table-id: 135, on shard-server id:0
+new table is createded with name: new_order_7, table-id: 136, on shard-server id:0
+new table is createded with name: new_order_8, table-id: 137, on shard-server id:0
+new table is createded with name: new_order_9, table-id: 138, on shard-server id:0
+new table is createded with name: new_order_10, table-id: 139, on shard-server id:0
+new table is createded with name: new_order_11, table-id: 140, on shard-server id:0
+new table is createded with name: new_order_12, table-id: 141, on shard-server id:0
+new table is createded with name: new_order_13, table-id: 142, on shard-server id:0
+new table is createded with name: new_order_14, table-id: 143, on shard-server id:0
+new table is createded with name: new_order_15, table-id: 144, on shard-server id:0
+new table is createded with name: new_order_16, table-id: 145, on shard-server id:0
+new table is createded with name: new_order_17, table-id: 146, on shard-server id:0
+new table is createded with name: new_order_18, table-id: 147, on shard-server id:0
+new table is createded with name: new_order_19, table-id: 148, on shard-server id:0
+new table is createded with name: new_order_20, table-id: 149, on shard-server id:0
+new table is createded with name: new_order_21, table-id: 150, on shard-server id:0
+new table is createded with name: new_order_22, table-id: 151, on shard-server id:0
+new table is createded with name: new_order_23, table-id: 152, on shard-server id:0
+new table is createded with name: new_order_24, table-id: 153, on shard-server id:0
+new table is createded with name: new_order_25, table-id: 154, on shard-server id:0
+new table is createded with name: new_order_26, table-id: 155, on shard-server id:0
+new table is createded with name: new_order_27, table-id: 156, on shard-server id:0
+new table is createded with name: new_order_28, table-id: 157, on shard-server id:0
+new table is createded with name: new_order_29, table-id: 158, on shard-server id:0
+new table is createded with name: new_order_30, table-id: 159, on shard-server id:0
+new table is createded with name: new_order_31, table-id: 160, on shard-server id:0
+new table is createded with name: oorder_0, table-id: 161, on shard-server id:0
+new table is createded with name: oorder_1, table-id: 162, on shard-server id:0
+new table is createded with name: oorder_2, table-id: 163, on shard-server id:0
+new table is createded with name: oorder_3, table-id: 164, on shard-server id:0
+new table is createded with name: oorder_4, table-id: 165, on shard-server id:0
+new table is createded with name: oorder_5, table-id: 166, on shard-server id:0
+new table is createded with name: oorder_6, table-id: 167, on shard-server id:0
+new table is createded with name: oorder_7, table-id: 168, on shard-server id:0
+new table is createded with name: oorder_8, table-id: 169, on shard-server id:0
+new table is createded with name: oorder_9, table-id: 170, on shard-server id:0
+new table is createded with name: oorder_10, table-id: 171, on shard-server id:0
+new table is createded with name: oorder_11, table-id: 172, on shard-server id:0
+new table is createded with name: oorder_12, table-id: 173, on shard-server id:0
+new table is createded with name: oorder_13, table-id: 174, on shard-server id:0
+new table is createded with name: oorder_14, table-id: 175, on shard-server id:0
+new table is createded with name: oorder_15, table-id: 176, on shard-server id:0
+new table is createded with name: oorder_16, table-id: 177, on shard-server id:0
+new table is createded with name: oorder_17, table-id: 178, on shard-server id:0
+new table is createded with name: oorder_18, table-id: 179, on shard-server id:0
+new table is createded with name: oorder_19, table-id: 180, on shard-server id:0
+new table is createded with name: oorder_20, table-id: 181, on shard-server id:0
+new table is createded with name: oorder_21, table-id: 182, on shard-server id:0
+new table is createded with name: oorder_22, table-id: 183, on shard-server id:0
+new table is createded with name: oorder_23, table-id: 184, on shard-server id:0
+new table is createded with name: oorder_24, table-id: 185, on shard-server id:0
+new table is createded with name: oorder_25, table-id: 186, on shard-server id:0
+new table is createded with name: oorder_26, table-id: 187, on shard-server id:0
+new table is createded with name: oorder_27, table-id: 188, on shard-server id:0
+new table is createded with name: oorder_28, table-id: 189, on shard-server id:0
+new table is createded with name: oorder_29, table-id: 190, on shard-server id:0
+new table is createded with name: oorder_30, table-id: 191, on shard-server id:0
+new table is createded with name: oorder_31, table-id: 192, on shard-server id:0
+new table is createded with name: oorder_c_id_idx_0, table-id: 193, on shard-server id:0
+new table is createded with name: oorder_c_id_idx_1, table-id: 194, on shard-server id:0
+new table is createded with name: oorder_c_id_idx_2, table-id: 195, on shard-server id:0
+new table is createded with name: oorder_c_id_idx_3, table-id: 196, on shard-server id:0
+new table is createded with name: oorder_c_id_idx_4, table-id: 197, on shard-server id:0
+new table is createded with name: oorder_c_id_idx_5, table-id: 198, on shard-server id:0
+new table is createded with name: oorder_c_id_idx_6, table-id: 199, on shard-server id:0
+new table is createded with name: oorder_c_id_idx_7, table-id: 200, on shard-server id:0
+We don't have sufficient tables for you, please don't create too many tables more than 200 on each shard. Assigned table_id (strange):201, expected range is:1,200, shard_index: 0, shard_index(args) [strange]:0
+All existing tables:
+(customer_0, 0) -> 1
+(customer_1, 0) -> 2
+(customer_10, 0) -> 11
+(customer_11, 0) -> 12
+(customer_12, 0) -> 13
+(customer_13, 0) -> 14
+(customer_14, 0) -> 15
+(customer_15, 0) -> 16
+(customer_16, 0) -> 17
+(customer_17, 0) -> 18
+(customer_18, 0) -> 19
+(customer_19, 0) -> 20
+(customer_2, 0) -> 3
+(customer_20, 0) -> 21
+(customer_21, 0) -> 22
+(customer_22, 0) -> 23
+(customer_23, 0) -> 24
+(customer_24, 0) -> 25
+(customer_25, 0) -> 26
+(customer_26, 0) -> 27
+(customer_27, 0) -> 28
+(customer_28, 0) -> 29
+(customer_29, 0) -> 30
+(customer_3, 0) -> 4
+(customer_30, 0) -> 31
+(customer_31, 0) -> 32
+(customer_4, 0) -> 5
+(customer_5, 0) -> 6
+(customer_6, 0) -> 7
+(customer_7, 0) -> 8
+(customer_8, 0) -> 9
+(customer_9, 0) -> 10
+(customer_name_idx_0, 0) -> 33
+(customer_name_idx_1, 0) -> 34
+(customer_name_idx_10, 0) -> 43
+(customer_name_idx_11, 0) -> 44
+(customer_name_idx_12, 0) -> 45
+(customer_name_idx_13, 0) -> 46
+(customer_name_idx_14, 0) -> 47
+(customer_name_idx_15, 0) -> 48
+(customer_name_idx_16, 0) -> 49
+(customer_name_idx_17, 0) -> 50
+(customer_name_idx_18, 0) -> 51
+(customer_name_idx_19, 0) -> 52
+(customer_name_idx_2, 0) -> 35
+(customer_name_idx_20, 0) -> 53
+(customer_name_idx_21, 0) -> 54
+(customer_name_idx_22, 0) -> 55
+(customer_name_idx_23, 0) -> 56
+(customer_name_idx_24, 0) -> 57
+(customer_name_idx_25, 0) -> 58
+(customer_name_idx_26, 0) -> 59
+(customer_name_idx_27, 0) -> 60
+(customer_name_idx_28, 0) -> 61
+(customer_name_idx_29, 0) -> 62
+(customer_name_idx_3, 0) -> 36
+(customer_name_idx_30, 0) -> 63
+(customer_name_idx_31, 0) -> 64
+(customer_name_idx_4, 0) -> 37
+(customer_name_idx_5, 0) -> 38
+(customer_name_idx_6, 0) -> 39
+(customer_name_idx_7, 0) -> 40
+(customer_name_idx_8, 0) -> 41
+(customer_name_idx_9, 0) -> 42
+(district_0, 0) -> 65
+(district_1, 0) -> 66
+(district_10, 0) -> 75
+(district_11, 0) -> 76
+(district_12, 0) -> 77
+(district_13, 0) -> 78
+(district_14, 0) -> 79
+(district_15, 0) -> 80
+(district_16, 0) -> 81
+(district_17, 0) -> 82
+(district_18, 0) -> 83
+(district_19, 0) -> 84
+(district_2, 0) -> 67
+(district_20, 0) -> 85
+(district_21, 0) -> 86
+(district_22, 0) -> 87
+(district_23, 0) -> 88
+(district_24, 0) -> 89
+(district_25, 0) -> 90
+(district_26, 0) -> 91
+(district_27, 0) -> 92
+(district_28, 0) -> 93
+(district_29, 0) -> 94
+(district_3, 0) -> 68
+(district_30, 0) -> 95
+(district_31, 0) -> 96
+(district_4, 0) -> 69
+(district_5, 0) -> 70
+(district_6, 0) -> 71
+(district_7, 0) -> 72
+(district_8, 0) -> 73
+(district_9, 0) -> 74
+(history_0, 0) -> 97
+(history_1, 0) -> 98
+(history_10, 0) -> 107
+(history_11, 0) -> 108
+(history_12, 0) -> 109
+(history_13, 0) -> 110
+(history_14, 0) -> 111
+(history_15, 0) -> 112
+(history_16, 0) -> 113
+(history_17, 0) -> 114
+(history_18, 0) -> 115
+(history_19, 0) -> 116
+(history_2, 0) -> 99
+(history_20, 0) -> 117
+(history_21, 0) -> 118
+(history_22, 0) -> 119
+(history_23, 0) -> 120
+(history_24, 0) -> 121
+(history_25, 0) -> 122
+(history_26, 0) -> 123
+(history_27, 0) -> 124
+(history_28, 0) -> 125
+(history_29, 0) -> 126
+(history_3, 0) -> 100
+(history_30, 0) -> 127
+(history_31, 0) -> 128
+(history_4, 0) -> 101
+(history_5, 0) -> 102
+(history_6, 0) -> 103
+(history_7, 0) -> 104
+(history_8, 0) -> 105
+(history_9, 0) -> 106
+(new_order_0, 0) -> 129
+(new_order_1, 0) -> 130
+(new_order_10, 0) -> 139
+(new_order_11, 0) -> 140
+(new_order_12, 0) -> 141
+(new_order_13, 0) -> 142
+(new_order_14, 0) -> 143
+(new_order_15, 0) -> 144
+(new_order_16, 0) -> 145
+(new_order_17, 0) -> 146
+(new_order_18, 0) -> 147
+(new_order_19, 0) -> 148
+(new_order_2, 0) -> 131
+(new_order_20, 0) -> 149
+(new_order_21, 0) -> 150
+(new_order_22, 0) -> 151
+(new_order_23, 0) -> 152
+(new_order_24, 0) -> 153
+(new_order_25, 0) -> 154
+(new_order_26, 0) -> 155
+(new_order_27, 0) -> 156
+(new_order_28, 0) -> 157
+(new_order_29, 0) -> 158
+(new_order_3, 0) -> 132
+(new_order_30, 0) -> 159
+(new_order_31, 0) -> 160
+(new_order_4, 0) -> 133
+(new_order_5, 0) -> 134
+(new_order_6, 0) -> 135
+(new_order_7, 0) -> 136
+(new_order_8, 0) -> 137
+(new_order_9, 0) -> 138
+(oorder_0, 0) -> 161
+(oorder_1, 0) -> 162
+(oorder_10, 0) -> 171
+(oorder_11, 0) -> 172
+(oorder_12, 0) -> 173
+(oorder_13, 0) -> 174
+(oorder_14, 0) -> 175
+(oorder_15, 0) -> 176
+(oorder_16, 0) -> 177
+(oorder_17, 0) -> 178
+(oorder_18, 0) -> 179
+(oorder_19, 0) -> 180
+(oorder_2, 0) -> 163
+(oorder_20, 0) -> 181
+(oorder_21, 0) -> 182
+(oorder_22, 0) -> 183
+(oorder_23, 0) -> 184
+(oorder_24, 0) -> 185
+(oorder_25, 0) -> 186
+(oorder_26, 0) -> 187
+(oorder_27, 0) -> 188
+(oorder_28, 0) -> 189
+(oorder_29, 0) -> 190
+(oorder_3, 0) -> 164
+(oorder_30, 0) -> 191
+(oorder_31, 0) -> 192
+(oorder_4, 0) -> 165
+(oorder_5, 0) -> 166
+(oorder_6, 0) -> 167
+(oorder_7, 0) -> 168
+(oorder_8, 0) -> 169
+(oorder_9, 0) -> 170
+(oorder_c_id_idx_0, 0) -> 193
+(oorder_c_id_idx_1, 0) -> 194
+(oorder_c_id_idx_2, 0) -> 195
+(oorder_c_id_idx_3, 0) -> 196
+(oorder_c_id_idx_4, 0) -> 197
+(oorder_c_id_idx_5, 0) -> 198
+(oorder_c_id_idx_6, 0) -> 199
+(oorder_c_id_idx_7, 0) -> 200
+
+# Exit code: 1

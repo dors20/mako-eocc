@@ -1,0 +1,6 @@
+scenario,throughput_txn_per_s,avg_latency_ms,abort_rate_per_s
+dbtest_baseline_tpcc,n/a,0.0132,178
+dbtest_batch_validation_reorder_minid,108,073,0.1473,64.77
+dbtest_batch_validation_reorder_prod,107,697,0.1478,63.47
+dbtest_batch_validation_storage,2,207,7.24,1.33
+dbtest_batch_validation_tpcc,151,698,0.1048,21.60

@@ -1,0 +1,179 @@
+{
+  "name": "dbtest_batch_validation_tpcc",
+  "description": "dbtest TPCC run with batch validation enabled.",
+  "mode": "full",
+  "command_template": "./build/dbtest -q config/mako_single_node.yml -N local_s0 -t {threads}",
+  "command": [
+    "./build/dbtest",
+    "-q",
+    "config/mako_single_node.yml",
+    "-N",
+    "local_s0",
+    "-t",
+    "4"
+  ],
+  "placeholders": {
+    "threads": 4,
+    "batch_size": 64,
+    "batch_wait_us": 5000
+  },
+  "env": {
+    "MAKO_ENABLE_BATCH_VALIDATION": "1",
+    "MAKO_BATCH_VALIDATION_SIZE": "64",
+    "MAKO_BATCH_VALIDATION_MAX_WAIT_US": "5000",
+    "DBTEST_EXIT_AFTER_SECS": "60"
+  },
+  "workdir": "/home/ubuntu/md/mako-eocc",
+  "timestamp": "20251203-051427",
+  "dry_run": false,
+  "metrics": {
+    "runtime_seconds": 30.1792,
+    "n_commits": 692554.0,
+    "agg_throughput_tps": 91842.3,
+    "agg_abort_rate_per_sec": 11.995,
+    "avg_latency_ms": 0.0429603
+  },
+  "event_counters": {
+    "allocator_arena0_allocation": 0,
+    "allocator_arena0_deallocation": 0,
+    "allocator_arena10_allocation": 0,
+    "allocator_arena10_deallocation": 0,
+    "allocator_arena11_allocation": 0,
+    "allocator_arena11_deallocation": 0,
+    "allocator_arena12_allocation": 0,
+    "allocator_arena12_deallocation": 0,
+    "allocator_arena13_allocation": 0,
+    "allocator_arena13_deallocation": 0,
+    "allocator_arena14_allocation": 0,
+    "allocator_arena14_deallocation": 0,
+    "allocator_arena15_allocation": 0,
+    "allocator_arena15_deallocation": 0,
+    "allocator_arena16_allocation": 0,
+    "allocator_arena16_deallocation": 0,
+    "allocator_arena17_allocation": 0,
+    "allocator_arena17_deallocation": 0,
+    "allocator_arena18_allocation": 0,
+    "allocator_arena18_deallocation": 0,
+    "allocator_arena19_allocation": 0,
+    "allocator_arena19_deallocation": 0,
+    "allocator_arena1_allocation": 0,
+    "allocator_arena1_deallocation": 0,
+    "allocator_arena20_allocation": 0,
+    "allocator_arena20_deallocation": 0,
+    "allocator_arena21_allocation": 0,
+    "allocator_arena21_deallocation": 0,
+    "allocator_arena22_allocation": 0,
+    "allocator_arena22_deallocation": 0,
+    "allocator_arena23_allocation": 0,
+    "allocator_arena23_deallocation": 0,
+    "allocator_arena24_allocation": 0,
+    "allocator_arena24_deallocation": 0,
+    "allocator_arena25_allocation": 0,
+    "allocator_arena25_deallocation": 0,
+    "allocator_arena26_allocation": 0,
+    "allocator_arena26_deallocation": 0,
+    "allocator_arena27_allocation": 0,
+    "allocator_arena27_deallocation": 0,
+    "allocator_arena28_allocation": 0,
+    "allocator_arena28_deallocation": 0,
+    "allocator_arena29_allocation": 0,
+    "allocator_arena29_deallocation": 0,
+    "allocator_arena2_allocation": 0,
+    "allocator_arena2_deallocation": 0,
+    "allocator_arena30_allocation": 0,
+    "allocator_arena30_deallocation": 0,
+    "allocator_arena31_allocation": 0,
+    "allocator_arena31_deallocation": 0,
+    "allocator_arena3_allocation": 0,
+    "allocator_arena3_deallocation": 0,
+    "allocator_arena4_allocation": 0,
+    "allocator_arena4_deallocation": 0,
+    "allocator_arena5_allocation": 0,
+    "allocator_arena5_deallocation": 0,
+    "allocator_arena6_allocation": 0,
+    "allocator_arena6_deallocation": 0,
+    "allocator_arena7_allocation": 0,
+    "allocator_arena7_deallocation": 0,
+    "allocator_arena8_allocation": 0,
+    "allocator_arena8_deallocation": 0,
+    "allocator_arena9_allocation": 0,
+    "allocator_arena9_deallocation": 0,
+    "allocator_large_allocation": 0,
+    "allocator_total_region_usage_bytes": 0,
+    "avg_abort_spins": {
+      "count": 0,
+      "max": 0.0
+    },
+    "avg_batch_size": {
+      "count": 845856,
+      "max": 4.0,
+      "avg": 3.28
+    },
+    "avg_batch_validation_time_us": {
+      "count": 845856,
+      "max": 126.0,
+      "avg": 9.12
+    },
+    "avg_cust_name_idx_scan_size": {
+      "count": 0,
+      "max": 0.0
+    },
+    "avg_gc_reaper_queue_len": {
+      "count": 0,
+      "max": 0.0
+    },
+    "avg_max_unordered_map_chain_length": {
+      "count": 0,
+      "max": 0.0
+    },
+    "avg_rcu_delete_queue_len": {
+      "count": 0,
+      "max": 0.0
+    },
+    "avg_rcu_local_delete_queue_len": {
+      "count": 0,
+      "max": 0.0
+    },
+    "avg_rcu_sync_try_release": {
+      "count": 0,
+      "max": 0.0
+    },
+    "avg_time_inbetween_allocator_releases_usec": {
+      "count": 0,
+      "max": 0.0
+    },
+    "avg_time_inbetween_rcu_epochs_usec": {
+      "count": 0,
+      "max": 0.0
+    },
+    "batch_finalize_phase_us": {
+      "count": 845856,
+      "max": 126.0,
+      "avg": 8.94
+    },
+    "batch_validated_txns": 2772077,
+    "batch_validations": 845856,
+    "rcu_deletes": 0,
+    "rcu_frees": 0,
+    "rcu_incomplete_local_reaps": 0,
+    "rcu_local_reaps": 0,
+    "rcu_loop_reaps": 0,
+    "sto_batch_phase_build_us": {
+      "count": 845856,
+      "max": 18.0,
+      "avg": 0.0
+    },
+    "sto_batch_phase_finalize_us": {
+      "count": 845856,
+      "max": 126.0,
+      "avg": 8.94
+    },
+    "stock_level_loop_join_lookups": {
+      "count": 110746,
+      "max": 252.0,
+      "avg": 196.611
+    },
+    "tpcc_cross_partition_new_order_txns": 118615,
+    "tpcc_cross_partition_payment_txns": 178928
+  }
+}

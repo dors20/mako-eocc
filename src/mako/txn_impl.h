@@ -343,6 +343,9 @@ transaction<Protocol, Traits>::commit(bool doThrow)
             std::string(__PRETTY_FUNCTION__) + std::string(":read_validation:")));
       ANON_REGION(probe3_name.c_str(), &transaction_base::g_txn_commit_probe3_cg);
 
+      // By default, perform individual validation; batch validation may skip it.
+      bool skip_individual_validation_flag = false;
+
 #ifdef ENABLE_BATCH_VALIDATION
       // Try to use batch validation if enabled
       static bool batch_validation_enabled = []() {
@@ -382,9 +385,8 @@ transaction<Protocol, Traits>::commit(bool doThrow)
         }
         return enabled;
       }();
-      
+
       // Use batch validation for parallel validation
-      bool skip_individual_validation_flag = false;
       if (batch_validation_enabled) {
         auto& validator = GetBatchValidator<Protocol, Traits>();
         // Add to batch - blocks until batch is validated in parallel

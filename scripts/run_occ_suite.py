@@ -169,6 +169,11 @@ def main():
         help="Mode that controls placeholder resolution.",
     )
     parser.add_argument(
+        "--override-threads",
+        type=int,
+        help="If set, override the 'threads' placeholder in scenarios that define it.",
+    )
+    parser.add_argument(
         "--results-root",
         type=Path,
         default=Path("/home/azureuser/mako-eocc/results/occ_runs"),
@@ -218,6 +223,9 @@ def main():
 
         description = scenario.get("description", "")
         placeholders = build_placeholders(scenario.get("placeholders"), args.mode)
+        # Allow caller to override thread-count while reusing other placeholders
+        if args.override_threads is not None and "threads" in placeholders:
+            placeholders["threads"] = args.override_threads
         try:
             command_template = scenario["command"]
         except KeyError as exc:
