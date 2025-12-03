@@ -194,8 +194,6 @@ scenarios:
       batch_size:
         fast: 8
         full: 16
-        fast: 8
-        full: 16
       batch_wait_us:
         fast: 250
         full: 500
@@ -214,12 +212,12 @@ scenarios:
       MAKO_STORAGE_REORDER_MAX_WAIT_US: "{storage_wait_us}"
 
   - name: batch_validation_stress_highbatch
-    description: Batch validation stress test with higher concurrency and batch size.
+    description: Batch validation stress test with larger batch size at a single thread-count (controlled by --override-threads).
     command: "./build/test_batch_validation_stress {threads} {txns_per_thread}"
     placeholders:
       threads:
-        fast: 8
-        full: 16
+        fast: 2
+        full: 8
       txns_per_thread:
         fast: 1000
         full: 5000
@@ -265,6 +263,7 @@ scenarios:
         fast: 2
         full: 24
     env:
+      MAKO_TXN_ENGINE: "occ"
       MAKO_ENABLE_BATCH_VALIDATION: "0"
       DBTEST_EXIT_AFTER_SECS:
         fast: 5
@@ -284,6 +283,7 @@ scenarios:
         fast: 250
         full: 500
     env:
+      MAKO_TXN_ENGINE: "occ"
       MAKO_ENABLE_BATCH_VALIDATION: "1"
       MAKO_BATCH_VALIDATION_SIZE: "{batch_size}"
       MAKO_BATCH_VALIDATION_MAX_WAIT_US: "{batch_wait_us}"
@@ -305,6 +305,7 @@ scenarios:
         fast: 250
         full: 500
     env:
+      MAKO_TXN_ENGINE: "occ"
       MAKO_ENABLE_BATCH_VALIDATION: "1"
       MAKO_ENABLE_TXN_REORDER: "1"
       MAKO_TXN_REORDER_FVS: "min"
@@ -329,6 +330,7 @@ scenarios:
         fast: 250
         full: 500
     env:
+      MAKO_TXN_ENGINE: "occ"
       MAKO_ENABLE_BATCH_VALIDATION: "1"
       MAKO_ENABLE_TXN_REORDER: "1"
       MAKO_TXN_REORDER_FVS: "prod"
@@ -359,6 +361,7 @@ scenarios:
         fast: 50
         full: 100
     env:
+      MAKO_TXN_ENGINE: "occ"
       MAKO_ENABLE_BATCH_VALIDATION: "1"
       MAKO_BATCH_VALIDATION_SIZE: "{batch_size}"
       MAKO_BATCH_VALIDATION_MAX_WAIT_US: "{batch_wait_us}"
@@ -384,6 +387,7 @@ scenarios:
         fast: 250
         full: 500
     env:
+      MAKO_TXN_ENGINE: "occ"
       MAKO_ENABLE_BATCH_VALIDATION: "1"
       MAKO_BATCH_VALIDATION_SIZE: "{batch_size}"
       MAKO_BATCH_VALIDATION_MAX_WAIT_US: "{batch_wait_us}"
@@ -414,6 +418,7 @@ scenarios:
         fast: 50
         full: 100
     env:
+      MAKO_TXN_ENGINE: "occ"
       MAKO_ENABLE_BATCH_VALIDATION: "1"
       MAKO_BATCH_VALIDATION_SIZE: "{batch_size}"
       MAKO_BATCH_VALIDATION_MAX_WAIT_US: "{batch_wait_us}"
@@ -428,12 +433,16 @@ scenarios:
         full: 60
 
   # Core-scaling OCC stress scenarios (high concurrent clients)
-  - name: stress_reorder_prod_1c
-    description: OCC stress harness with txn reordering (prod FVS), 1 thread, high load.
+  - name: stress_reorder_prod
+    description: OCC stress harness with txn reordering (prod FVS); thread-count is controlled globally via --override-threads.
     command: "./build/test_batch_validation_stress {threads} {txns_per_thread}"
     placeholders:
-      threads: 1
-      txns_per_thread: 10000
+      threads:
+        fast: 2
+        full: 16
+      txns_per_thread:
+        fast: 10000
+        full: 10000
     env:
       MAKO_ENABLE_BATCH_VALIDATION: "1"
       MAKO_ENABLE_TXN_REORDER: "1"
@@ -442,12 +451,17 @@ scenarios:
       MAKO_BATCH_VALIDATION_SIZE: "8"
       MAKO_BATCH_VALIDATION_MAX_WAIT_US: "250"
 
-  - name: stress_reorder_prod_2c
-    description: OCC stress harness with txn reordering (prod FVS), 2 threads, high load.
+  # OCC stress harness with explicit parallel reordering threads (ParallelGraphBackend), sharing the same thread-count
+  - name: stress_reorder_parallel_threads
+    description: OCC stress harness with txn reordering using ParallelGraphBackend threads equal to client threads (via --override-threads).
     command: "./build/test_batch_validation_stress {threads} {txns_per_thread}"
     placeholders:
-      threads: 2
-      txns_per_thread: 10000
+      threads:
+        fast: 2
+        full: 16
+      txns_per_thread:
+        fast: 10000
+        full: 10000
     env:
       MAKO_ENABLE_BATCH_VALIDATION: "1"
       MAKO_ENABLE_TXN_REORDER: "1"
@@ -455,79 +469,7 @@ scenarios:
       MAKO_TXN_REORDER_ALGO: "sort"
       MAKO_BATCH_VALIDATION_SIZE: "8"
       MAKO_BATCH_VALIDATION_MAX_WAIT_US: "250"
-
-  - name: stress_reorder_prod_4c
-    description: OCC stress harness with txn reordering (prod FVS), 4 threads, high load.
-    command: "./build/test_batch_validation_stress {threads} {txns_per_thread}"
-    placeholders:
-      threads: 4
-      txns_per_thread: 10000
-    env:
-      MAKO_ENABLE_BATCH_VALIDATION: "1"
-      MAKO_ENABLE_TXN_REORDER: "1"
-      MAKO_TXN_REORDER_FVS: "prod"
-      MAKO_TXN_REORDER_ALGO: "sort"
-      MAKO_BATCH_VALIDATION_SIZE: "8"
-      MAKO_BATCH_VALIDATION_MAX_WAIT_US: "250"
-
-  - name: stress_reorder_prod_8c
-    description: OCC stress harness with txn reordering (prod FVS), 8 threads, high load.
-    command: "./build/test_batch_validation_stress {threads} {txns_per_thread}"
-    placeholders:
-      threads: 8
-      txns_per_thread: 10000
-    env:
-      MAKO_ENABLE_BATCH_VALIDATION: "1"
-      MAKO_ENABLE_TXN_REORDER: "1"
-      MAKO_TXN_REORDER_FVS: "prod"
-      MAKO_TXN_REORDER_ALGO: "sort"
-      MAKO_BATCH_VALIDATION_SIZE: "8"
-      MAKO_BATCH_VALIDATION_MAX_WAIT_US: "250"
-
-  - name: stress_reorder_prod_16c
-    description: OCC stress harness with txn reordering (prod FVS), 16 threads, high load.
-    command: "./build/test_batch_validation_stress {threads} {txns_per_thread}"
-    placeholders:
-      threads: 16
-      txns_per_thread: 10000
-    env:
-      MAKO_ENABLE_BATCH_VALIDATION: "1"
-      MAKO_ENABLE_TXN_REORDER: "1"
-      MAKO_TXN_REORDER_FVS: "prod"
-      MAKO_TXN_REORDER_ALGO: "sort"
-      MAKO_BATCH_VALIDATION_SIZE: "8"
-      MAKO_BATCH_VALIDATION_MAX_WAIT_US: "250"
-
-  # OCC stress harness with explicit parallel reordering threads (ParallelGraphBackend)
-  - name: stress_reorder_parallel_threads_4c
-    description: OCC stress harness with txn reordering using 4 parallel graph threads.
-    command: "./build/test_batch_validation_stress {threads} {txns_per_thread}"
-    placeholders:
-      threads: 8
-      txns_per_thread: 10000
-    env:
-      MAKO_ENABLE_BATCH_VALIDATION: "1"
-      MAKO_ENABLE_TXN_REORDER: "1"
-      MAKO_TXN_REORDER_FVS: "prod"
-      MAKO_TXN_REORDER_ALGO: "sort"
-      MAKO_BATCH_VALIDATION_SIZE: "8"
-      MAKO_BATCH_VALIDATION_MAX_WAIT_US: "250"
-      MAKO_TXN_REORDER_THREADS: "4"
-
-  - name: stress_reorder_parallel_threads_8c
-    description: OCC stress harness with txn reordering using 8 parallel graph threads.
-    command: "./build/test_batch_validation_stress {threads} {txns_per_thread}"
-    placeholders:
-      threads: 16
-      txns_per_thread: 10000
-    env:
-      MAKO_ENABLE_BATCH_VALIDATION: "1"
-      MAKO_ENABLE_TXN_REORDER: "1"
-      MAKO_TXN_REORDER_FVS: "prod"
-      MAKO_TXN_REORDER_ALGO: "sort"
-      MAKO_BATCH_VALIDATION_SIZE: "8"
-      MAKO_BATCH_VALIDATION_MAX_WAIT_US: "250"
-      MAKO_TXN_REORDER_THREADS: "8"
+      MAKO_TXN_REORDER_THREADS: "{threads}"
 
   # All OCC optimizations combined on stress harness (batch + reorder + storage)
   - name: batch_validation_stress_all_optimizations

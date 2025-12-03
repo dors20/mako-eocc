@@ -23,6 +23,7 @@
 #include "benchmarks/bench.h"
 #include "benchmarks/sto/sync_util.hh"
 #include "benchmarks/mbta_wrapper.hh"
+#include "benchmarks/occ_db.hh"
 #include "benchmarks/common.h"
 #include "benchmarks/common2.h"
 #include "benchmarks/benchmark_config.h"
@@ -100,6 +101,18 @@ static mako::MultiTransportManager* g_multi_transport_manager = nullptr;
 
 // Initialize database for a specific shard (multi-shard mode)
 // This allows creating isolated database instances for each shard
+static bool use_occ_engine() {
+  const char* env = std::getenv("MAKO_TXN_ENGINE");
+  if (!env) {
+    return false;
+  }
+  std::string v(env);
+  for (auto& c : v) {
+    c = static_cast<char>(std::tolower(c));
+  }
+  return v == "occ";
+}
+
 static abstract_db* initShardDB(int shard_idx, bool is_leader, const std::string& cluster_role) {
   auto& benchConfig = BenchmarkConfig::getInstance();
 
@@ -107,7 +120,12 @@ static abstract_db* initShardDB(int shard_idx, bool is_leader, const std::string
          shard_idx, cluster_role.c_str(), is_leader);
 
   // Create and initialize database instance for this shard
-  abstract_db *db = new mbta_wrapper;
+  abstract_db *db = nullptr;
+  if (use_occ_engine()) {
+    db = new occ_db;
+  } else {
+    db = new mbta_wrapper;
+  }
   db->init();
 
   return db;
@@ -202,7 +220,12 @@ static abstract_db* initWithDB() {
                                benchConfig.getCluster(),
                                benchConfig.getConfig());
 
-  abstract_db *db = new mbta_wrapper; // on the leader replica
+  abstract_db *db = nullptr;
+  if (use_occ_engine()) {
+    db = new occ_db; // OCC engine
+  } else {
+    db = new mbta_wrapper; // STO-backed engine
+  }
   db->init() ;
   return db;
 }
