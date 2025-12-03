@@ -32,6 +32,24 @@ class StoStorageReorderer {
     std::lock_guard<std::mutex> lk(mutex_);
     batch_size_ = std::max<size_t>(1, batch_size);
     max_wait_us_ = max_wait_us;
+    idle_wait_us_ = ParseIdleWaitEnv();
+    low_watermark_ = ParseLowWatermarkEnv();
+    inline_flush_enabled_ = ParseInlineFlushEnv();
+    inline_flush_threshold_ = ParseInlineThresholdEnv();
+    reorder_min_size_ = ParseMinReorderSizeEnv();
+    pass_inline_batches_ = ParsePassInlineEnv();
+    if (reorder_min_size_ < size_t{1}) {
+      reorder_min_size_ = 1;
+    }
+    if (inline_flush_threshold_ < size_t{1}) {
+      inline_flush_threshold_ = 1;
+    }
+    if (low_watermark_ > batch_size_) {
+      low_watermark_ = batch_size_;
+    }
+    if (low_watermark_ < size_t{1}) {
+      low_watermark_ = 1;
+    }
     enabled_ = true;
     pending_.clear();
     shutdown_ = false;
@@ -77,6 +95,8 @@ class StoStorageReorderer {
     Entry entry;
     entry.txn = txn;
 
+    bool inline_flush = false;
+    std::vector<Entry*> inline_entries;
     {
       std::lock_guard<std::mutex> lock(mutex_);
       if (shutdown_) {
@@ -87,6 +107,23 @@ class StoStorageReorderer {
       }
       pending_.push_back(&entry);
       RecordStorageEnqueue(txn);
+      const bool do_inline = inline_flush_enabled_ &&
+                             pass_inline_batches_ &&
+                             pending_.size() <= inline_flush_threshold_;
+      if (do_inline) {
+        inline_entries.swap(pending_);
+        first_enqueue_time_ = std::chrono::steady_clock::now();
+        inline_flush = true;
+      } else {
+        cv_.notify_one();
+      }
+    }
+
+    if (inline_flush && pass_inline_batches_) {
+      Flush(inline_entries);
+    } else if (inline_flush) {
+      std::lock_guard<std::mutex> lock(mutex_);
+      pending_ = std::move(inline_entries);
       cv_.notify_one();
     }
 
@@ -124,15 +161,17 @@ class StoStorageReorderer {
           continue;
         }
 
-        bool flush_now = pending_.size() >= batch_size_;
+        const size_t pending_size = pending_.size();
+        bool flush_now = pending_size >= batch_size_;
         bool timed_out = false;
+        const size_t wait_us = DetermineWaitUs(pending_size);
 
         if (!flush_now) {
-          if (max_wait_us_ == 0) {
+          if (wait_us == 0) {
             timed_out = true;
           } else {
             const auto deadline = first_enqueue_time_ +
-                                  std::chrono::microseconds(max_wait_us_);
+                                  std::chrono::microseconds(wait_us);
             const bool predicate = cv_.wait_until(
                 lock,
                 deadline,
@@ -190,10 +229,6 @@ class StoStorageReorderer {
     };
     const auto start = clock::now();
 
-    occ::storage_reorder_batches_counter().inc();
-    occ::storage_reorder_avg_batch_size_counter().offer(entries.size());
-    occ::storage_reorder_attempts_counter().inc();
-
     std::vector<Transaction*> txns;
     txns.reserve(entries.size());
     for (auto* entry : entries) {
@@ -202,79 +237,216 @@ class StoStorageReorderer {
     }
     const auto build_done = clock::now();
     occ::storage_reorder_phase_build_us_counter().offer(to_us(build_done - start));
+    auto reorder_done = build_done;
+    bool had_reorder = false;
 
-    auto plan = StoTxnReorderController::Plan(txns);
-    const auto reorder_done = clock::now();
-    occ::storage_reorder_phase_reorder_us_counter().offer(to_us(reorder_done - build_done));
-    if (plan.removed_nodes > 0) {
-      occ::storage_reorder_removed_counter().inc(plan.removed_nodes);
-    }
-    if (plan.cycle_components > 0) {
-      occ::storage_reorder_cycles_counter().inc(plan.cycle_components);
-    }
-    if (plan.applied) {
-      occ::storage_reorder_applied_counter().inc();
+    std::vector<Entry*> survivors;
+    std::vector<Transaction*> survivor_txns;
+    bool reorder_applied = false;
+
+    if (txns.size() >= reorder_min_size_) {
+      occ::storage_reorder_batches_counter().inc();
+      occ::storage_reorder_avg_batch_size_counter().offer(entries.size());
+      occ::storage_reorder_attempts_counter().inc();
+
+      auto plan = StoTxnReorderController::Plan(txns);
+      reorder_done = clock::now();
+      had_reorder = true;
+      occ::storage_reorder_phase_reorder_us_counter().offer(to_us(reorder_done - build_done));
+      if (plan.removed_nodes > 0) {
+        occ::storage_reorder_removed_counter().inc(plan.removed_nodes);
+      }
+      if (plan.cycle_components > 0) {
+        occ::storage_reorder_cycles_counter().inc(plan.cycle_components);
+      }
+      if (plan.applied) {
+        occ::storage_reorder_applied_counter().inc();
+        reorder_applied = true;
+      }
+
+      std::unordered_map<Transaction*, Entry*> entry_map;
+      entry_map.reserve(entries.size());
+      for (auto* entry : entries) {
+        entry_map.emplace(entry->txn, entry);
+      }
+
+      for (auto* txn : plan.aborted) {
+        occ::storage_reorder_aborted_counter().inc();
+        auto it = entry_map.find(txn);
+        if (it == entry_map.end()) {
+          continue;
+        }
+        {
+          std::lock_guard<std::mutex> lock(it->second->mutex);
+          it->second->decision = StoBatchValidator::Decision::kAborted;
+          it->second->done = true;
+        }
+        it->second->cv.notify_one();
+        entry_map.erase(it);
+      }
+
+      const bool has_order = !plan.ordered.empty();
+      const auto& execution_order = has_order ? plan.ordered : txns;
+
+      survivors.reserve(entry_map.size());
+      survivor_txns.reserve(entry_map.size());
+
+      auto capture_entry = [&](Transaction* txn) {
+        auto it = entry_map.find(txn);
+        if (it == entry_map.end()) {
+          return;
+        }
+        survivors.push_back(it->second);
+        survivor_txns.push_back(it->second->txn);
+        entry_map.erase(it);
+      };
+
+      for (auto* txn : execution_order) {
+        capture_entry(txn);
+      }
+      for (auto& kv : entry_map) {
+        survivors.push_back(kv.second);
+        survivor_txns.push_back(kv.second->txn);
+      }
+      entry_map.clear();
+
+    } else {
+      survivors.reserve(entries.size());
+      survivor_txns.reserve(entries.size());
+      for (auto* entry : entries) {
+        survivors.push_back(entry);
+        survivor_txns.push_back(entry->txn);
+      }
     }
 
-    std::unordered_map<Transaction*, Entry*> entry_map;
-    entry_map.reserve(entries.size());
-    for (auto* entry : entries) {
-      entry_map.emplace(entry->txn, entry);
-    }
-
-    for (auto* txn : plan.aborted) {
-      occ::storage_reorder_aborted_counter().inc();
-      auto it = entry_map.find(txn);
-      if (it == entry_map.end()) {
-        continue;
+    if (!survivors.empty()) {
+      std::vector<StoBatchValidator::Decision> decisions;
+      StoBatchValidator::Instance().ProcessBatch(survivor_txns, decisions);
+      for (size_t i = 0; i < survivors.size(); ++i) {
+        auto decision = (i < decisions.size())
+                            ? decisions[i]
+                            : StoBatchValidator::Decision::kBypass;
+        auto* entry = survivors[i];
+        {
+          std::lock_guard<std::mutex> lock(entry->mutex);
+          entry->decision = decision;
+          entry->done = true;
+        }
+        entry->cv.notify_one();
       }
-      {
-        std::lock_guard<std::mutex> lock(it->second->mutex);
-        it->second->decision = StoBatchValidator::Decision::kAborted;
-        it->second->done = true;
-      }
-      it->second->cv.notify_one();
-      entry_map.erase(it);
-    }
-
-    const bool has_order = !plan.ordered.empty();
-    const auto& execution_order = has_order ? plan.ordered : txns;
-
-    for (auto* txn : execution_order) {
-      if (!txn) {
-        continue;
-      }
-      auto it = entry_map.find(txn);
-      if (it == entry_map.end()) {
-        continue;
-      }
-      auto decision = StoBatchValidator::Instance().Process(txn);
-      {
-        std::lock_guard<std::mutex> lock(it->second->mutex);
-        it->second->decision = decision;
-        it->second->done = true;
-      }
-      it->second->cv.notify_one();
-      entry_map.erase(it);
-    }
-
-    for (auto& kv : entry_map) {
-      auto* entry = kv.second;
-      auto decision = StoBatchValidator::Instance().Process(entry->txn);
-      {
-        std::lock_guard<std::mutex> lock(entry->mutex);
-        entry->decision = decision;
-        entry->done = true;
-      }
-      entry->cv.notify_one();
     }
 
     const auto finalize_done = clock::now();
-    occ::storage_reorder_phase_finalize_us_counter().offer(to_us(finalize_done - reorder_done));
+    const auto finalize_delta = had_reorder ? (finalize_done - reorder_done)
+                                            : (finalize_done - build_done);
+    occ::storage_reorder_phase_finalize_us_counter().offer(to_us(finalize_delta));
+  }
+
+  size_t ParseIdleWaitEnv() const {
+    const char* env = std::getenv("MAKO_STORAGE_REORDER_IDLE_WAIT_US");
+    if (!env) {
+      return 10;
+    }
+    char* end = nullptr;
+    unsigned long long value = std::strtoull(env, &end, 10);
+    if (end == env) {
+      return 10;
+    }
+    return static_cast<size_t>(value);
+  }
+
+  size_t ParseLowWatermarkEnv() const {
+    const char* env = std::getenv("MAKO_STORAGE_REORDER_LOW_WATERMARK");
+    if (!env) {
+      return 4;
+    }
+    char* end = nullptr;
+    unsigned long long value = std::strtoull(env, &end, 10);
+    if (end == env) {
+      return 4;
+    }
+    return static_cast<size_t>(value);
+  }
+
+  bool ParseInlineFlushEnv() const {
+    const char* env = std::getenv("MAKO_STORAGE_REORDER_INLINE_FLUSH");
+    if (!env) {
+      return true;
+    }
+    std::string flag(env);
+    std::transform(flag.begin(),
+                   flag.end(),
+                   flag.begin(),
+                   [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+    return flag == "1" || flag == "true" || flag == "on";
+  }
+
+  size_t ParseInlineThresholdEnv() const {
+    const char* env = std::getenv("MAKO_STORAGE_REORDER_INLINE_THRESHOLD");
+    if (!env) {
+      return 1;
+    }
+    char* end = nullptr;
+    unsigned long long value = std::strtoull(env, &end, 10);
+    if (end == env) {
+      return 1;
+    }
+    return static_cast<size_t>(value);
+  }
+
+  size_t ParseMinReorderSizeEnv() const {
+    const char* env = std::getenv("MAKO_STORAGE_REORDER_MIN_SIZE");
+    if (!env) {
+      return 2;
+    }
+    char* end = nullptr;
+    unsigned long long value = std::strtoull(env, &end, 10);
+    if (end == env) {
+      return 2;
+    }
+    if (value == 0) {
+      value = 1;
+    }
+    return static_cast<size_t>(value);
+  }
+
+  bool ParsePassInlineEnv() const {
+    const char* env = std::getenv("MAKO_STORAGE_REORDER_PASS_INLINE");
+    if (!env) {
+      return true;
+    }
+    std::string flag(env);
+    std::transform(flag.begin(),
+                   flag.end(),
+                   flag.begin(),
+                   [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+    return flag == "1" || flag == "true" || flag == "on";
+  }
+
+  size_t DetermineWaitUs(size_t queue_depth) const {
+    if (queue_depth >= batch_size_) {
+      return 0;
+    }
+    if (max_wait_us_ == 0) {
+      return 0;
+    }
+    if (queue_depth >= low_watermark_) {
+      return max_wait_us_;
+    }
+    if (idle_wait_us_ == 0) {
+      return 0;
+    }
+    return std::min(max_wait_us_, idle_wait_us_);
   }
 
   size_t batch_size_{4};
   size_t max_wait_us_{1000};
+  size_t idle_wait_us_{50};
+  size_t low_watermark_{4};
+  bool inline_flush_enabled_{true};
+  size_t inline_flush_threshold_{1};
+  size_t reorder_min_size_{2};
+  bool pass_inline_batches_{true};
   bool enabled_{false};
   bool shutdown_{false};
   bool worker_running_{false};
