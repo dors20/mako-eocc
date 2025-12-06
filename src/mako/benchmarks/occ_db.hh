@@ -194,8 +194,7 @@ public:
   }
 
 private:
-  using Proto = transaction_proto2;
-  ndb_wrapper<Proto> occ_impl_;
+  ndb_wrapper<transaction_proto2> occ_impl_;
 
   // Simple table registry to satisfy get_index_by_table_id().
   std::vector<abstract_ordered_index *> tables_by_id_;

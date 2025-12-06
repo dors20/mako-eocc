@@ -1,0 +1,236 @@
+{
+  "name": "dbtest_baseline_tpcc",
+  "description": "Baseline dbtest TPCC run (sequential validation) using default config.",
+  "mode": "fast",
+  "command_template": "./build/dbtest -q config/mako_single_node.yml -N local_s0 -t {threads}",
+  "command": [
+    "./build/dbtest",
+    "-q",
+    "config/mako_single_node.yml",
+    "-N",
+    "local_s0",
+    "-t",
+    "2"
+  ],
+  "placeholders": {
+    "threads": 2
+  },
+  "env": {
+    "MAKO_ENABLE_BATCH_VALIDATION": "0",
+    "DBTEST_EXIT_AFTER_SECS": "5"
+  },
+  "workdir": "/home/azureuser/mako-eocc",
+  "timestamp": "20251206-142728",
+  "dry_run": false,
+  "metrics": {
+    "runtime_seconds": 30.2129,
+    "n_commits": 1280099.0,
+    "agg_throughput_tps": 84514.1,
+    "agg_abort_rate_per_sec": 13.107,
+    "avg_latency_ms": 0.0230817
+  },
+  "event_counters": {
+    "ABORT_REASON_FUTURE_TID_READ": 0,
+    "ABORT_REASON_INSERT_NODE_INTERFERENCE": 0,
+    "ABORT_REASON_NODE_SCAN_READ_VERSION_CHANGED": 0,
+    "ABORT_REASON_NODE_SCAN_WRITE_VERSION_CHANGED": 0,
+    "ABORT_REASON_NONE": 0,
+    "ABORT_REASON_READ_ABSENCE_INTEREFERENCE": 0,
+    "ABORT_REASON_READ_NODE_INTEREFERENCE": 0,
+    "ABORT_REASON_UNSTABLE_READ": 0,
+    "ABORT_REASON_USER": 0,
+    "ABORT_REASON_WRITE_NODE_INTERFERENCE": 0,
+    "allocator_arena0_allocation": 0,
+    "allocator_arena0_deallocation": 0,
+    "allocator_arena10_allocation": 0,
+    "allocator_arena10_deallocation": 0,
+    "allocator_arena11_allocation": 0,
+    "allocator_arena11_deallocation": 0,
+    "allocator_arena12_allocation": 0,
+    "allocator_arena12_deallocation": 0,
+    "allocator_arena13_allocation": 0,
+    "allocator_arena13_deallocation": 0,
+    "allocator_arena14_allocation": 0,
+    "allocator_arena14_deallocation": 0,
+    "allocator_arena15_allocation": 0,
+    "allocator_arena15_deallocation": 0,
+    "allocator_arena16_allocation": 0,
+    "allocator_arena16_deallocation": 0,
+    "allocator_arena17_allocation": 0,
+    "allocator_arena17_deallocation": 0,
+    "allocator_arena18_allocation": 0,
+    "allocator_arena18_deallocation": 0,
+    "allocator_arena19_allocation": 0,
+    "allocator_arena19_deallocation": 0,
+    "allocator_arena1_allocation": 0,
+    "allocator_arena1_deallocation": 0,
+    "allocator_arena20_allocation": 0,
+    "allocator_arena20_deallocation": 0,
+    "allocator_arena21_allocation": 0,
+    "allocator_arena21_deallocation": 0,
+    "allocator_arena22_allocation": 0,
+    "allocator_arena22_deallocation": 0,
+    "allocator_arena23_allocation": 0,
+    "allocator_arena23_deallocation": 0,
+    "allocator_arena24_allocation": 0,
+    "allocator_arena24_deallocation": 0,
+    "allocator_arena25_allocation": 0,
+    "allocator_arena25_deallocation": 0,
+    "allocator_arena26_allocation": 0,
+    "allocator_arena26_deallocation": 0,
+    "allocator_arena27_allocation": 0,
+    "allocator_arena27_deallocation": 0,
+    "allocator_arena28_allocation": 0,
+    "allocator_arena28_deallocation": 0,
+    "allocator_arena29_allocation": 0,
+    "allocator_arena29_deallocation": 0,
+    "allocator_arena2_allocation": 0,
+    "allocator_arena2_deallocation": 0,
+    "allocator_arena30_allocation": 0,
+    "allocator_arena30_deallocation": 0,
+    "allocator_arena31_allocation": 0,
+    "allocator_arena31_deallocation": 0,
+    "allocator_arena3_allocation": 0,
+    "allocator_arena3_deallocation": 0,
+    "allocator_arena4_allocation": 0,
+    "allocator_arena4_deallocation": 0,
+    "allocator_arena5_allocation": 0,
+    "allocator_arena5_deallocation": 0,
+    "allocator_arena6_allocation": 0,
+    "allocator_arena6_deallocation": 0,
+    "allocator_arena7_allocation": 0,
+    "allocator_arena7_deallocation": 0,
+    "allocator_arena8_allocation": 0,
+    "allocator_arena8_deallocation": 0,
+    "allocator_arena9_allocation": 0,
+    "allocator_arena9_deallocation": 0,
+    "allocator_large_allocation": 0,
+    "allocator_total_region_usage_bytes": 0,
+    "avg_abort_spins": {
+      "count": 0,
+      "max": 0.0
+    },
+    "avg_cust_name_idx_scan_size": {
+      "count": 0,
+      "max": 0.0
+    },
+    "avg_dbtuple_chain_len": {
+      "count": 0,
+      "max": 0.0
+    },
+    "avg_dbtuple_lock_acquire_spins": {
+      "count": 0,
+      "max": 0.0
+    },
+    "avg_dbtuple_read_retries": {
+      "count": 0,
+      "max": 0.0
+    },
+    "avg_dbtuple_stable_version_spins": {
+      "count": 0,
+      "max": 0.0
+    },
+    "avg_gc_reaper_queue_len": {
+      "count": 0,
+      "max": 0.0
+    },
+    "avg_log_buffer_compress_time_us": {
+      "count": 0,
+      "max": 0.0
+    },
+    "avg_log_buffer_iov_len": {
+      "count": 0,
+      "max": 0.0
+    },
+    "avg_log_entry_ntxns_per_entry": {
+      "count": 0,
+      "max": 0.0
+    },
+    "avg_log_entry_size": {
+      "count": 0,
+      "max": 0.0
+    },
+    "avg_logger_bytes_per_sec": {
+      "count": 0,
+      "max": 0.0
+    },
+    "avg_logger_bytes_per_writev": {
+      "count": 0,
+      "max": 0.0
+    },
+    "avg_max_unordered_map_chain_length": {
+      "count": 0,
+      "max": 0.0
+    },
+    "avg_proto_gc_queue_len": {
+      "count": 0,
+      "max": 0.0
+    },
+    "avg_rcu_delete_queue_len": {
+      "count": 0,
+      "max": 0.0
+    },
+    "avg_rcu_local_delete_queue_len": {
+      "count": 0,
+      "max": 0.0
+    },
+    "avg_rcu_sync_try_release": {
+      "count": 0,
+      "max": 0.0
+    },
+    "avg_record_spill_len": {
+      "count": 0,
+      "max": 0.0
+    },
+    "avg_time_inbetween_allocator_releases_usec": {
+      "count": 0,
+      "max": 0.0
+    },
+    "avg_time_inbetween_rcu_epochs_usec": {
+      "count": 0,
+      "max": 0.0
+    },
+    "avg_time_inbetween_ro_epochs_usec": {
+      "count": 0,
+      "max": 0.0
+    },
+    "dbtuple_bytes_allocated": 0,
+    "dbtuple_bytes_freed": 0,
+    "dbtuple_creates": 0,
+    "dbtuple_inplace_buf_insufficient": 0,
+    "dbtuple_inplace_buf_insufficient_on_spill": 0,
+    "dbtuple_latest_replacement": 0,
+    "dbtuple_logical_deletes": 0,
+    "dbtuple_no_space_for_delkey": 0,
+    "dbtuple_physical_deletes": 0,
+    "dbtuple_spills": 0,
+    "dbtuple_write_insert_failed": 0,
+    "dbtuple_write_search_failed": 0,
+    "local_chain_cleanups": 0,
+    "local_search_lookups": 0,
+    "local_search_write_set_hits": 0,
+    "log_buffer_bytes_after_compress": 0,
+    "log_buffer_bytes_before_compress": 0,
+    "log_buffer_epoch_boundary": 0,
+    "log_buffer_out_of_space": 0,
+    "logger_max_lag_wait": 0,
+    "logger_writev_limit_met": 0,
+    "proto_gc_delete_requeue": 0,
+    "rcu_deletes": 0,
+    "rcu_frees": 0,
+    "rcu_incomplete_local_reaps": 0,
+    "rcu_local_reaps": 0,
+    "rcu_loop_reaps": 0,
+    "read_logical_deleted_node_scan": 0,
+    "read_logical_deleted_node_search": 0,
+    "stock_level_loop_join_lookups": {
+      "count": 102306,
+      "max": 260.0,
+      "avg": 196.531
+    },
+    "tpcc_cross_partition_new_order_txns": 108972,
+    "tpcc_cross_partition_payment_txns": 163998,
+    "try_delete_unlinks": 0,
+    "worker_thread_wait_log_buffer": 0
+  }
+}

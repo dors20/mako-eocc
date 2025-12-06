@@ -39,6 +39,7 @@ protected:
     using cast = private_::cast_base<Transaction, Traits>;
 
 public:
+  using TxnProfileHint = abstract_db::TxnProfileHint;
 
   ndb_wrapper(
       const std::vector<std::string> &logfiles,
@@ -47,7 +48,7 @@ public:
       bool use_compression,
       bool fake_writes);
 
-  virtual ssize_t txn_max_batch_size() const OVERRIDE { return 100; }
+  virtual ssize_t txn_max_batch_size() const { return 100; }
 
   virtual void
   do_txn_epoch_sync() const
@@ -123,6 +124,10 @@ public:
       void *txn,
       const std::string &key,
       std::string &value, size_t max_bytes_read);
+  bool shard_get(
+      lcdf::Str key,
+      std::string &value,
+      size_t max_bytes_read = std::string::npos) override;
   virtual const char * put(
       void *txn,
       const std::string &key,
@@ -155,6 +160,14 @@ public:
       void *txn,
       lcdf::Str key,
       std::string &&value);
+  const char * put_mbta(
+      void *txn,
+      lcdf::Str key,
+      bool(*compar)(const std::string& newValue,const std::string& oldValue),
+      const std::string &value) override;
+  const char * shard_put(
+      lcdf::Str key,
+      const std::string &value) override;
   virtual const char *
   insert(void *txn,
          lcdf::Str key,
@@ -169,6 +182,16 @@ public:
       const std::string *end_key,
       scan_callback &callback,
       str_arena *arena);
+  bool shard_scan(
+      const std::string &start_key,
+      const std::string *end_key,
+      scan_callback &callback,
+      str_arena *arena = nullptr) override;
+  void scanRemoteOne(
+      void *txn,
+      const std::string &start_key,
+      const std::string &end_key,
+      std::string &value) override;
   virtual void rscan(
       void *txn,
       const std::string &start_key,
@@ -180,9 +203,13 @@ public:
       lcdf::Str key);
   virtual size_t size() const;
   virtual std::map<std::string, uint64_t> clear();
+  int get_table_id() override;
+  bool get_is_remote() override;
 private:
   std::string name;
   txn_btree<Transaction> btr;
+  int table_id_{-1};
+  bool is_remote_{false};
 };
 
 #endif /* _NDB_WRAPPER_H_ */

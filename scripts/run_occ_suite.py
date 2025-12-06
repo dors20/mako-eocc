@@ -174,6 +174,15 @@ def main():
         help="If set, override the 'threads' placeholder in scenarios that define it.",
     )
     parser.add_argument(
+        "--threads-fraction",
+        type=float,
+        help=(
+            "If set and --override-threads is not used, set the 'threads' "
+            "placeholder to max(1, int(os.cpu_count() * fraction)) in "
+            "scenarios that define it."
+        ),
+    )
+    parser.add_argument(
         "--results-root",
         type=Path,
         default=Path("/home/azureuser/mako-eocc/results/occ_runs"),
@@ -188,6 +197,11 @@ def main():
         "--only",
         nargs="*",
         help="Optional list of scenario names to run.",
+    )
+    parser.add_argument(
+        "--only-dbtest",
+        action="store_true",
+        help="If set, run only scenarios whose name starts with 'dbtest_'.",
     )
     args = parser.parse_args()
 
@@ -220,12 +234,19 @@ def main():
             continue
         if selected and name not in selected:
             continue
+        if args.only_dbtest and not name.startswith("dbtest_"):
+            continue
 
         description = scenario.get("description", "")
         placeholders = build_placeholders(scenario.get("placeholders"), args.mode)
         # Allow caller to override thread-count while reusing other placeholders
         if args.override_threads is not None and "threads" in placeholders:
             placeholders["threads"] = args.override_threads
+        elif args.threads_fraction is not None and "threads" in placeholders:
+            # Derive thread-count from hardware threads (e.g., 0.25 → 25% of cores).
+            hw_threads = os.cpu_count() or 1
+            derived = max(1, int(hw_threads * args.threads_fraction))
+            placeholders["threads"] = derived
         try:
             command_template = scenario["command"]
         except KeyError as exc:

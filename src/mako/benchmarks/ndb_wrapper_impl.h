@@ -10,9 +10,19 @@
 #include "../util.h"
 #include "../scopedperf.hh"
 #include "../txn.h"
+#include "benchmark_config.h"
 //#include "../txn_proto1_impl.h"
 #include "../txn_proto2_impl.h"
 #include "../tuple.h"
+
+namespace {
+inline std::string StrToStdString(lcdf::Str key) {
+  if (key.length() <= 0 || key.data() == nullptr) {
+    return std::string();
+  }
+  return std::string(key.data(), static_cast<size_t>(key.length()));
+}
+}  // namespace
 
 struct hint_default_traits : public default_transaction_traits {
   typedef str_arena StringAllocator;
@@ -131,13 +141,18 @@ ndb_wrapper<Transaction>::ndb_wrapper(
 {
   if (logfiles.empty())
     return;
+
+  auto& bench_config = BenchmarkConfig::getInstance();
+  const size_t thread_count =
+      std::max<size_t>(1, static_cast<size_t>(bench_config.getNthreads()));
+
   std::vector<std::vector<unsigned>> assignments_used;
   txn_logger::Init(
-      nthreads, logfiles, assignments_given, &assignments_used,
+      thread_count, logfiles, assignments_given, &assignments_used,
       call_fsync,
       use_compression,
       fake_writes);
-  if (verbose) {
+  if (bench_config.getVerbose()) {
     std::cerr << "[logging subsystem]" << std::endl;
     std::cerr << "  assignments: " << assignments_used << std::endl;
     std::cerr << "  call fsync : " << call_fsync       << std::endl;
@@ -478,9 +493,8 @@ ndb_ordered_index<Transaction>::get(
     lcdf::Str key,
     std::string &value, size_t max_bytes_read)
 {
-    printf("Should not reach here - get\n");
-    assert(false);
-    return true;
+  const std::string key_str = StrToStdString(key);
+  return get(txn, key_str, value, max_bytes_read);
 }
 
 // XXX: find way to remove code duplication below using C++ templates!
@@ -492,9 +506,8 @@ ndb_ordered_index<Transaction>::put(
     lcdf::Str key,
     const std::string &value)
 {
-  printf("Should not reach here - put\n");
-  assert(false);
-  return 0;
+  const std::string key_str = StrToStdString(key);
+  return put(txn, key_str, value);
 }
 
 template <template <typename> class Transaction>
@@ -504,9 +517,8 @@ ndb_ordered_index<Transaction>::put(
     lcdf::Str key,
     std::string &&value)
 {
-printf("Should not reach here-put\n");
-  assert(false);
-  return 0;
+  const std::string key_str = StrToStdString(key);
+  return put(txn, key_str, std::move(value));
 }
 
 template <template <typename> class Transaction>
@@ -516,9 +528,8 @@ ndb_ordered_index<Transaction>::insert(
     lcdf::Str key,
     const std::string &value)
 {
-printf("Should not reach here - insert\n");
-  assert(false);
-  return 0;
+  const std::string key_str = StrToStdString(key);
+  return insert(txn, key_str, value);
 }
 
 template <template <typename> class Transaction>
@@ -528,9 +539,45 @@ ndb_ordered_index<Transaction>::insert(
     lcdf::Str key,
     std::string &&value)
 {
-printf("Should not reach here-insert\n");
-  assert(false);
-  return 0;
+  const std::string key_str = StrToStdString(key);
+  return insert(txn, key_str, std::move(value));
+}
+
+template <template <typename> class Transaction>
+bool
+ndb_ordered_index<Transaction>::shard_get(
+    lcdf::Str key,
+    std::string &value,
+    size_t max_bytes_read)
+{
+  (void) key;
+  (void) value;
+  (void) max_bytes_read;
+  return false;
+}
+
+template <template <typename> class Transaction>
+const char *
+ndb_ordered_index<Transaction>::put_mbta(
+    void *txn,
+    lcdf::Str key,
+    bool(*compar)(const std::string& newValue,const std::string& oldValue),
+    const std::string &value)
+{
+  (void) compar;
+  const std::string key_str = StrToStdString(key);
+  return put(txn, key_str, value);
+}
+
+template <template <typename> class Transaction>
+const char *
+ndb_ordered_index<Transaction>::shard_put(
+    lcdf::Str key,
+    const std::string &value)
+{
+  (void) key;
+  (void) value;
+  return nullptr;
 }
 
 template <template <typename> class Transaction>
@@ -580,6 +627,35 @@ ndb_ordered_index<Transaction>::scan(
   } catch (transaction_abort_exception &ex) {
     throw abstract_db::abstract_abort_exception();
   }
+}
+
+template <template <typename> class Transaction>
+bool
+ndb_ordered_index<Transaction>::shard_scan(
+    const std::string &start_key,
+    const std::string *end_key,
+    scan_callback &callback,
+    str_arena *arena)
+{
+  (void) start_key;
+  (void) end_key;
+  (void) callback;
+  (void) arena;
+  return false;
+}
+
+template <template <typename> class Transaction>
+void
+ndb_ordered_index<Transaction>::scanRemoteOne(
+    void *txn,
+    const std::string &start_key,
+    const std::string &end_key,
+    std::string &value)
+{
+  (void) txn;
+  (void) start_key;
+  (void) end_key;
+  value.clear();
 }
 
 template <template <typename> class Transaction>
@@ -640,8 +716,8 @@ template <template <typename> class Transaction>
 void
 ndb_ordered_index<Transaction>::remove(void *txn, lcdf::Str key)
 {
-printf("Should not reach here - remove\n");
-  assert(false);
+  const std::string key_str = StrToStdString(key);
+  remove(txn, key_str);
 }
 
 template <template <typename> class Transaction>
@@ -659,6 +735,20 @@ ndb_ordered_index<Transaction>::clear()
   std::cerr << "purging txn index: " << name << std::endl;
 #endif
   return btr.unsafe_purge(true);
+}
+
+template <template <typename> class Transaction>
+int
+ndb_ordered_index<Transaction>::get_table_id()
+{
+  return table_id_;
+}
+
+template <template <typename> class Transaction>
+bool
+ndb_ordered_index<Transaction>::get_is_remote()
+{
+  return is_remote_;
 }
 
 #endif /* _NDB_WRAPPER_IMPL_H_ */

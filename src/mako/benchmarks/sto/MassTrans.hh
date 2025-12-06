@@ -19,7 +19,9 @@
 #include "common.hh"
 #include "stdlib.h"
 
-#define RCU 1
+#ifndef MASS_TRANS_RCU
+#define MASS_TRANS_RCU 1
+#endif
 #define ABORT_ON_WRITE_READ_CONFLICT 0
 
 #ifndef READ_MY_WRITES
@@ -31,7 +33,7 @@
 template <typename V, typename Box = versioned_value_struct<V>, bool Opacity = true>
 class MassTrans : public TObject {
 public:
-#if !RCU
+#if !MASS_TRANS_RCU
   typedef debug_threadinfo threadinfo;
 #endif
 
@@ -60,7 +62,7 @@ public:
     typedef std::string key_write_value_type;
 
   MassTrans() {
-#if RCU
+#if MASS_TRANS_RCU
     if (!mythreadinfo.ti) {
       auto* ti = threadinfo::make(threadinfo::TI_MAIN, -1);
       mythreadinfo.ti = ti;
@@ -101,7 +103,7 @@ public:
   }
 
   static void thread_init() {
-#if !RCU
+#if !MASS_TRANS_RCU
     mythreadinfo.ti = new threadinfo;
     return;
 #else

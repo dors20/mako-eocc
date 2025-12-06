@@ -203,7 +203,13 @@ static abstract_db* initWithDB() {
   //initialize_rust_wrapper();
 
   // initialize the numa allocator
-  size_t numa_memory = mako::parse_memory_spec("1G");
+  //
+  // Use a larger logical region than the original 1G default so that
+  // OCC + batch validation runs do not exhaust the per-core hugepage
+  // pool on small machines (e.g., 2 cores, 8 GiB RAM). The allocator
+  // only faults in pages on demand, so this primarily increases the
+  // virtual address window rather than upfront physical usage.
+  size_t numa_memory = mako::parse_memory_spec("4G");
   if (numa_memory > 0) {
     const size_t maxpercpu = util::iceil(
         numa_memory / benchConfig.getNthreads(), ::allocator::GetHugepageSize());

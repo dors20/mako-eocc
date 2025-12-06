@@ -2,7 +2,11 @@
 
 // a no-op RCU class for MassTrans (aka, completely unimportant code)
 
-#if !RCU
+#ifndef MASS_TRANS_RCU
+#define MASS_TRANS_RCU 1
+#endif
+
+#if !MASS_TRANS_RCU
 class debug_threadinfo {
 public:
 #if 0

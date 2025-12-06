@@ -318,7 +318,11 @@ bench_worker::run()
   // int s;
   // s = pthread_getcpuclockid(pthread_self(), &cid);
   // pclock((char*)("[CPU_TIME] Database worker thread CPU time lock, id: " + std::to_string(TThread::id()) + ": ").c_str(), cid);
-  TThread::sclient->statistics();
+  // In single-node or OCC-only configurations there may be no ShardClient;
+  // guard against nullptr before requesting transport statistics.
+  if (TThread::sclient) {
+    TThread::sclient->statistics();
+  }
   sleep(1); // ensure all worker threads finish execution
 }
 

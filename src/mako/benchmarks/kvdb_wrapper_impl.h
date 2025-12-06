@@ -272,7 +272,7 @@ struct basic_kvdb_record : public record_version<UseConcurrencyControl> {
       std::numeric_limits<uint16_t>::max() + sizeof(basic_kvdb_record);
     const size_t alloc_sz =
       std::min(
-          util::round_up<size_t, allocator::LgAllocAlignment>(sizeof(basic_kvdb_record) + sz),
+          util::round_up<size_t, ::allocator::LgAllocAlignment>(sizeof(basic_kvdb_record) + sz),
           max_alloc_sz);
     char * const p = reinterpret_cast<char *>(rcu::s_instance.alloc(alloc_sz));
     INVARIANT(p);

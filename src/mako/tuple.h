@@ -998,7 +998,7 @@ public:
       std::numeric_limits<node_size_type>::max() + sizeof(dbtuple);
     const size_t alloc_sz =
       std::min(
-          util::round_up<size_t, allocator::LgAllocAlignment>(sizeof(dbtuple) + sz),
+          util::round_up<size_t, ::allocator::LgAllocAlignment>(sizeof(dbtuple) + sz),
           max_alloc_sz);
     char *p = reinterpret_cast<char *>(rcu::s_instance.alloc(alloc_sz));
     INVARIANT(p);
@@ -1014,7 +1014,7 @@ public:
       std::numeric_limits<node_size_type>::max() + sizeof(dbtuple);
     const size_t alloc_sz =
       std::min(
-          util::round_up<size_t, allocator::LgAllocAlignment>(sizeof(dbtuple) + base->size),
+          util::round_up<size_t, ::allocator::LgAllocAlignment>(sizeof(dbtuple) + base->size),
           max_alloc_sz);
     char *p = reinterpret_cast<char *>(rcu::s_instance.alloc(alloc_sz));
     INVARIANT(p);
@@ -1036,7 +1036,7 @@ public:
       std::numeric_limits<node_size_type>::max() + sizeof(dbtuple);
     const size_t alloc_sz =
       std::min(
-          util::round_up<size_t, allocator::LgAllocAlignment>(sizeof(dbtuple) + needed_sz),
+          util::round_up<size_t, ::allocator::LgAllocAlignment>(sizeof(dbtuple) + needed_sz),
           max_alloc_sz);
     char *p = reinterpret_cast<char *>(rcu::s_instance.alloc(alloc_sz));
     INVARIANT(p);

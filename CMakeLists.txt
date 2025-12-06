@@ -383,9 +383,9 @@ if(GPROF)
   list(APPEND LDFLAGS -pg -static-libstdc++ -static-libgcc)
 endif()
 
+set(LZ4_LIBRARY_PATH ${CMAKE_CURRENT_SOURCE_DIR}/third-party/lz4/liblz4.so)
 set(LZ4LDFLAGS
   -L${CMAKE_CURRENT_SOURCE_DIR}/third-party/lz4
-  -llz4
   -Wl,-rpath,${TOP}/third-party/lz4
 )
 
@@ -653,6 +653,8 @@ target_link_libraries(txlog
     pthread
     ${CMAKE_DL_LIBS}
     Python3::Python
+    ${LZ4_LIBRARY_PATH}
+    ${LZ4LDFLAGS}
 )
 
 # Set output location to match expected path
@@ -734,12 +736,14 @@ function(add_apps exec_name exec_path)
       erpc
       rust_lib
       txlog  # Link to the CMake txlog target instead of the .so file
+      ${LZ4_LIBRARY_PATH}
       ${BENCH_LDFLAGS}
       yaml-cpp
       pthread
       numa
       event_pthreads
       rocksdb
+      ${LZ4LDFLAGS}
       ${LIBEVENT_LDFLAGS}
       ${GFLAGS_LDFLAGS}
       ${PROTOBUF_LDFLAGS}
@@ -792,12 +796,14 @@ target_link_libraries(test_batch_validation_stress
     erpc
     rust_lib
     txlog
+    ${LZ4_LIBRARY_PATH}
     ${BENCH_LDFLAGS}
     yaml-cpp
     pthread
     numa
     event_pthreads
     rocksdb
+    ${LZ4LDFLAGS}
     ${LIBEVENT_LDFLAGS}
     ${GFLAGS_LDFLAGS}
     ${PROTOBUF_LDFLAGS}
