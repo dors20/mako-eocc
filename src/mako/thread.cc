@@ -2,8 +2,14 @@
 #include "macros.h"
 #include "thread.h"
 #include "lib/fasttransport.h"
+#include "loader_phase.h"
 
 using namespace std;
+
+// Default: threads are not in the TPCC loader phase unless explicitly marked.
+namespace mako {
+__thread bool g_in_loader_phase = false;
+}
 
 ndb_thread::~ndb_thread()
 {

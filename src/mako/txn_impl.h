@@ -3,6 +3,7 @@
 
 #include "txn.h"
 #include "lockguard.h"
+#include "loader_phase.h"
 #ifdef ENABLE_BATCH_VALIDATION
 #include "txn_occ_batch_validation.h"
 #include <cstdlib>
@@ -347,8 +348,10 @@ transaction<Protocol, Traits>::commit(bool doThrow)
       bool skip_individual_validation_flag = false;
 
 #ifdef ENABLE_BATCH_VALIDATION
-      // Try to use batch validation if enabled
-      static bool batch_validation_enabled = []() {
+      // Try to use batch validation if enabled and we are *not* in the
+      // TPCC load phase. Loader threads are marked via mako::g_in_loader_phase
+      // (see loader_phase.h) to avoid deadlocks during initial data load.
+      static bool global_batch_validation_enabled = []() {
         const char* env = std::getenv("MAKO_ENABLE_BATCH_VALIDATION");
         bool enabled = env && (std::string(env) == "1" || std::string(env) == "true");
         if (mako::BatchValidationTraceEnabled()) {
@@ -386,8 +389,20 @@ transaction<Protocol, Traits>::commit(bool doThrow)
         return enabled;
       }();
 
+      // Only enable OCC batch validation for transaction traits that
+      // explicitly opt in via Traits::enable_batch_validation. This is
+      // currently enabled only for well-understood TPCC transaction
+      // shapes (e.g., NewOrder). Other TPCC transactions like Payment
+      // and Delivery run with the original sequential validation path.
+      constexpr bool kSupportsBatchValidation = Traits::enable_batch_validation;
+
+      const bool use_batch_validation =
+          global_batch_validation_enabled &&
+          !mako::g_in_loader_phase &&
+          kSupportsBatchValidation;
+
       // Use batch validation for parallel validation
-      if (batch_validation_enabled) {
+      if (use_batch_validation) {
         auto& validator = GetBatchValidator<Protocol, Traits>();
         // Add to batch - blocks until batch is validated in parallel
         bool validation_passed = validator.AddToBatch(this);

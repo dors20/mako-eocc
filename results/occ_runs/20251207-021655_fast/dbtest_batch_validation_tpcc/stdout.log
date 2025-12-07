@@ -1,0 +1,90 @@
+# Command: ./build/dbtest -q config/mako_single_node.yml -N local_s0 -t 2
+# Working dir: /home/azureuser/mako-eocc
+20251107-02:18.07-137418(us) 324260 * ParseNewFormat  (configuration.cc:99): Using new configuration format
+20251107-02:18.07-137799(us) 324260 * ParseNewFormat  (configuration.cc:159): Loaded 1 sites in 1 shards
+20251107-02:18.07-137833(us) 324260 * handle_new_config_format (dbtest.cc:131):    Site local_s0: shard=0, replica_idx=0, is_leader=1, cluster=localhost
+allocator::Initialize()
+  hugepgsize: 2097152
+  use MADV_WILLNEED: 1
+  mmap() region [0x79e250c00000, 0x79e350e00000)
+cpu0 owns [0x79e250c00000, 0x79e2d0c00000)
+cpu1 owns [0x79e2d0c00000, 0x79e350c00000)
+Database Benchmark:
+  pid: 324260
+settings:
+  num-cpus    : 2
+  num-threads : 2
+  shardIndex  : 0
+  paxos_proc_name  : localhost
+  nshards     : 1
+  is_micro    : 0
+  is_replicated : 0
+  var-encode  : yes
+  allocator   : jemalloc
+system properties:
+  tuple_prefetch          : no
+  btree_node_prefetch     : yes
+tpcc settings:
+  cross_partition_transactions : 1
+  read_only_snapshots          : 1
+  partition_locks              : 0
+  separate_tree_per_partition  : 1
+  new_order_remote_item_pct    : 1
+  new_order_fast_id_gen        : 1
+  uniform_item_dist            : 0
+  order_status_scan_hack       : 0
+  workload_mix                 : [45, 43, 4, 4, 4]
+20251107-02:18.07-141917(us) 324260 * ParseNewFormat  (configuration.cc:99): Using new configuration format
+20251107-02:18.07-141991(us) 324260 * ParseNewFormat  (configuration.cc:159): Loaded 1 sites in 1 shards
+[TRANSPORT] Using default: rrr
+20251107-02:18.07-143649(us) 324260 * Initialize      (rrr_rpc_backend.cc:58): RrrRpcBackend::Initialize: poll_thread_worker_ created, is_some=1
+20251107-02:18.07-144010(us) 324260 * Initialize      (rrr_rpc_backend.cc:88): RrrRpcBackend initialized on 127.0.0.1:31007 (listening on 0.0.0.0:31007)
+20251107-02:18.07-144169(us) 324260 * FastTransport   (fasttransport.cc:116): FastTransport initialized with rrr/rpc backend on 127.0.0.1:31007
+20251107-02:18.07-144181(us) 324260 * RunEventLoop    (rrr_rpc_backend.cc:518): RrrRpcBackend::RunEventLoop: Starting event loop
+20251107-02:18.07-144543(us) 324260 * ParseNewFormat  (configuration.cc:99): Using new configuration format
+20251107-02:18.07-144736(us) 324260 * ParseNewFormat  (configuration.cc:159): Loaded 1 sites in 1 shards
+[TRANSPORT] Using default: rrr
+20251107-02:18.07-145128(us) 324260 * Initialize      (rrr_rpc_backend.cc:58): RrrRpcBackend::Initialize: poll_thread_worker_ created, is_some=1
+20251107-02:18.07-145402(us) 324260 * Initialize      (rrr_rpc_backend.cc:88): RrrRpcBackend initialized on 127.0.0.1:31008 (listening on 0.0.0.0:31008)
+20251107-02:18.07-145549(us) 324260 * FastTransport   (fasttransport.cc:116): FastTransport initialized with rrr/rpc backend on 127.0.0.1:31008
+20251107-02:18.07-145566(us) 324260 * RunEventLoop    (rrr_rpc_backend.cc:518): RrrRpcBackend::RunEventLoop: Starting event loop
+20251107-02:18.07-148103(us) 324260 ! run             (bench.cc:361):     # of loaders size:6
+start worker:7146
+[INFO] finished loading warehouse
+[INFO]   * average warehouse record length: 97 bytes
+[INFO] finished loading item
+[INFO]   * average item record length: 84.1739 bytes
+PinToWarehouseId(): coreid=3 pinned to whse=1 (partid=0)
+PinToWarehouseId(): coreid=4 pinned to whse=1 (partid=0)
+PinToWarehouseId(): coreid=4 pinned to whse=2 (partid=1)
+[INFO] finished loading district
+[INFO]   * average district record length: 99 bytes
+PinToWarehouseId(): coreid=3 pinned to whse=2 (partid=1)
+[INFO] finished loading stock
+[INFO]   * average stock record length: 8 bytes
+PinToWarehouseId(): coreid=5 pinned to whse=1 (partid=0)
+num batches: 30
+PinToWarehouseId(): coreid=6 pinned to whse=1 (partid=0)
+PinToWarehouseId(): coreid=5 pinned to whse=2 (partid=1)
+PinToWarehouseId(): coreid=6 pinned to whse=2 (partid=1)
+[INFO] finished loading order
+[INFO]   * average order_line record length: 11.1187 bytes
+[INFO]   * average oorder record length: 7.7038 bytes
+[INFO]   * average new_order record length: 12 bytes
+[INFO] finished loading customer
+[INFO]   * average customer record length: 153.862 bytes 
+timed region dataloading took 5025.15 ms
+DB size: 346.348 MB
+wait_an_epoch(): consistent reads happening in e-1: 3
+[0, 0, 0] txns persisted in loading phase
+20251107-02:18.13-123079(us) 324260 ! run             (bench.cc:414):     # of nthreads:2
+starting benchmark...
+--------------Finish loading data and wait for others completing load phase ------------
+tpcc: worker id 8 => warehouses [1, 2)
+tpcc: worker id 9 => warehouses [2, 3)
+No JEMALLOC_NO_RENAME
+No JEMALLOC_NO_RENAME
+20251107-02:18.13-142824(us) 324260 ! run             (bench.cc:465):     start the running time, runTime:30
+20251107-02:18.13-142963(us) 324260 ! run             (bench.cc:477):     runtime time left:30000 ms, bool:1
+
+# Exit code: -11

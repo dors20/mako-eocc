@@ -14,6 +14,7 @@
 #include "../util.h"
 #include "../spinbarrier.h"
 #include "../rcu.h"
+#include "../loader_phase.h"
 #include "deptran/s_main.h"
 #include "lib/configuration.h"
 #include "benchmark_config.h"
@@ -71,8 +72,10 @@ public:
     // ALWAYS_ASSERT(b);
     // b->count_down();
     // b->wait_for();
+    mako::g_in_loader_phase = true;
     scoped_db_thread_ctx ctx(db, true);
     load();
+    mako::g_in_loader_phase = false;
   }
 protected:
   inline void *txn_buf() { return (void *) txn_obj_buf.data(); }

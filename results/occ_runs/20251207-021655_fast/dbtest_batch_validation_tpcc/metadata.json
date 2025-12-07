@@ -1,0 +1,33 @@
+{
+  "name": "dbtest_batch_validation_tpcc",
+  "description": "dbtest TPCC run with batch validation enabled.",
+  "mode": "fast",
+  "command_template": "./build/dbtest -q config/mako_single_node.yml -N local_s0 -t {threads}",
+  "command": [
+    "./build/dbtest",
+    "-q",
+    "config/mako_single_node.yml",
+    "-N",
+    "local_s0",
+    "-t",
+    "2"
+  ],
+  "placeholders": {
+    "threads": 2,
+    "batch_size": 8,
+    "batch_wait_us": 250
+  },
+  "env": {
+    "MAKO_BATCH_VALIDATION_THREADS": "2",
+    "OMP_NUM_THREADS": "2",
+    "MAKO_TXN_ENGINE": "occ",
+    "MAKO_ENABLE_BATCH_VALIDATION": "1",
+    "MAKO_BATCH_VALIDATION_SIZE": "8",
+    "MAKO_BATCH_VALIDATION_MAX_WAIT_US": "250",
+    "DBTEST_EXIT_AFTER_SECS": "5"
+  },
+  "workdir": "/home/azureuser/mako-eocc",
+  "timestamp": "20251207-021655",
+  "dry_run": false,
+  "occ_only_counters": true
+}

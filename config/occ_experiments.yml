@@ -286,9 +286,46 @@ scenarios:
         fast: 5
         full: 60
 
+  - name: dbtest_baseline_tpcc_1wh_hot
+    description: Baseline dbtest TPCC run (sequential validation) using 1-warehouse high-contention config.
+    command: "./build/dbtest -q config/mako_single_node_1wh_hot.yml -N local_s0 -t {threads}"
+    placeholders:
+      threads:
+        fast: 2
+        full: 24
+    env:
+      MAKO_ENABLE_BATCH_VALIDATION: "0"
+      DBTEST_EXIT_AFTER_SECS:
+        fast: 5
+        full: 60
+
   - name: dbtest_batch_validation_tpcc
     description: dbtest TPCC run with batch validation enabled.
     command: "./build/dbtest -q config/mako_single_node.yml -N local_s0 -t {threads}"
+    placeholders:
+      threads:
+        fast: 2
+        full: 24
+      batch_size:
+        fast: 8
+        full: 16
+      batch_wait_us:
+        fast: 250
+        full: 500
+    env:
+      MAKO_BATCH_VALIDATION_THREADS: "{threads}"
+      OMP_NUM_THREADS: "{threads}"
+      MAKO_TXN_ENGINE: "occ"
+      MAKO_ENABLE_BATCH_VALIDATION: "1"
+      MAKO_BATCH_VALIDATION_SIZE: "{batch_size}"
+      MAKO_BATCH_VALIDATION_MAX_WAIT_US: "{batch_wait_us}"
+      DBTEST_EXIT_AFTER_SECS:
+        fast: 5
+        full: 60
+
+  - name: dbtest_batch_validation_tpcc_1wh_hot
+    description: dbtest TPCC run with batch validation enabled on 1-warehouse high-contention config.
+    command: "./build/dbtest -q config/mako_single_node_1wh_hot.yml -N local_s0 -t {threads}"
     placeholders:
       threads:
         fast: 2
@@ -337,9 +374,63 @@ scenarios:
         fast: 5
         full: 60
 
+  - name: dbtest_batch_validation_reorder_minid_1wh_hot
+    description: dbtest TPCC with batch validation + txn reordering (Min-ID FVS) on 1-warehouse high-contention config.
+    command: "./build/dbtest -q config/mako_single_node_1wh_hot.yml -N local_s0 -t {threads}"
+    placeholders:
+      threads:
+        fast: 2
+        full: 24
+      batch_size:
+        fast: 8
+        full: 16
+      batch_wait_us:
+        fast: 250
+        full: 500
+    env:
+      MAKO_BATCH_VALIDATION_THREADS: "{threads}"
+      OMP_NUM_THREADS: "{threads}"
+      MAKO_TXN_ENGINE: "occ"
+      MAKO_ENABLE_BATCH_VALIDATION: "1"
+      MAKO_ENABLE_TXN_REORDER: "1"
+      MAKO_TXN_REORDER_FVS: "min"
+      MAKO_TXN_REORDER_ALGO: "sort"
+      MAKO_BATCH_VALIDATION_SIZE: "{batch_size}"
+      MAKO_BATCH_VALIDATION_MAX_WAIT_US: "{batch_wait_us}"
+      DBTEST_EXIT_AFTER_SECS:
+        fast: 5
+        full: 60
+
   - name: dbtest_batch_validation_reorder_prod
     description: dbtest TPCC with batch validation + txn reordering (degree-product FVS).
     command: "./build/dbtest -q config/mako_single_node.yml -N local_s0 -t {threads}"
+    placeholders:
+      threads:
+        fast: 2
+        full: 24
+      batch_size:
+        fast: 8
+        full: 16
+      batch_wait_us:
+        fast: 250
+        full: 500
+    env:
+      MAKO_BATCH_VALIDATION_THREADS: "{threads}"
+      OMP_NUM_THREADS: "{threads}"
+      MAKO_TXN_ENGINE: "occ"
+      MAKO_ENABLE_BATCH_VALIDATION: "1"
+      MAKO_ENABLE_TXN_REORDER: "1"
+      MAKO_TXN_REORDER_FVS: "prod"
+      MAKO_TXN_REORDER_ALGO: "sort"
+      MAKO_BATCH_VALIDATION_SIZE: "{batch_size}"
+      MAKO_BATCH_VALIDATION_MAX_WAIT_US: "{batch_wait_us}"
+      DBTEST_EXIT_AFTER_SECS:
+        fast: 5
+        full: 60
+
+  - name: dbtest_batch_validation_reorder_prod_1wh_hot
+    description: dbtest TPCC with batch validation + txn reordering (degree-product FVS) on 1-warehouse high-contention config.
+    command: "./build/dbtest -q config/mako_single_node_1wh_hot.yml -N local_s0 -t {threads}"
     placeholders:
       threads:
         fast: 2
@@ -397,10 +488,67 @@ scenarios:
         fast: 5
         full: 60
 
+  - name: dbtest_batch_validation_storage_1wh_hot
+    description: dbtest TPCC with batch validation + storage-stage reordering on 1-warehouse high-contention config.
+    command: "./build/dbtest -q config/mako_single_node_1wh_hot.yml -N local_s0 -t {threads}"
+    placeholders:
+      threads:
+        fast: 2
+        full: 24
+      batch_size:
+        fast: 8
+        full: 16
+      batch_wait_us:
+        fast: 250
+        full: 500
+      storage_batch:
+        fast: 8
+        full: 16
+      storage_wait_us:
+        fast: 50
+        full: 100
+    env:
+      MAKO_BATCH_VALIDATION_THREADS: "{threads}"
+      OMP_NUM_THREADS: "{threads}"
+      MAKO_TXN_ENGINE: "occ"
+      MAKO_ENABLE_BATCH_VALIDATION: "1"
+      MAKO_BATCH_VALIDATION_SIZE: "{batch_size}"
+      MAKO_BATCH_VALIDATION_MAX_WAIT_US: "{batch_wait_us}"
+      MAKO_ENABLE_STORAGE_REORDER: "1"
+      MAKO_STORAGE_REORDER_SIZE: "{storage_batch}"
+      MAKO_STORAGE_REORDER_MAX_WAIT_US: "{storage_wait_us}"
+      DBTEST_EXIT_AFTER_SECS:
+        fast: 5
+        full: 60
+
   # dbtest TPCC with batch validation and OpenMP-style parallel validation in OCC path (for future OCC+TPCC integration)
   - name: dbtest_parallel_validation_tpcc
     description: dbtest TPCC with batch validation knobs set for OCC-style parallel validation (uses all configured OpenMP threads if OCC path is enabled).
     command: "./build/dbtest -q config/mako_single_node.yml -N local_s0 -t {threads}"
+    placeholders:
+      threads:
+        fast: 2
+        full: 24
+      batch_size:
+        fast: 8
+        full: 16
+      batch_wait_us:
+        fast: 250
+        full: 500
+    env:
+      MAKO_TXN_ENGINE: "occ"
+      MAKO_ENABLE_BATCH_VALIDATION: "1"
+      MAKO_BATCH_VALIDATION_SIZE: "{batch_size}"
+      MAKO_BATCH_VALIDATION_MAX_WAIT_US: "{batch_wait_us}"
+      MAKO_BATCH_VALIDATION_THREADS: "{threads}"
+      OMP_NUM_THREADS: "{threads}"
+      DBTEST_EXIT_AFTER_SECS:
+        fast: 5
+        full: 60
+
+  - name: dbtest_parallel_validation_tpcc_1wh_hot
+    description: dbtest TPCC with batch validation knobs set for OCC-style parallel validation on 1-warehouse high-contention config.
+    command: "./build/dbtest -q config/mako_single_node_1wh_hot.yml -N local_s0 -t {threads}"
     placeholders:
       threads:
         fast: 2
@@ -445,6 +593,43 @@ scenarios:
     env:
       MAKO_BATCH_VALIDATION_THREADS: "{threads}"
       OMP_NUM_THREADS: "{threads}"
+      MAKO_TXN_ENGINE: "occ"
+      MAKO_ENABLE_BATCH_VALIDATION: "1"
+      MAKO_BATCH_VALIDATION_SIZE: "{batch_size}"
+      MAKO_BATCH_VALIDATION_MAX_WAIT_US: "{batch_wait_us}"
+      MAKO_ENABLE_TXN_REORDER: "1"
+      MAKO_TXN_REORDER_FVS: "prod"
+      MAKO_TXN_REORDER_ALGO: "sort"
+      MAKO_ENABLE_STORAGE_REORDER: "1"
+      MAKO_STORAGE_REORDER_SIZE: "{storage_batch}"
+      MAKO_STORAGE_REORDER_MAX_WAIT_US: "{storage_wait_us}"
+      DBTEST_EXIT_AFTER_SECS:
+        fast: 5
+        full: 60
+
+  - name: dbtest_batch_validation_all_optimizations_1wh_hot
+    description: dbtest TPCC with batch validation, txn reordering (prod FVS), and storage-stage reordering enabled on 1-warehouse high-contention config.
+    command: "./build/dbtest -q config/mako_single_node_1wh_hot.yml -N local_s0 -t {threads}"
+    placeholders:
+      threads:
+        fast: 2
+        full: 24
+      batch_size:
+        fast: 8
+        full: 16
+      batch_wait_us:
+        fast: 250
+        full: 500
+      storage_batch:
+        fast: 8
+        full: 16
+      storage_wait_us:
+        fast: 50
+        full: 100
+    env:
+      MAKO_BATCH_VALIDATION_THREADS: "{threads}"
+      OMP_NUM_THREADS: "{threads}"
+      MAKO_TXN_ENGINE: "occ"
       MAKO_ENABLE_BATCH_VALIDATION: "1"
       MAKO_BATCH_VALIDATION_SIZE: "{batch_size}"
       MAKO_BATCH_VALIDATION_MAX_WAIT_US: "{batch_wait_us}"
@@ -462,6 +647,39 @@ scenarios:
   - name: dbtest_storage_reorder_only_tpcc
     description: dbtest TPCC with OCC engine and storage-stage reordering flags set, but without OCC batch validation.
     command: "./build/dbtest -q config/mako_single_node.yml -N local_s0 -t {threads}"
+    placeholders:
+      threads:
+        fast: 2
+        full: 24
+      batch_size:
+        fast: 8
+        full: 16
+      batch_wait_us:
+        fast: 250
+        full: 500
+      storage_batch:
+        fast: 8
+        full: 16
+      storage_wait_us:
+        fast: 50
+        full: 100
+    env:
+      MAKO_TXN_ENGINE: "occ"
+      MAKO_ENABLE_BATCH_VALIDATION: "1"
+      MAKO_BATCH_VALIDATION_SIZE: "{batch_size}"
+      MAKO_BATCH_VALIDATION_MAX_WAIT_US: "{batch_wait_us}"
+      MAKO_BATCH_VALIDATION_THREADS: "{threads}"
+      OMP_NUM_THREADS: "{threads}"
+      MAKO_ENABLE_STORAGE_REORDER: "1"
+      MAKO_STORAGE_REORDER_SIZE: "{storage_batch}"
+      MAKO_STORAGE_REORDER_MAX_WAIT_US: "{storage_wait_us}"
+      DBTEST_EXIT_AFTER_SECS:
+        fast: 5
+        full: 60
+
+  - name: dbtest_storage_reorder_only_tpcc_1wh_hot
+    description: dbtest TPCC with OCC engine and storage-stage reordering flags set, but without OCC batch validation, on 1-warehouse high-contention config.
+    command: "./build/dbtest -q config/mako_single_node_1wh_hot.yml -N local_s0 -t {threads}"
     placeholders:
       threads:
         fast: 2

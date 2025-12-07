@@ -1,0 +1,3 @@
+scenario,throughput_txn_per_s,avg_latency_ms,abort_rate_per_s
+dbtest_baseline_tpcc,52,801,0.0372,7.53
+dbtest_baseline_tpcc_1wh_hot,53,491,0.0367,8.62

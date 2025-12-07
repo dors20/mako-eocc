@@ -403,6 +403,9 @@ struct default_transaction_traits {
   static const size_t write_set_expected_size = SMALL_SIZE_MAP;
   static const bool stable_input_memory = false;
   static const bool hard_expected_sizes = false; // true if the expected sizes are hard maximums
+  // Whether this transaction shape is known to be compatible with OCC
+  // batch validation and parallel read-set checking.
+  static const bool enable_batch_validation = false;
   static const bool read_own_writes = true; // if we read a key which we previous put(), are we guaranteed
                                             // to read our latest (uncommited) values? this comes at a
                                             // performance penality [you should not need this behavior to

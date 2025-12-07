@@ -110,6 +110,21 @@ COUNTER_PATTERN = re.compile(
 )
 
 
+OCC_COUNTER_PREFIXES = (
+    "batch_",
+    "txn_reorder_",
+    "sto_batch_",
+    "storage_reorder_",
+)
+
+OCC_COUNTER_NAMES = {
+    "validator_queue_wait_us",
+    "txn_client_exec_us",
+    "txn_total_latency_us",
+    "txn_abort_latency_us",
+}
+
+
 def extract_metrics(log_path):
     metrics = {}
     counters = {}
@@ -136,10 +151,8 @@ def extract_metrics(log_path):
             count_val = int(count_str)
         except ValueError:
             continue
-        if max_str is None and avg_str is None:
-            counters[name] = count_val
-            continue
-        entry = {"count": count_val}
+        # Normalize all counters to a common dict representation.
+        entry: Dict[str, float] = {"count": float(count_val)}
         if max_str is not None:
             try:
                 entry["max"] = float(max_str)
@@ -202,6 +215,16 @@ def main():
         "--only-dbtest",
         action="store_true",
         help="If set, run only scenarios whose name starts with 'dbtest_'.",
+    )
+    parser.add_argument(
+        "--occ-only-counters",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help=(
+            "When true (default), restrict recorded event_counters to OCC-related "
+            "names (batch_*, txn_reorder_*, storage_reorder_*, etc.). "
+            "Use --no-occ-only-counters to keep all counters."
+        ),
     )
     args = parser.parse_args()
 
@@ -275,6 +298,7 @@ def main():
             "workdir": str(Path(scenario.get("workdir", workdir_default)).resolve()),
             "timestamp": timestamp,
             "dry_run": args.dry_run,
+            "occ_only_counters": args.occ_only_counters,
         }
         with open(metadata_path, "w", encoding="utf-8") as meta_file:
             json.dump(metadata, meta_file, indent=2)
@@ -306,7 +330,17 @@ def main():
             with open(metadata_path, "w", encoding="utf-8") as meta_file:
                 json.dump(metadata, meta_file, indent=2)
         if counters:
-            metadata.setdefault("event_counters", counters)
+            if args.occ_only_counters:
+                filtered = {}
+                for cname, data in counters.items():
+                    if (
+                        cname in OCC_COUNTER_NAMES
+                        or any(cname.startswith(prefix) for prefix in OCC_COUNTER_PREFIXES)
+                    ):
+                        filtered[cname] = data
+                metadata.setdefault("event_counters", filtered)
+            else:
+                metadata.setdefault("event_counters", counters)
             with open(metadata_path, "w", encoding="utf-8") as meta_file:
                 json.dump(metadata, meta_file, indent=2)
         ran_any = True

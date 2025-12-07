@@ -25,6 +25,7 @@ inline std::string StrToStdString(lcdf::Str key) {
 }  // namespace
 
 struct hint_default_traits : public default_transaction_traits {
+  static const bool enable_batch_validation = false;
   typedef str_arena StringAllocator;
 };
 
@@ -36,6 +37,9 @@ struct hint_kv_get_put_traits {
   static const size_t absent_set_expected_size = 1;
   static const bool stable_input_memory = true;
   static const bool hard_expected_sizes = true;
+  // YCSB-style KV profiles do not use OCC batch validation; keep the
+  // original sequential validation path.
+  static const bool enable_batch_validation = false;
   static const bool read_own_writes = false;
   typedef str_arena StringAllocator;
 };
@@ -48,6 +52,7 @@ struct hint_kv_scan_traits {
   static const size_t absent_set_expected_size = read_set_expected_size / 7 + 1;
   static const bool stable_input_memory = true;
   static const bool hard_expected_sizes = false;
+  static const bool enable_batch_validation = false;
   static const bool read_own_writes = false;
   typedef str_arena StringAllocator;
 };
@@ -60,6 +65,7 @@ struct hint_read_only_traits {
   static const size_t absent_set_expected_size = 1;
   static const bool stable_input_memory = true;
   static const bool hard_expected_sizes = true;
+  static const bool enable_batch_validation = false;
   static const bool read_own_writes = false;
   typedef str_arena StringAllocator;
 };
@@ -70,6 +76,7 @@ struct hint_tpcc_new_order_traits {
   static const size_t absent_set_expected_size = 1;
   static const bool stable_input_memory = true;
   static const bool hard_expected_sizes = true;
+  static const bool enable_batch_validation = true;
   static const bool read_own_writes = false;
   typedef str_arena StringAllocator;
 };
@@ -80,6 +87,7 @@ struct hint_tpcc_payment_traits {
   static const size_t absent_set_expected_size = 15;
   static const bool stable_input_memory = true;
   static const bool hard_expected_sizes = false;
+  static const bool enable_batch_validation = false;
   static const bool read_own_writes = false;
   typedef str_arena StringAllocator;
 };
@@ -90,6 +98,7 @@ struct hint_tpcc_delivery_traits {
   static const size_t absent_set_expected_size = 35;
   static const bool stable_input_memory = true;
   static const bool hard_expected_sizes = false;
+  static const bool enable_batch_validation = false;
   static const bool read_own_writes = false;
   typedef str_arena StringAllocator;
 };
@@ -100,6 +109,7 @@ struct hint_tpcc_order_status_traits {
   static const size_t absent_set_expected_size = 25;
   static const bool stable_input_memory = true;
   static const bool hard_expected_sizes = false;
+  static const bool enable_batch_validation = false;
   static const bool read_own_writes = false;
   typedef str_arena StringAllocator;
 };
@@ -112,6 +122,7 @@ struct hint_tpcc_stock_level_traits {
   static const size_t absent_set_expected_size = 25;
   static const bool stable_input_memory = true;
   static const bool hard_expected_sizes = false;
+  static const bool enable_batch_validation = false;
   static const bool read_own_writes = false;
   typedef str_arena StringAllocator;
 };

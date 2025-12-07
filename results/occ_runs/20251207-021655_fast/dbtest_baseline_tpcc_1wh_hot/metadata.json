@@ -1,0 +1,34 @@
+{
+  "name": "dbtest_baseline_tpcc_1wh_hot",
+  "description": "Baseline dbtest TPCC run (sequential validation) using 1-warehouse high-contention config.",
+  "mode": "fast",
+  "command_template": "./build/dbtest -q config/mako_single_node_1wh_hot.yml -N local_s0 -t {threads}",
+  "command": [
+    "./build/dbtest",
+    "-q",
+    "config/mako_single_node_1wh_hot.yml",
+    "-N",
+    "local_s0",
+    "-t",
+    "2"
+  ],
+  "placeholders": {
+    "threads": 2
+  },
+  "env": {
+    "MAKO_ENABLE_BATCH_VALIDATION": "0",
+    "DBTEST_EXIT_AFTER_SECS": "5"
+  },
+  "workdir": "/home/azureuser/mako-eocc",
+  "timestamp": "20251207-021655",
+  "dry_run": false,
+  "occ_only_counters": true,
+  "metrics": {
+    "runtime_seconds": 30.2768,
+    "n_commits": 763242.0,
+    "agg_throughput_tps": 53490.9,
+    "agg_abort_rate_per_sec": 8.62047,
+    "avg_latency_ms": 0.0366956
+  },
+  "event_counters": {}
+}
