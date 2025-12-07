@@ -1,0 +1,46 @@
+{
+  "name": "dbtest_storage_reorder_only_tpcc_1wh_hot",
+  "description": "dbtest TPCC with OCC engine and storage-stage reordering flags set, but without OCC batch validation, on 1-warehouse high-contention config.",
+  "mode": "fast",
+  "command_template": "./build/dbtest -q config/mako_single_node_1wh_hot.yml -N local_s0 -t {threads}",
+  "command": [
+    "./build/dbtest",
+    "-q",
+    "config/mako_single_node_1wh_hot.yml",
+    "-N",
+    "local_s0",
+    "-t",
+    "2"
+  ],
+  "placeholders": {
+    "threads": 2,
+    "batch_size": 8,
+    "batch_wait_us": 250,
+    "storage_batch": 8,
+    "storage_wait_us": 50
+  },
+  "env": {
+    "MAKO_TXN_ENGINE": "occ",
+    "MAKO_ENABLE_BATCH_VALIDATION": "1",
+    "MAKO_BATCH_VALIDATION_SIZE": "8",
+    "MAKO_BATCH_VALIDATION_MAX_WAIT_US": "250",
+    "MAKO_BATCH_VALIDATION_THREADS": "2",
+    "OMP_NUM_THREADS": "2",
+    "MAKO_ENABLE_STORAGE_REORDER": "1",
+    "MAKO_STORAGE_REORDER_SIZE": "8",
+    "MAKO_STORAGE_REORDER_MAX_WAIT_US": "50",
+    "DBTEST_EXIT_AFTER_SECS": "5"
+  },
+  "workdir": "/home/azureuser/mako-eocc",
+  "timestamp": "20251207-033729",
+  "dry_run": false,
+  "occ_only_counters": true,
+  "metrics": {
+    "runtime_seconds": 30.2863,
+    "n_commits": 829751.0,
+    "agg_throughput_tps": 53377.6,
+    "agg_abort_rate_per_sec": 2.04713,
+    "avg_latency_ms": 0.0368296
+  },
+  "event_counters": {}
+}

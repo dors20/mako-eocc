@@ -1,0 +1,17 @@
+scenario,throughput_txn_per_s,avg_latency_ms,abort_rate_per_s
+dbtest_baseline_tpcc,35,613,0.0553,5.41
+dbtest_baseline_tpcc_1wh_hot,53,917,0.0364,7.69
+dbtest_batch_validation_all_optimizations,54,610,0.0360,2.18
+dbtest_batch_validation_all_optimizations_1wh_hot,54,333,0.0362,2.77
+dbtest_batch_validation_reorder_minid,52,202,0.0377,1.55
+dbtest_batch_validation_reorder_minid_1wh_hot,49,433,0.0398,2.47
+dbtest_batch_validation_reorder_prod,50,088,0.0393,2.18
+dbtest_batch_validation_reorder_prod_1wh_hot,50,298,0.0391,2.44
+dbtest_batch_validation_storage,51,981,0.0378,1.95
+dbtest_batch_validation_storage_1wh_hot,34,907,0.0566,1.48
+dbtest_batch_validation_tpcc,51,026,0.0385,2.41
+dbtest_batch_validation_tpcc_1wh_hot,51,348,0.0383,1.65
+dbtest_parallel_validation_tpcc,50,889,0.0386,1.91
+dbtest_parallel_validation_tpcc_1wh_hot,51,968,0.0378,2.47
+dbtest_storage_reorder_only_tpcc,54,690,0.0359,2.01
+dbtest_storage_reorder_only_tpcc_1wh_hot,53,378,0.0368,2.05
