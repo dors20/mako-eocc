@@ -1,0 +1,22 @@
+# Single node configuration for Mako testing (high-contention 1-warehouse TPCC)
+# This configuration runs everything on localhost without replication,
+# but restricts TPCC to a single warehouse to increase contention.
+
+sites:
+    - name: "local_s0"
+      id: 1
+      ip: 127.0.0.1
+      port: 31000
+
+# Single shard with no replication
+shard_map:
+    - ["local_s0"]  # Shard 0 with only one node (leader)
+
+# Configuration parameters
+# NOTE: Setting warehouses to 1 intentionally increases contention.
+warehouses: 1  # number of warehouses per shard
+
+# Memory control ports
+memlocalhost: 31500
+
+

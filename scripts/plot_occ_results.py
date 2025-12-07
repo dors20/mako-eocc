@@ -134,33 +134,100 @@ def generate_plots(run_dir: Path, show: bool = False) -> None:
 
     rows = load_run_data(run_dir)
 
-    plot_rows = [
+    # Focus plots on dbtest_* scenarios when present.
+    dbtest_rows = [
         row
         for row in rows
         if row["scenario"].startswith("dbtest")
         and "inline" not in row["scenario"]
     ]
-    if not plot_rows:
-        plot_rows = rows
+    if not dbtest_rows:
+        dbtest_rows = rows
 
+    #
+    # 1) Overall dbtest plots (preserve existing filenames for compatibility)
+    #
     plot_metric(
-        plot_rows,
+        dbtest_rows,
         "throughput",
-        "Throughput (txn/s)",
+        "Throughput (txn/s) - all dbtest scenarios",
         "txn/s",
         run_dir / "throughput.png",
     )
     plot_metric(
-        plot_rows, "latency", "Average Latency (ms)", "ms", run_dir / "latency.png"
+        dbtest_rows,
+        "latency",
+        "Average Latency (ms) - all dbtest scenarios",
+        "ms",
+        run_dir / "latency.png",
     )
     plot_metric(
-        plot_rows,
+        dbtest_rows,
         "abort_rate",
-        "Abort Rate",
+        "Abort Rate - all dbtest scenarios",
         "aborts per second",
         run_dir / "abort_rate.png",
     )
 
+    #
+    # 2) Split TPCC vs 1-warehouse high-contention TPCC plots.
+    #    Standard TPCC: dbtest_* scenarios that do NOT end with "_1wh_hot".
+    #    High-contention TPCC: dbtest_* scenarios that DO end with "_1wh_hot".
+    #
+    standard_tpcc_rows = [
+        row for row in dbtest_rows if not row["scenario"].endswith("_1wh_hot")
+    ]
+    hot_tpcc_rows = [
+        row for row in dbtest_rows if row["scenario"].endswith("_1wh_hot")
+    ]
+
+    if standard_tpcc_rows:
+        plot_metric(
+            standard_tpcc_rows,
+            "throughput",
+            "Throughput (txn/s) - TPCC (standard warehouses)",
+            "txn/s",
+            run_dir / "throughput_tpcc.png",
+        )
+        plot_metric(
+            standard_tpcc_rows,
+            "latency",
+            "Average Latency (ms) - TPCC (standard warehouses)",
+            "ms",
+            run_dir / "latency_tpcc.png",
+        )
+        plot_metric(
+            standard_tpcc_rows,
+            "abort_rate",
+            "Abort Rate - TPCC (standard warehouses)",
+            "aborts per second",
+            run_dir / "abort_rate_tpcc.png",
+        )
+
+    if hot_tpcc_rows:
+        plot_metric(
+            hot_tpcc_rows,
+            "throughput",
+            "Throughput (txn/s) - TPCC 1WH high-contention",
+            "txn/s",
+            run_dir / "throughput_tpcc_1wh_hot.png",
+        )
+        plot_metric(
+            hot_tpcc_rows,
+            "latency",
+            "Average Latency (ms) - TPCC 1WH high-contention",
+            "ms",
+            run_dir / "latency_tpcc_1wh_hot.png",
+        )
+        plot_metric(
+            hot_tpcc_rows,
+            "abort_rate",
+            "Abort Rate - TPCC 1WH high-contention",
+            "aborts per second",
+            run_dir / "abort_rate_tpcc_1wh_hot.png",
+        )
+
+    # CSV summary remains over all scenarios for maximum flexibility.
     write_summary(rows, run_dir / "summary_metrics.csv")
 
     if show:

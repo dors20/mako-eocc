@@ -74,6 +74,13 @@ private:
     bool is_full() const { return txns.size() >= batch_size_; }
     
     size_t batch_size_;
+    // Timestamp of first enqueue in this batch (used for max_wait_us_)
+    std::chrono::steady_clock::time_point first_enqueue_;
+    bool has_first_enqueue_{false};
+    // True once some thread has decided to flush this batch.
+    bool sealed_{false};
+    // True once validate_batch_parallel() has completed for this batch.
+    bool done_{false};
     
     ValidationBatch(size_t bs) : batch_size_(bs) {
       txns.reserve(bs);
@@ -85,6 +92,16 @@ private:
       results.clear();
       completed_count.store(0);
       validated_count.store(0);
+      has_first_enqueue_ = false;
+      sealed_ = false;
+      done_ = false;
+    }
+
+    void on_enqueue() {
+      if (!has_first_enqueue_) {
+        first_enqueue_ = std::chrono::steady_clock::now();
+        has_first_enqueue_ = true;
+      }
     }
   };
 
@@ -106,7 +123,7 @@ private:
 
   // Batch management
   std::mutex batch_mutex_;
-  std::unique_ptr<ValidationBatch> pending_batch_;
+  std::shared_ptr<ValidationBatch> pending_batch_;
   std::condition_variable batch_cv_;
   std::atomic<bool> shutdown_{false};
 
@@ -234,7 +251,7 @@ public:
     }
     
     // Initialize pending batch
-    pending_batch_ = std::make_unique<ValidationBatch>(batch_size_);
+    pending_batch_ = std::make_shared<ValidationBatch>(batch_size_);
   }
 
   /**
@@ -258,53 +275,86 @@ public:
    *         false if should validate immediately (batch disabled or snapshot)
    */
   bool AddToBatch(txn_type *txn) {
-    // Opportunistic, non-blocking batching:
-    // - If batching is disabled or this is a snapshot txn, fall back immediately.
-    // - Otherwise, append to the current batch under a mutex.
-    // - If this append *fills* the batch, flush it synchronously.
-    // - If not full yet, return false so the caller can do sequential validation.
+    // Fast path: batching disabled or snapshots/read-only transactions.
     if (!enabled_ || !txn || txn->is_snapshot()) {
       return false;
     }
 
-    std::unique_ptr<ValidationBatch> batch_to_flush;
+    using clock = std::chrono::steady_clock;
+
+    std::shared_ptr<ValidationBatch> batch;
     size_t txn_position = 0;
+    bool i_am_flusher = false;
 
     {
-      std::lock_guard<std::mutex> lock(batch_mutex_);
+      std::unique_lock<std::mutex> lock(batch_mutex_);
       if (shutdown_.load(std::memory_order_acquire)) {
         return false;
       }
 
       if (!pending_batch_) {
-        pending_batch_ = std::make_unique<ValidationBatch>(batch_size_);
+        pending_batch_ = std::make_shared<ValidationBatch>(batch_size_);
       }
 
-      ValidationBatch* batch = pending_batch_.get();
+      batch = pending_batch_;
+
+      // Append this transaction to the current batch.
       txn_position = batch->txns.size();
       batch->txns.push_back(txn);
+      batch->on_enqueue();
 
-      // Only flush when the batch is actually full. This avoids blocking
-      // low-concurrency workloads (like TPCC loaders on a 2-core VM) while
-      // still giving us real batches under higher concurrency.
-      if (!batch->is_full()) {
-        return false;
+      // Determine whether this thread should flush the batch.
+      const bool size_ready = batch->is_full();
+      bool time_ready = false;
+      if (max_wait_us_ > 0 && batch->has_first_enqueue_) {
+        const auto now = clock::now();
+        const auto elapsed_us =
+            std::chrono::duration_cast<std::chrono::microseconds>(
+                now - batch->first_enqueue_).count();
+        time_ready = elapsed_us >= static_cast<long long>(max_wait_us_);
       }
 
-      batch_to_flush = std::move(pending_batch_);
-      // Lazily recreate the next batch on-demand.
-      pending_batch_.reset();
-    }  // release batch_mutex_
+      if (!batch->sealed_ && (size_ready || time_ready)) {
+        // This thread becomes the flusher for this batch.
+        batch->sealed_ = true;
+        // Detach the sealed batch so new transactions start a fresh one.
+        pending_batch_.reset();
+        i_am_flusher = true;
+      } else {
+        // Wait until validation for this batch completes.
+        while (!batch->done_ && !shutdown_.load(std::memory_order_acquire)) {
+          batch_cv_.wait(lock);
+        }
+      }
+    } // lock released
 
-    // Perform validation for the full batch outside the mutex.
-    validate_batch_parallel(*batch_to_flush);
-
-    // If our recorded position is out of bounds, conservatively fall back.
-    if (txn_position >= batch_to_flush->results.size()) {
+    if (shutdown_.load(std::memory_order_acquire)) {
       return false;
     }
 
-    return batch_to_flush->results[txn_position].valid;
+    if (i_am_flusher) {
+      // Perform validation outside the mutex.
+      validate_batch_parallel(*batch);
+      {
+        std::lock_guard<std::mutex> lock(batch_mutex_);
+        batch->done_ = true;
+      }
+      batch_cv_.notify_all();
+    }
+
+    // At this point, validation for this batch has completed (or we bailed on shutdown).
+    if (!batch->done_) {
+      // Conservatively fall back to individual validation.
+      return false;
+    }
+
+    // If results vector is smaller than the recorded position (should not happen),
+    // fall back to individual validation.
+    if (txn_position >= batch->results.size()) {
+      return false;
+    }
+
+    return batch->results[txn_position].valid;
   }
 
   /**
